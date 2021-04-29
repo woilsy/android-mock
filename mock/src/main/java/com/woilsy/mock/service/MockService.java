@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.woilsy.mock.HttpService;
+import com.woilsy.mock.options.MockOptions;
 
 public class MockService extends Service {
 
@@ -45,7 +46,7 @@ public class MockService extends Service {
             startForeground(100, notification);
         }
         new Thread(() -> {
-            int port = 8080;
+            int port = MockOptions.PORT;
             HttpService httpService = new HttpService(port);
             try {
                 httpService.start();

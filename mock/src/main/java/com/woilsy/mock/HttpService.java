@@ -9,7 +9,6 @@ import org.nanohttpd.protocols.http.response.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.nanohttpd.protocols.http.response.Response.newFixedLengthResponse;
 
@@ -33,14 +32,27 @@ public class HttpService extends NanoHTTPD {
         } catch (IOException | ResponseException e) {
             e.printStackTrace();
         }
-        StringBuilder builder = new StringBuilder();
-        Method method = session.getMethod();
+        //uri
         String uri = session.getUri();
-        Map<String, String> parms = session.getParms();
-        String data = parms.get("data");//这里的data是POST提交表单时key
-        Log.i(TAG, "uri: " + uri);//如果有uri,会打印出uri
-        Log.i(TAG, "data: " + data);
-        builder.append("任意内容");// 反馈给调用者的数据
-        return newFixedLengthResponse(builder.toString());
+        String data = UrlManager.getInstance().urlDataMap.get(uri);
+        Log.d(TAG, "请求url: " + uri + "对应的数据:" + data);
+        //
+        //Method get post delete put
+        Method method = Method.lookup(session.getMethod().name());
+        if (method == Method.GET) {
+            return newFixedLengthResponse(data);
+        } else if (method == Method.POST) {
+            return newFixedLengthResponse(data);
+        } else if (method == Method.PUT) {
+            return newFixedLengthResponse(data);
+        } else if (method == Method.DELETE) {
+            return newFixedLengthResponse(data);
+        }
+        return newFixedLengthResponse("Unsupported request type");
+    }
+
+    @Override
+    public Response handle(IHTTPSession session) {
+        return super.handle(session);
     }
 }
