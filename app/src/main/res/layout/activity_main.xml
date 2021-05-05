@@ -1,16 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".ui.MainActivity">
 
     <Button
-        android:id="@+id/btn_start"
+        android:id="@+id/btn_start1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="发起网络请求" />
+        android:text="网络请求1" />
+
+    <Button
+        android:id="@+id/btn_start2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="网络请求2" />
+
+    <Button
+        android:id="@+id/btn_start3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="网络请求3" />
+
+    <Button
+        android:id="@+id/btn_start4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="网络请求4" />
 
 </LinearLayout>

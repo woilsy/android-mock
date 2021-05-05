@@ -1,10 +1,14 @@
 package com.woilsy.mock;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.options.MockOptions;
-import com.woilsy.mock.test.ApiService;
+import com.woilsy.mock.service.MockService;
 import com.woilsy.mock.utils.ClassUtils;
 
 import java.lang.annotation.Annotation;
@@ -30,27 +34,30 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 
+/**
+ * 启动器<br/>
+ * TODO 分析静态url 动态url(@url String url)形式需要另想办法<br/>
+ * TODO 目前获取字段是通过getFields，全字段需要过滤某些默认字段
+ */
 public class MockLauncher {
 
     private static final Map<String, Type> clsTb = new HashMap<>();
 
-//    public static void start(Context context, Retrofit retrofit, Class<?>... classes) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            context.startForegroundService(new Intent(context, MockService.class));
-//        } else {
-//            context.startService(new Intent(context, MockService.class));
-//        }
-//        //监听Retrofit的Method执行过程，需要在过程中根据方法签名和实际参数，将value赋值到map中 动态url
-//
-//        //解析class内部并插入map
-//        for (Class<?> cls : classes) {
-//            parse(cls);
-//        }
-//    }
-
-    public static void main(String[] args) {
-        parse(ApiService.class);
+    public static void start(Context context, Class<?>... classes) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(new Intent(context, MockService.class));
+        } else {
+            context.startService(new Intent(context, MockService.class));
+        }
+        //解析class内部并插入map
+        for (Class<?> cls : classes) {
+            parse(cls);
+        }
     }
+
+//    public static void main(String[] args) {
+//        parse(ApiService.class);
+//    }
 
     private static void parse(Class<?> cls) {
         //解析cls并传递给url管理
@@ -73,7 +80,7 @@ public class MockLauncher {
         }
     }
 
-    //分析静态url 动态url需要另想办法
+    //分析静态url
     private static String actUrl(Method m) {
         Annotation[] annotations = m.getAnnotations();
         for (Annotation a : annotations) {
@@ -175,9 +182,7 @@ public class MockLauncher {
             Object obj = handleClass((Class<?>) type, parent, parentField);
             if (parent == null) {
                 return obj;
-            } else {
-                //do nothing 否则会造成无限循环
-            }
+            }//else do nothing 否则会造成无限循环
         } else if (type instanceof TypeVariable) {//类型变量 name:T bounds:Object
 //            TypeVariable表示的是类型变量，它用来反映的是JVM编译该泛型前的信息，例如List<T>中的T就是类型变量，它在编译时需要被转换为一个具体的类型后才能正常使用。
 //            该接口常用的方法有3个，分别是：
@@ -195,11 +200,13 @@ public class MockLauncher {
         } else if (type instanceof GenericArrayType) {
             //GenericArrayType表示的是数组类型且组成元素时ParameterizedType或TypeVariable，例如List<T>或T[]，该接口只有
             // Type getGenericComponentType()一个方法，它返回数组的组成元素类型。
+            println("handleType()->" + type + "暂不处理");
         } else if (type instanceof WildcardType) {
             //例如? extends Number 和 ? super Integer。
             //Wildcard接口有两个方法，分别是：
             //(1) Type[] getUpperBounds()——返回类型变量的上边界。
             //(2) Type[] getLowerBounds()——返回类型变量的下边界。
+            println("handleType()->" + type + "暂不处理");
         } else {
             println("handleType()->无法识别的类型:" + type);
         }
@@ -209,6 +216,7 @@ public class MockLauncher {
     private static Object handleClass(Class<?> cls, Object parent, Field parentField) {
         Object finalObj = getFinalObj(cls);
         if (finalObj == null) {//表示该类型需要解析
+            println("handleClass()->非final类型，需要单独解析" + cls.getName());
             return handleObjClass(cls, parent, parentField);
         } else {//表示该类型不需要解析 直接设置给父类 返回父类 如果父类为null 返回自身
             println("handleClass()->" + cls.getName() + "->final类型，直接返回或设置给parent");
@@ -255,17 +263,8 @@ public class MockLauncher {
         }
     }
 
-    //限制1 getFields()必须为public修饰
     private static boolean isFinalType(Class<?> cls) {
         return getFinalObj(cls) != null;
-    }
-
-    private static Object getFinalObj(Type type) {
-        if (type instanceof Class) {
-            return getFinalObj((Class<?>) type);
-        } else {
-            return null;
-        }
     }
 
     private static Object getFinalObj(Class<?> cls) {
@@ -285,7 +284,7 @@ public class MockLauncher {
 
     private static void println(String msg) {
         if (MockOptions.DEBUG) {
-            println(msg);
+            System.out.println(msg);
         }
     }
 
