@@ -14,6 +14,23 @@ public class MockBean<T> {
 
     public static class Bean2 {
         public int code;
+
+        @Override
+        public String toString() {
+            return "Bean2{" +
+                    "code=" + code +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "MockBean{" +
+                "data=" + data +
+                ", map=" + map +
+                ", a='" + a + '\'' +
+                ", bean2=" + bean2 +
+                '}';
     }
 }
 

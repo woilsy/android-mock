@@ -1,30 +1,47 @@
 package com.woilsy.mock;
 
-//import android.content.Context;
-//import android.content.Intent;
-//import android.os.Build;
-
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.woilsy.mock.generate.Generator;
+import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.test.ApiService;
-import com.woilsy.mock.test.MockBean;
+import com.woilsy.mock.utils.ClassUtils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import okhttp3.ResponseBody;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 public class MockLauncher {
 
-//    public static void start(Context context, Class<?>... classes) {
+    private static final Map<String, Type> clsTb = new HashMap<>();
+
+//    public static void start(Context context, Retrofit retrofit, Class<?>... classes) {
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 //            context.startForegroundService(new Intent(context, MockService.class));
 //        } else {
 //            context.startService(new Intent(context, MockService.class));
 //        }
+//        //监听Retrofit的Method执行过程，需要在过程中根据方法签名和实际参数，将value赋值到map中 动态url
+//
 //        //解析class内部并插入map
 //        for (Class<?> cls : classes) {
 //            parse(cls);
@@ -36,70 +53,240 @@ public class MockLauncher {
     }
 
     private static void parse(Class<?> cls) {
-        MockBean<List<String>> mockBean = new MockBean<>();
-        mockBean.a = "";
-        mockBean.bean2 = new MockBean.Bean2();
-        mockBean.data = new ArrayList<>();
-        String json = new Gson().toJson(mockBean);
-        System.out.println(json);
         //解析cls并传递给url管理
         UrlManager urlManager = UrlManager.getInstance();
-        //第一步：获取url
+        //第一步：获取url及数据
         Method[] methods = cls.getMethods();
+        Gson gson = new GsonBuilder().create();
         for (Method m : methods) {
-            System.out.println("====== 解析Method " + m.getName() + " start ======");
+            println("====== 解析Method " + m.getName() + " start ======");
             //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
-            Type type = m.getGenericReturnType();
-            System.out.println("顶层类型:" + type);
-            actTypes(type);
-            System.out.println("====== 解析Method " + m.getName() + " end ======");
+            String actUrl = actUrl(m);
+            println("url:" + actUrl);
+            Object o = actType(m);
+            println("data:" + o == null ? "null" : gson.toJson(o));
+            if (actUrl != null && o != null) {
+                urlManager.urlDataMap.put(actUrl, gson.toJson(o));
+            }
+            println("====== 解析Method " + m.getName() + " end ======");
+            println("---------------分割线---------------");
         }
-        String url = "";
-        //第二步：获取数据
-        Object bean = null;
-        String data = new Gson().toJson(bean);
-
-        //第三步：插入数据
-        urlManager.urlDataMap.put(url, data);
     }
 
-    private static void actTypes(Type type) {
-        if (type instanceof ParameterizedType) {//带泛型
+    //分析静态url 动态url需要另想办法
+    private static String actUrl(Method m) {
+        Annotation[] annotations = m.getAnnotations();
+        for (Annotation a : annotations) {
+            if (a instanceof GET) {
+                return transString(((GET) a).value());
+            } else if (a instanceof POST) {
+                return transString(((POST) a).value());
+            } else if (a instanceof DELETE) {
+                return transString(((DELETE) a).value());
+            } else if (a instanceof PUT) {
+                return transString(((PUT) a).value());
+            } else {
+                println("不支持的请求类型，目前只支持GET POST DELETE PUT");
+            }
+        }
+        return null;
+    }
+
+    private static String transString(String s) {
+        return s == null || s.isEmpty() ? null : s;
+    }
+
+    private static Object actType(Method m) {
+        return parseType(m.getGenericReturnType());
+    }
+
+    /**
+     * @return 返回一个拥有所有mock属性的对象，将其作为value
+     */
+    private static Object parseType(Type type) {
+        return handleType(type, null, null);
+    }
+
+    private static Object handleType(Type type, Object parent, Field parentField) {
+        if (type instanceof ParameterizedType) {//带参数类型
             // 强制转型为带参数的泛型类型
-            Type[] types = ((ParameterizedType) type).getActualTypeArguments();
-            if (types.length > 0) {//只需要处理第一个
-                Type childType = types[0];
-                System.out.println("子参数类型:" + childType);
-                if (childType == ResponseBody.class) {//不知道咋处理 不管了
-                    //需要特殊处理的类型 也可以不处理
-                } else {//需要根据层级一层一层处理
-                    try {
-                        String clsName = "";
+            Type rawType1 = ((ParameterizedType) type).getRawType();
+            if (rawType1 == Map.class) {//需要获取key value的类型再处理
+                println("handleType()->map类型，尝试分析创建");
+                Map<Object, Object> map = new HashMap<>();
+                Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
+                if (typeArguments != null && typeArguments.length == 2) {
+                    Object key = handleType(typeArguments[0], null, null);
+                    Object value = handleType(typeArguments[1], null, null);
+                    println("handleType()->key:" + key);
+                    println("handleType()->value:" + value);
+                    map.put(key, value);
+                }
+                return setParentField(parent, parentField, map);
+            } else if (rawType1 == List.class) {
+                println("handleType()->List类型，尝试分析创建");
+                List<Object> objects = new ArrayList<>();
+                Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
+                if (typeArguments != null && typeArguments.length == 1) {
+                    objects.add(handleType(typeArguments[0], null, null));
+                }
+                return setParentField(parent, parentField, objects);
+            } else if (rawType1 == Set.class) {//同上
+                println("handleType()->Set类型，尝试分析创建");
+                HashSet<Object> objects = new HashSet<>();
+                Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
+                if (typeArguments != null && typeArguments.length == 1) {
+                    objects.add(handleType(typeArguments[0], null, null));
+                }
+                return setParentField(parent, parentField, objects);
+            } else {//目前先解析此类型 再想办法解析其他类型
+                Type[] types = ((ParameterizedType) type).getActualTypeArguments();
+                if (types.length == 1) {//一般情况只需要处理第一个，但是还有map的情况，所以
+                    Type childType = types[0];
+                    String clsName = "";
+                    if (childType == ResponseBody.class) {
+                        println("handleType()->ResponseBody类型暂不处理");
+                    } else {
+                        println("handleType()->childType:" + childType);
                         if (childType instanceof ParameterizedType) {
                             Type rawType = ((ParameterizedType) childType).getRawType();
-                            System.out.println("真实类型:" + rawType);
                             clsName = ((Class<?>) rawType).getName();
+                            //插入泛型类型
+                            Type[] typeArguments = ((ParameterizedType) childType).getActualTypeArguments();
+                            if (typeArguments != null && typeArguments.length > 0) {
+                                //将泛型实际类型传入到map中，因为反射对象会导致泛型丢失
+                                clsTb.put(clsName, typeArguments[0]);
+                            }
                         } else {
                             clsName = childType.toString();
                         }
-                        System.out.println("尝试反射" + clsName);
-                        Class<?> cls = Class.forName(clsName);
-                        Field[] fields = cls.getFields();
-                        for (Field f : fields) {
-                            System.out.println(f.getName() + "↓");
-                            System.out.println("isSynthetic:" + f.isSynthetic());
-                            actTypes(f.getType());//进入递归
+                        println("handleType()->尝试反射" + clsName);
+                        try {
+                            return handleClass(Class.forName(clsName), parent, parentField);
+                        } catch (ClassNotFoundException e) {
+                            println("handleType()->" + clsName + "反射失败");
                         }
-                    } catch (ClassNotFoundException e) {
-                        System.out.println("未找到" + childType + "反射创建失败");
                     }
+                } else {//为0 或大于1的情况
+                    println("handleType()->参数为0或大于1，暂不处理");
                 }
             }
-        } else {//不带泛型的类型：分为基本类型和其他类型，可以直接尝试转换
-            Class<?> cls = (Class<?>) type;
-            System.out.println("最终类型:" + type);
+        } else if (type instanceof Class<?>) {//class类型
+            Object obj = handleClass((Class<?>) type, parent, parentField);
+            if (parent == null) {
+                return obj;
+            } else {
+                //do nothing 否则会造成无限循环
+            }
+        } else if (type instanceof TypeVariable) {//类型变量 name:T bounds:Object
+//            TypeVariable表示的是类型变量，它用来反映的是JVM编译该泛型前的信息，例如List<T>中的T就是类型变量，它在编译时需要被转换为一个具体的类型后才能正常使用。
+//            该接口常用的方法有3个，分别是：
+//            (1) Type[] getBounds()——获取类型变量的上边界，如果未明确声明上边界则默认为Object。例如Class<K extents Person>中K的上边界就是Person。
+//            (2) D getGenericDeclaration()——获取声明该类型变量的原始类型，例如Test<K extents Person>中原始类型是Test。
+//            (3) String getName()——获取在源码中定义的名字，上例中为K。
+            //尝试从map中获取原始类型
+            Type actType = clsTb.get(parent.getClass().getName());
+            if (actType != null) {
+                println("handleType()->尝试从clsTb中获取对象实际泛型类型" + actType);
+                handleType(actType, parent, parentField);//直接重进
+            } else {
+                println("handleType()->从clsTb中获取对象实际泛型类型失败" + type);
+            }
+        } else if (type instanceof GenericArrayType) {
+            //GenericArrayType表示的是数组类型且组成元素时ParameterizedType或TypeVariable，例如List<T>或T[]，该接口只有
+            // Type getGenericComponentType()一个方法，它返回数组的组成元素类型。
+        } else if (type instanceof WildcardType) {
+            //例如? extends Number 和 ? super Integer。
+            //Wildcard接口有两个方法，分别是：
+            //(1) Type[] getUpperBounds()——返回类型变量的上边界。
+            //(2) Type[] getLowerBounds()——返回类型变量的下边界。
+        } else {
+            println("handleType()->无法识别的类型:" + type);
+        }
+        return null;
+    }
+
+    private static Object handleClass(Class<?> cls, Object parent, Field parentField) {
+        Object finalObj = getFinalObj(cls);
+        if (finalObj == null) {//表示该类型需要解析
+            return handleObjClass(cls, parent, parentField);
+        } else {//表示该类型不需要解析 直接设置给父类 返回父类 如果父类为null 返回自身
+            println("handleClass()->" + cls.getName() + "->final类型，直接返回或设置给parent");
+            return parent == null ? finalObj : setParentField(parent, parentField, finalObj);
+        }
+    }
+
+    //处理对象class
+    private static Object handleObjClass(Class<?> cls, Object parent, Field parentField) {
+        //获取class对象实例
+        Object obj = tryGetClassObj(cls);
+        if (obj == null) {
+            println("handleObjClass()->获取class实例失败，直接return");
+            return null;
+        }
+        //获取所有字段
+        Field[] fields = cls.getFields();
+        for (Field f : fields) {
+            Type genericType = f.getGenericType();
+            println("handleObjClass()->字段：" + f.getName() + " 类型:" + genericType);
+            handleType(genericType, obj, f);
+        }
+        return parent == null ? obj : setParentField(parent, parentField, obj);
+    }
+
+    private static Object setParentField(Object parent, Field parentField, Object value) {
+        if (parent == null || parentField == null) return null;
+        try {
+            parentField.setAccessible(true);
+            parentField.set(parent, value);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return parent;
+    }
+
+    private static Object tryGetClassObj(Class<?> cls) {
+        try {//默认构造器创建
+            Constructor<?> constructor = cls.getConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (Exception e) {//使用不安全的方式创建
+            return ClassUtils.allocateInstance(cls);
         }
     }
 
     //限制1 getFields()必须为public修饰
+    private static boolean isFinalType(Class<?> cls) {
+        return getFinalObj(cls) != null;
+    }
+
+    private static Object getFinalObj(Type type) {
+        if (type instanceof Class) {
+            return getFinalObj((Class<?>) type);
+        } else {
+            return null;
+        }
+    }
+
+    private static Object getFinalObj(Class<?> cls) {
+        Class<?> recClass = ClassUtils.getEncapsulationType(cls);
+        if (recClass == String.class) return Generator.getString();
+        if (recClass == Integer.class) return Generator.getInt();
+        if (recClass == Long.class) return Generator.getLong();
+        if (recClass == Byte.class) return Generator.getByte();
+        if (recClass == Character.class) return Generator.getCharacter();
+        if (recClass == Double.class) return Generator.getDouble();
+        if (recClass == Float.class) return Generator.getFloat();
+        if (recClass == Short.class) return Generator.getShort();
+        if (recClass == Boolean.class) return Generator.getBoolean();
+        if (recClass == BigDecimal.class) return Generator.getBigDecimal();
+        return null;
+    }
+
+    private static void println(String msg) {
+        if (MockOptions.DEBUG) {
+            println(msg);
+        }
+    }
+
 }
