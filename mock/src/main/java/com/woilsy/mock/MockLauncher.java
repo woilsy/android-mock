@@ -52,7 +52,11 @@ public class MockLauncher {
         }
         //解析class内部并插入map
         for (Class<?> cls : classes) {
-            parse(cls);
+            try {
+                parse(cls);
+            } catch (Exception e) {
+                println("解析Service失败");
+            }
         }
     }
 
