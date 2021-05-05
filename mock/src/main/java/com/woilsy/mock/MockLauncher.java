@@ -257,6 +257,7 @@ public class MockLauncher {
         Field[] fields = cls.getFields();
         for (Field f : fields) {
             try {
+                f.setAccessible(true);
                 Object o = f.get(obj);
                 if (o == null) {//表示没有默认值 需要mock数据
                     Type genericType = f.getGenericType();
