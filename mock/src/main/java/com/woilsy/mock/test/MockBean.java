@@ -1,5 +1,7 @@
 package com.woilsy.mock.test;
 
+import com.woilsy.mock.type.Image;
+
 import java.util.Map;
 
 public class MockBean<T> {
@@ -11,6 +13,9 @@ public class MockBean<T> {
     public String a;
 
     public Bean2 bean2;
+
+    @Image
+    public String userAvatar;
 
     public static class Bean2 {
         public int code;

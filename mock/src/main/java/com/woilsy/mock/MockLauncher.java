@@ -10,6 +10,8 @@ import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.service.MockService;
 import com.woilsy.mock.test.ApiService;
+import com.woilsy.mock.type.Image;
+import com.woilsy.mock.type.Images;
 import com.woilsy.mock.utils.ClassUtils;
 
 import java.lang.annotation.Annotation;
@@ -26,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import okhttp3.ResponseBody;
@@ -209,7 +212,7 @@ public class MockLauncher {
             clsName = ((Class<?>) rawType).getName();
             //插入泛型类型
             Type[] typeArguments = ((ParameterizedType) childType).getActualTypeArguments();
-            if (typeArguments != null && typeArguments.length > 0) {
+            if (typeArguments.length > 0) {
                 //将泛型实际类型传入到map中，因为反射对象会导致泛型丢失
                 clsTb.put(clsName, typeArguments[0]);
             }
@@ -231,7 +234,7 @@ public class MockLauncher {
     }
 
     private static Object handleClass(Class<?> cls, Object parent, Field parentField) {
-        Object finalObj = getFinalObj(cls);
+        Object finalObj = getFinalObj(cls, parentField);
         if (finalObj == null) {//表示该类型需要解析
             println("handleClass()->非final类型，需要单独解析" + cls.getName());
             return handleObjClass(cls, parent, parentField);
@@ -253,8 +256,17 @@ public class MockLauncher {
         Field[] fields = cls.getFields();
         for (Field f : fields) {
             Type genericType = f.getGenericType();
-            println("handleObjClass()->字段：" + f.getName() + " 类型:" + genericType);
-            handleType(genericType, obj, f);
+            try {
+                Object o = f.get(obj);
+                if (o == null) {
+                    println("handleObjClass()->字段：" + f.getName() + " 类型:" + genericType);
+                    handleType(genericType, obj, f);
+                } else {
+                    println("handleObjClass()->字段：" + f.getName() + "已有默认值，无需处理");
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
         return parent == null ? obj : setParentField(parent, parentField, obj);
     }
@@ -280,11 +292,23 @@ public class MockLauncher {
         }
     }
 
-    private static boolean isFinalType(Class<?> cls) {
-        return getFinalObj(cls) != null;
-    }
-
-    private static Object getFinalObj(Class<?> cls) {
+    private static Object getFinalObj(Class<?> cls, Field parentField) {
+        if (parentField != null) {
+            Image image = parentField.getAnnotation(Image.class);
+            if (image != null) {
+                String defaultUrl = image.value();
+                if (defaultUrl.isEmpty()) {
+                    List<String> images = MockOptions.IMAGES;
+                    List<String> actImages = images == null || images.size() == 0 ? Images.get() : images;
+                    if (actImages.size() > 0) {
+                        int index = new Random().nextInt(actImages.size());
+                        return actImages.get(index);
+                    }
+                } else {
+                    return defaultUrl;
+                }
+            }
+        }
         return GENERATOR.get(cls);
     }
 
