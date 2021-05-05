@@ -21,7 +21,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,11 +39,12 @@ import retrofit2.http.PUT;
  * TODO 分析静态url 动态url(@Url String url)形式需要另想办法<br/>
  * TODO 目前获取字段是通过getFields，全字段需要过滤某些默认字段<br/>
  * TODO 返回值为ResponseBody时，暂不支持<br/>
- * TODO 数据词典暂不支持自定义，目前使用的是随机
  */
 public class MockLauncher {
 
     private static final Map<String, Type> clsTb = new HashMap<>();
+
+    private static final Generator GENERATOR = new Generator();
 
     public static void start(Context context, Class<?>... classes) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -285,18 +285,7 @@ public class MockLauncher {
     }
 
     private static Object getFinalObj(Class<?> cls) {
-        Class<?> recClass = ClassUtils.getEncapsulationType(cls);
-        if (recClass == String.class) return Generator.getString();
-        if (recClass == Integer.class) return Generator.getInt();
-        if (recClass == Long.class) return Generator.getLong();
-        if (recClass == Byte.class) return Generator.getByte();
-        if (recClass == Character.class) return Generator.getCharacter();
-        if (recClass == Double.class) return Generator.getDouble();
-        if (recClass == Float.class) return Generator.getFloat();
-        if (recClass == Short.class) return Generator.getShort();
-        if (recClass == Boolean.class) return Generator.getBoolean();
-        if (recClass == BigDecimal.class) return Generator.getBigDecimal();
-        return null;
+        return GENERATOR.get(cls);
     }
 
     private static void println(String msg) {
