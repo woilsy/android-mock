@@ -256,10 +256,10 @@ public class MockLauncher {
         //获取所有字段
         Field[] fields = cls.getFields();
         for (Field f : fields) {
-            Type genericType = f.getGenericType();
             try {
                 Object o = f.get(obj);
-                if (o == null) {
+                if (o == null) {//表示没有默认值 需要mock数据
+                    Type genericType = f.getGenericType();
                     println("handleObjClass()->字段：" + f.getName() + " 类型:" + genericType);
                     handleType(genericType, obj, f);
                 } else {
