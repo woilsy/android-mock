@@ -14,7 +14,19 @@ public interface ApiService {
     @GET
     Call<ResponseBody> test(@Url String url);
 
-    @POST("123")
-    Observable<MockBean<List<String>>> getSomeThing();
+    @POST("/request1")
+    Observable<MockBean<List<String>>> getData1();
+
+    @GET("/request2")
+    Observable<MockBean<String>> getData2();
+
+    @GET("/request3")
+    Observable<String> getData3();
+
+    @GET("/request4")
+    Observable<MockBean<MockBean2<MockBeanChild>>> getData4();
+
+    @GET("/request5")
+    Observable<MockBean<MockBean2<List<MockBeanChild>>>> getData5();
 
 }

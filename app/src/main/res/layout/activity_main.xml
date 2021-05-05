@@ -30,4 +30,16 @@
         android:layout_height="wrap_content"
         android:text="网络请求4" />
 
+    <Button
+        android:id="@+id/btn_start5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="网络请求5" />
+
+    <Button
+        android:id="@+id/btn_start6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="网络请求6" />
+
 </LinearLayout>

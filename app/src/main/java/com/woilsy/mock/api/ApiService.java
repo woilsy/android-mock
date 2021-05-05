@@ -1,6 +1,8 @@
 package com.woilsy.mock.api;
 
 import com.woilsy.mock.test.MockBean;
+import com.woilsy.mock.test.MockBean2;
+import com.woilsy.mock.test.MockBeanChild;
 
 import java.util.List;
 
@@ -24,5 +26,11 @@ public interface ApiService {
 
     @GET("/request3")
     Observable<String> getData3();
+
+    @GET("/request4")
+    Observable<MockBean<MockBean2<MockBeanChild>>> getData4();
+
+    @GET("/request5")
+    Observable<MockBean<MockBean2<List<MockBeanChild>>>> getData5();
 
 }

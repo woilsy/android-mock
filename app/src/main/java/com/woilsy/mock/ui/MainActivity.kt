@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btn_start2).setOnClickListener { httpTest2() }
         findViewById<View>(R.id.btn_start3).setOnClickListener { httpTest3() }
         findViewById<View>(R.id.btn_start4).setOnClickListener { httpTest4() }
+        findViewById<View>(R.id.btn_start5).setOnClickListener { httpTest5() }
+        findViewById<View>(R.id.btn_start6).setOnClickListener { httpTest6() }
     }
 
     private fun httpTest1() {
@@ -86,6 +88,36 @@ class MainActivity : AppCompatActivity() {
                 },
                 {
                     Log.e(TAG, "httpTest4: 请求失败", it)
+                }
+            )
+    }
+
+    private fun httpTest5() {
+        getApiService()
+            .data4
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "httpTest5: 请求成功:$it")
+                },
+                {
+                    Log.e(TAG, "httpTest5: 请求失败", it)
+                }
+            )
+    }
+
+    private fun httpTest6() {
+        getApiService()
+            .data5
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "httpTest6: 请求成功:$it")
+                },
+                {
+                    Log.e(TAG, "httpTest6: 请求失败", it)
                 }
             )
     }

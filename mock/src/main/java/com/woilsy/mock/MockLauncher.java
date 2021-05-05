@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.service.MockService;
+import com.woilsy.mock.test.ApiService;
 import com.woilsy.mock.utils.ClassUtils;
 
 import java.lang.annotation.Annotation;
@@ -55,9 +56,9 @@ public class MockLauncher {
         }
     }
 
-//    public static void main(String[] args) {
-//        parse(ApiService.class);
-//    }
+    public static void main(String[] args) {
+        parse(ApiService.class);
+    }
 
     private static void parse(Class<?> cls) {
         //解析cls并传递给url管理
@@ -125,8 +126,6 @@ public class MockLauncher {
                 if (typeArguments != null && typeArguments.length == 2) {
                     Object key = handleType(typeArguments[0], null, null);
                     Object value = handleType(typeArguments[1], null, null);
-                    println("handleType()->key:" + key);
-                    println("handleType()->value:" + value);
                     map.put(key, value);
                 }
                 return setParentField(parent, parentField, map);
@@ -146,36 +145,19 @@ public class MockLauncher {
                     objects.add(handleType(typeArguments[0], null, null));
                 }
                 return setParentField(parent, parentField, objects);
-            } else {//目前先解析此类型 再想办法解析其他类型
-                Type[] types = ((ParameterizedType) type).getActualTypeArguments();
-                if (types.length == 1) {//一般情况只需要处理第一个，多反省
+            } else {//
+                if (parent == null) {//如果为null 从泛型一开始解析 不用管是Observable、Flow、Single之类的
+                    //可能是com.woilsy.mock.test.MockBean2<com.woilsy.mock.test.MockBeanChild>
+                    Type[] types = ((ParameterizedType) type).getActualTypeArguments();
                     Type childType = types[0];
-                    String clsName = "";
                     if (childType == ResponseBody.class) {
                         println("handleType()->ResponseBody类型暂不处理");
                     } else {
                         println("handleType()->childType:" + childType);
-                        if (childType instanceof ParameterizedType) {
-                            Type rawType = ((ParameterizedType) childType).getRawType();
-                            clsName = ((Class<?>) rawType).getName();
-                            //插入泛型类型
-                            Type[] typeArguments = ((ParameterizedType) childType).getActualTypeArguments();
-                            if (typeArguments != null && typeArguments.length > 0) {
-                                //将泛型实际类型传入到map中，因为反射对象会导致泛型丢失
-                                clsTb.put(clsName, typeArguments[0]);
-                            }
-                        } else {
-                            clsName = childType.toString().replace("class ", "");
-                        }
-                        println("handleType()->尝试反射" + clsName);
-                        try {
-                            return handleClass(Class.forName(clsName), parent, parentField);
-                        } catch (ClassNotFoundException e) {
-                            println("handleType()->" + clsName + "反射失败");
-                        }
+                        return createClassObj(childType, null, null);
                     }
-                } else {//为0 或大于1的情况
-                    println("handleType()->泛型参数大于1，暂不处理");
+                } else {//其他从当前开始分析
+                    createClassObj(type, parent, parentField);
                 }
             }
         } else if (type instanceof Class<?>) {//class类型
@@ -209,6 +191,35 @@ public class MockLauncher {
             println("handleType()->" + type + "暂不处理");
         } else {
             println("handleType()->无法识别的类型:" + type);
+        }
+        return null;
+    }
+
+    //尝试创建class对象
+    private static Object createClassObj(Type childType, Object parent, Field parentField) {
+        String clsName = "";
+        if (childType instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) childType).getRawType();
+            clsName = ((Class<?>) rawType).getName();
+            //插入泛型类型
+            Type[] typeArguments = ((ParameterizedType) childType).getActualTypeArguments();
+            if (typeArguments != null && typeArguments.length > 0) {
+                //将泛型实际类型传入到map中，因为反射对象会导致泛型丢失
+                clsTb.put(clsName, typeArguments[0]);
+            }
+        } else {//不带泛型的，尝试获取finalObj
+            Object obj = handleType(childType, null, null);
+            if (obj != null) {
+                return obj;
+            } else {
+                clsName = childType.toString().replace("class ", "");
+            }
+        }
+        println("handleType()->尝试反射" + clsName);
+        try {
+            return handleClass(Class.forName(clsName), parent, parentField);
+        } catch (Exception e) {
+            println("handleType()->" + clsName + "反射失败," + e.getMessage());
         }
         return null;
     }
