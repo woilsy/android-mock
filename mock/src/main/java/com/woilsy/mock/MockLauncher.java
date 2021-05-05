@@ -71,7 +71,7 @@ public class MockLauncher {
             String actUrl = actUrl(m);
             println("url:" + actUrl);
             Object o = actType(m);
-            println("data:" + o == null ? "null" : gson.toJson(o));
+            println("data:" + (o == null ? "null" : gson.toJson(o)));
             if (actUrl != null && o != null) {
                 urlManager.urlDataMap.put(actUrl, gson.toJson(o));
             }
@@ -148,7 +148,7 @@ public class MockLauncher {
                 return setParentField(parent, parentField, objects);
             } else {//目前先解析此类型 再想办法解析其他类型
                 Type[] types = ((ParameterizedType) type).getActualTypeArguments();
-                if (types.length == 1) {//一般情况只需要处理第一个，但是还有map的情况，所以
+                if (types.length == 1) {//一般情况只需要处理第一个，多反省
                     Type childType = types[0];
                     String clsName = "";
                     if (childType == ResponseBody.class) {
@@ -165,7 +165,7 @@ public class MockLauncher {
                                 clsTb.put(clsName, typeArguments[0]);
                             }
                         } else {
-                            clsName = childType.toString();
+                            clsName = childType.toString().replace("class ", "");
                         }
                         println("handleType()->尝试反射" + clsName);
                         try {
@@ -175,7 +175,7 @@ public class MockLauncher {
                         }
                     }
                 } else {//为0 或大于1的情况
-                    println("handleType()->参数为0或大于1，暂不处理");
+                    println("handleType()->泛型参数大于1，暂不处理");
                 }
             }
         } else if (type instanceof Class<?>) {//class类型

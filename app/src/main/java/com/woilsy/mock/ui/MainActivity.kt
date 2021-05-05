@@ -15,6 +15,10 @@ import retrofit2.Callback
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        const val TAG = "MainActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -32,11 +36,11 @@ class MainActivity : AppCompatActivity() {
                     call: Call<ResponseBody?>,
                     response: retrofit2.Response<ResponseBody?>
                 ) {
-                    Log.d("LEO", "onResponse: 返回了")
+                    Log.d(TAG, "onResponse: 返回了")
                 }
 
                 override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-                    Log.e("LEO", "onFailure: 网络请求出错！！！！", t)
+                    Log.e(TAG, "onFailure: 网络请求出错！！！！", t)
                 }
             })
     }
@@ -48,40 +52,40 @@ class MainActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    Log.d("LEO", "httpTest2: 请求成功:$it")
+                    Log.d(TAG, "httpTest2: 请求成功:$it")
                 },
                 {
-                    Log.e("LEO", "httpTest2: 请求失败", it)
+                    Log.e(TAG, "httpTest2: 请求失败", it)
                 }
             )
     }
 
     private fun httpTest3() {
         getApiService()
-            .data1
+            .data2
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    Log.d("LEO", "httpTest2: 请求成功:$it")
+                    Log.d(TAG, "httpTest3: 请求成功:$it")
                 },
                 {
-                    Log.e("LEO", "httpTest2: 请求失败", it)
+                    Log.e(TAG, "httpTest3: 请求失败", it)
                 }
             )
     }
 
     private fun httpTest4() {
         getApiService()
-            .data1
+            .data3
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    Log.d("LEO", "httpTest2: 请求成功:$it")
+                    Log.d(TAG, "httpTest4: 请求成功:$it")
                 },
                 {
-                    Log.e("LEO", "httpTest2: 请求失败", it)
+                    Log.e(TAG, "httpTest4: 请求失败", it)
                 }
             )
     }

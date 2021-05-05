@@ -16,13 +16,13 @@ public interface ApiService {
     @GET
     Call<ResponseBody> test(@Url String url);
 
-    @POST("/123")
+    @POST("/request1")
     Observable<MockBean<List<String>>> getData1();
 
-    @GET("/aac")
+    @GET("/request2")
     Observable<MockBean<String>> getData2();
 
-    @GET("/aab")
+    @GET("/request3")
     Observable<String> getData3();
 
 }
