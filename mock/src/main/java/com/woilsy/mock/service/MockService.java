@@ -4,13 +4,11 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
-
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.woilsy.mock.HttpService;
 import com.woilsy.mock.options.MockOptions;
@@ -22,7 +20,6 @@ public class MockService extends Service {
     private static final String CHANNEL_ID = "channel_mock_service";
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -33,8 +30,8 @@ public class MockService extends Service {
         super.onCreate();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //
-            NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
-            notificationManagerCompat.createNotificationChannel(
+            NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(
                     new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
             );
             //

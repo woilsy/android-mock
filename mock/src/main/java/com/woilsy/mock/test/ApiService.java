@@ -2,7 +2,6 @@ package com.woilsy.mock.test;
 
 import java.util.List;
 
-import io.reactivex.rxjava3.core.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -15,18 +14,18 @@ public interface ApiService {
     Call<ResponseBody> test(@Url String url);
 
     @POST("/request1")
-    Observable<MockBean<List<String>>> getData1();
+    Call<MockBean<List<String>>> getData1();
 
     @GET("/request2")
-    Observable<MockBean<String>> getData2();
+    Call<MockBean<String>> getData2();
 
     @GET("/request3")
-    Observable<String> getData3();
+    Call<String> getData3();
 
     @GET("/request4")
-    Observable<MockBean<MockBean2<MockBeanChild>>> getData4();
+    Call<MockBean<MockBean2<MockBeanChild>>> getData4();
 
     @GET("/request5")
-    Observable<MockBean<MockBean2<List<MockBeanChild>>>> getData5();
+    Call<MockBean<MockBean2<List<MockBeanChild>>>> getData5();
 
 }
