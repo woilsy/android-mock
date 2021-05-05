@@ -39,6 +39,7 @@ import retrofit2.http.PUT;
 
 /**
  * 启动器，目前支持POST/DELETE/GET/PUT 四种请求<br/>
+ * 某些策略说明：如果字段有默认值，那么不会处理该字段，直接返回默认值数据。<br/>
  * TODO 分析静态url 动态url(@Url String url)形式需要另想办法<br/>
  * TODO 目前获取字段是通过getFields，全字段需要过滤某些默认字段<br/>
  * TODO 返回值为ResponseBody时，暂不支持<br/>
@@ -132,7 +133,7 @@ public class MockLauncher {
                 println("handleType()->map类型，尝试分析创建");
                 Map<Object, Object> map = new HashMap<>();
                 Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-                if (typeArguments != null && typeArguments.length == 2) {
+                if (typeArguments.length == 2) {
                     Object key = handleType(typeArguments[0], null, null);
                     Object value = handleType(typeArguments[1], null, null);
                     map.put(key, value);
@@ -142,7 +143,7 @@ public class MockLauncher {
                 println("handleType()->List类型，尝试分析创建");
                 List<Object> objects = new ArrayList<>();
                 Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-                if (typeArguments != null && typeArguments.length == 1) {
+                if (typeArguments.length == 1) {
                     objects.add(handleType(typeArguments[0], null, null));
                 }
                 return setParentField(parent, parentField, objects);
@@ -150,7 +151,7 @@ public class MockLauncher {
                 println("handleType()->Set类型，尝试分析创建");
                 HashSet<Object> objects = new HashSet<>();
                 Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-                if (typeArguments != null && typeArguments.length == 1) {
+                if (typeArguments.length == 1) {
                     objects.add(handleType(typeArguments[0], null, null));
                 }
                 return setParentField(parent, parentField, objects);
