@@ -36,9 +36,11 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 
 /**
- * 启动器<br/>
- * TODO 分析静态url 动态url(@url String url)形式需要另想办法<br/>
- * TODO 目前获取字段是通过getFields，全字段需要过滤某些默认字段
+ * 启动器，目前支持POST/DELETE/GET/PUT 四种请求<br/>
+ * TODO 分析静态url 动态url(@Url String url)形式需要另想办法<br/>
+ * TODO 目前获取字段是通过getFields，全字段需要过滤某些默认字段<br/>
+ * TODO 返回值为ResponseBody时，暂不支持<br/>
+ * TODO 数据词典暂不支持自定义，目前使用的是随机
  */
 public class MockLauncher {
 

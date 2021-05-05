@@ -35,7 +35,7 @@ public class HttpService extends NanoHTTPD {
         //uri
         String uri = session.getUri();
         String data = UrlManager.getInstance().urlDataMap.get(uri);
-        Log.d(TAG, "客户端请求url-> " + uri + " 将返回Mock数据->" + data);
+        Log.d(TAG, "客户端请求url-> " + uri + " 将返回mock数据->" + data);
         //
         //Method get post delete put
         Method method = Method.lookup(session.getMethod().name());
@@ -47,8 +47,9 @@ public class HttpService extends NanoHTTPD {
             return newFixedLengthResponse(data);
         } else if (method == Method.DELETE) {
             return newFixedLengthResponse(data);
+        } else {
+            return newFixedLengthResponse("Unsupported request type");
         }
-        return newFixedLengthResponse("Unsupported request type");
     }
 
     @Override
