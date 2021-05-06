@@ -76,7 +76,7 @@ public class HttpService extends NanoHTTPD {
                 }
             }
         }
-        return null;
+        return uri;
     }
 
     @Override
