@@ -39,16 +39,16 @@ import retrofit2.http.PUT;
 /**
  * 启动器，目前支持POST/DELETE/GET/PUT 四种请求<br/>
  * 某些策略说明：<br/>
- * 如果字段有默认值，那么不会处理该字段，直接返回默认值数据。<br/>
- * 如果使用了动态url(@Url String url)，那么需要自行在合适的地方使用UrlManager插入<br/>
- * 返回值为ResponseBody时，需要自行新建一个mock数据文件，以
+ * 1,如果字段有默认值，那么不会处理该字段，直接返回默认值数据。<br/>
+ * 2,返回值为ResponseBody时或需要自定义mock数据时，需要自行新建一个mock数据文件，以<br/>
  * [<br/>
- * {<br/>
- * "url":"/xxx"<br/>
- * "data":{} <br/>
+ *  {<br/>
+ *  "url":"/xxx"<br/>
+ *  "data":{} <br/>
  * }<br/>
  * ]<br/>
  * 的形式传入，可以放在assets文件中，上线前删除该文件<br/>
+ * TODO 如果使用了动态url(@Url String url)，由于其可能不访问MockOptions.BASE_URL，所以暂时无法处理<br/>
  * TODO 目前获取字段是通过getFields，全字段需要过滤某些默认字段<br/>
  */
 public class MockLauncher {
