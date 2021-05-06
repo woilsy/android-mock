@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        findViewById<View>(R.id.btn_start0).setOnClickListener { httpTest0() }
         findViewById<View>(R.id.btn_start1).setOnClickListener { httpTest1() }
         findViewById<View>(R.id.btn_start2).setOnClickListener { httpTest2() }
         findViewById<View>(R.id.btn_start3).setOnClickListener { httpTest3() }
@@ -30,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btn_start6).setOnClickListener { httpTest6() }
     }
 
-    private fun httpTest1() {
+    private fun httpTest0() {
         getApiService()
             .test(MockOptions.BASE_URL)
             .enqueue(object : Callback<ResponseBody?> {
@@ -47,9 +48,24 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
-    private fun httpTest2() {
+    private fun httpTest1() {
         getApiService()
             .data1
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "httpTest1: 请求成功:$it")
+                },
+                {
+                    Log.e(TAG, "httpTest1: 请求失败", it)
+                }
+            )
+    }
+
+    private fun httpTest2() {
+        getApiService()
+            .data2
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -64,7 +80,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun httpTest3() {
         getApiService()
-            .data2
+            .data3
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -79,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun httpTest4() {
         getApiService()
-            .data3
+            .data4
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -94,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun httpTest5() {
         getApiService()
-            .data4
+            .data5
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -108,17 +124,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun httpTest6() {
-        getApiService()
-            .data5
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    Log.d(TAG, "httpTest6: 请求成功:$it")
-                },
-                {
-                    Log.e(TAG, "httpTest6: 请求失败", it)
-                }
-            )
+
     }
 }
