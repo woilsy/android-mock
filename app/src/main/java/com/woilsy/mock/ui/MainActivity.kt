@@ -124,6 +124,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun httpTest6() {
-
+        getApiService()
+            .getData6("id222")
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "httpTest6: 请求成功:$it")
+                },
+                {
+                    Log.e(TAG, "httpTest6: 请求失败", it)
+                }
+            )
     }
 }

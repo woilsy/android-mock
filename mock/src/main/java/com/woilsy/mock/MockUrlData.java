@@ -69,4 +69,8 @@ public class MockUrlData {
         return INSTANCE.urlDataMap.get(key);
     }
 
+    public static Map<String, String> getMap() {
+        return INSTANCE.urlDataMap;
+    }
+
 }
