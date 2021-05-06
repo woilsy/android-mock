@@ -7,6 +7,10 @@ import com.woilsy.mock.entity.MockData;
 import com.woilsy.mock.utils.GsonUtil;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -35,29 +39,49 @@ public class MockUrlData {
         }
     }
 
+    public static void addFromFile(File file) {
+        try {
+            if (file != null && file.exists()) {
+                addFromInputStream(new FileInputStream(file));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void addFromAssets(Context context, String fileUrl) {
         try {
-            InputStream is = context.getAssets().open(fileUrl);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            addFromInputStream(context.getAssets().open(fileUrl));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void addFromInputStream(InputStream inputStream) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder sb = new StringBuilder();
             while (br.ready()) {
                 String line = br.readLine();
                 sb.append(line.trim().replaceAll(" ", ""));
             }
             br.close();
-            String json = sb.toString();
-            System.out.println("addFromAssets()->即将导入：" + json);
-            List<MockData> mockDatas = GsonUtil.jsonToObj(json, new TypeToken<List<MockData>>() {
-            }.getType());
-            if (mockDatas != null) {
-                for (MockData md : mockDatas) {
-                    add(md.url, md.data);
-                }
-            } else {
-                System.out.println("addFromAssets()->转换mock数据列表失败");
-            }
+            addFromJson(sb.toString());
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void addFromJson(String json) {
+        System.out.println("addFromAssets()->即将导入：" + json);
+        List<MockData> mockDatas = GsonUtil.jsonToObj(json, new TypeToken<List<MockData>>() {
+        }.getType());
+        if (mockDatas != null) {
+            for (MockData md : mockDatas) {
+                add(md.url, md.data);
+            }
+        } else {
+            System.out.println("addFromAssets()->转换mock数据列表失败");
         }
     }
 
