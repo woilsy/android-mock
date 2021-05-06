@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.service.MockService;
@@ -13,6 +11,7 @@ import com.woilsy.mock.test.ApiService;
 import com.woilsy.mock.type.Image;
 import com.woilsy.mock.type.Images;
 import com.woilsy.mock.utils.ClassUtils;
+import com.woilsy.mock.utils.GsonUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -39,10 +38,18 @@ import retrofit2.http.PUT;
 
 /**
  * 启动器，目前支持POST/DELETE/GET/PUT 四种请求<br/>
- * 某些策略说明：如果字段有默认值，那么不会处理该字段，直接返回默认值数据。<br/>
- * TODO 分析静态url 动态url(@Url String url)形式需要另想办法<br/>
+ * 某些策略说明：<br/>
+ * 如果字段有默认值，那么不会处理该字段，直接返回默认值数据。<br/>
+ * 如果使用了动态url(@Url String url)，那么需要自行在合适的地方使用UrlManager插入<br/>
+ * 返回值为ResponseBody时，需要自行新建一个mock数据文件，以
+ * [<br/>
+ * {<br/>
+ * "url":"/xxx"<br/>
+ * "data":{} <br/>
+ * }<br/>
+ * ]<br/>
+ * 的形式传入，可以放在assets文件中，上线前删除该文件<br/>
  * TODO 目前获取字段是通过getFields，全字段需要过滤某些默认字段<br/>
- * TODO 返回值为ResponseBody时，暂不支持<br/>
  */
 public class MockLauncher {
 
@@ -71,20 +78,20 @@ public class MockLauncher {
     }
 
     private static void parse(Class<?> cls) {
-        //解析cls并传递给url管理
-        UrlManager urlManager = UrlManager.getInstance();
         //第一步：获取url及数据
         Method[] methods = cls.getMethods();
-        Gson gson = new GsonBuilder().create();
         for (Method m : methods) {
             println("====== 解析Method " + m.getName() + " start ======");
             //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
             String actUrl = actUrl(m);
             println("url:" + actUrl);
-            Object o = actType(m);
-            println("data:" + (o == null ? "null" : gson.toJson(o)));
-            if (actUrl != null && o != null) {
-                urlManager.urlDataMap.put(actUrl, gson.toJson(o));
+            boolean containsKey = MockUrlData.contain(actUrl);
+            if (containsKey) {
+                println("该url已由其他mock数据占用，无需静态解析");
+            } else {
+                Object o = actType(m);
+                println("data:" + (o == null ? "null" : GsonUtil.toJson(o)));
+                MockUrlData.add(actUrl, o);
             }
             println("====== 解析Method " + m.getName() + " end ======");
             println("---------------分割线---------------");

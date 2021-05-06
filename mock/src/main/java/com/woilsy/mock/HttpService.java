@@ -34,7 +34,7 @@ public class HttpService extends NanoHTTPD {
         }
         //uri
         String uri = session.getUri();
-        String data = UrlManager.getInstance().urlDataMap.get(uri);
+        String data = MockUrlData.get(uri);
         Log.d(TAG, "客户端请求url-> " + uri + " 将返回mock数据->" + data);
         //
         //Method get post delete put
