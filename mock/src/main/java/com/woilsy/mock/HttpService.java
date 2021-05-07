@@ -62,17 +62,19 @@ public class HttpService extends NanoHTTPD {
         Set<Map.Entry<String, String>> entries = MockUrlData.getMap().entrySet();
         for (Map.Entry<String, String> en : entries) {
             String key = en.getKey();
-            String[] split2 = key.split("/");
-            if (split1.length == split2.length) {//可比较
-                int max = split2.length;//允许max-1
-                int count = 0;
-                for (int j = 0; j < max; j++) {
-                    if (split1[j].equals(split2[j])) {
-                        count++;
+            if (key.contains("{") && split1.length > 2) {//表示有@Path形式的url，那么需要进行匹配 且
+                String[] split2 = key.split("/");
+                if (split1.length == split2.length) {//可比较
+                    int max = split2.length;//允许max-1
+                    int count = 0;
+                    for (int j = 0; j < max; j++) {
+                        if (split1[j].equals(split2[j])) {
+                            count++;
+                        }
                     }
-                }
-                if (count >= max - 1) {
-                    return key;
+                    if (count >= max - 1) {
+                        return key;
+                    }
                 }
             }
         }

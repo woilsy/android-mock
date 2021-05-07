@@ -3,6 +3,7 @@ package com.woilsy.mock.service;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,8 @@ public class MockService extends Service {
 
     private static final String CHANNEL_ID = "channel_mock_service";
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
+
+    private static final String ACTION_STOP = "stop_service";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -37,10 +40,14 @@ public class MockService extends Service {
             //
             Notification notification =
                     new Notification.Builder(this, CHANNEL_ID)
+                            .setContentTitle("Mock服务器已启用")
+                            .setContentIntent(getIntent())
                             .setContentText("Mock服务器正在运行...")
+                            .setWhen(System.currentTimeMillis())
+                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setSubText("Mock")
                             .build();
-            startForeground(100, notification);
+            startForeground(1, notification);
         }
         new Thread(() -> {
             int port = MockOptions.PORT;
@@ -55,8 +62,17 @@ public class MockService extends Service {
                 .start();
     }
 
+    private PendingIntent getIntent() {
+        Intent intent = new Intent(this, MockService.class);
+        intent.setAction(ACTION_STOP);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_NO_CREATE);
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            stopSelf();
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
