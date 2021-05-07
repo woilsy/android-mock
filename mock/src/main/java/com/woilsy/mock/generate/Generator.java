@@ -1,6 +1,5 @@
 package com.woilsy.mock.generate;
 
-import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.utils.ClassUtils;
 
 import java.math.BigDecimal;
@@ -10,44 +9,50 @@ import java.math.BigDecimal;
  */
 public class Generator implements Rule {
 
+    private final Rule rule;
+
+    public Generator(Rule rule) {
+        this.rule = rule;
+    }
+
     public String getString() {
-        return MockOptions.DATE_GENERATOR_RULE.getString();
+        return rule.getString();
     }
 
     public Integer getInt() {
-        return MockOptions.DATE_GENERATOR_RULE.getInt();
+        return rule.getInt();
     }
 
     public Long getLong() {
-        return MockOptions.DATE_GENERATOR_RULE.getLong();
+        return rule.getLong();
     }
 
     public Boolean getBoolean() {
-        return MockOptions.DATE_GENERATOR_RULE.getBoolean();
+        return rule.getBoolean();
     }
 
     public Float getFloat() {
-        return MockOptions.DATE_GENERATOR_RULE.getFloat();
+        return rule.getFloat();
     }
 
     public Character getCharacter() {
-        return MockOptions.DATE_GENERATOR_RULE.getCharacter();
+        return rule.getCharacter();
     }
 
     public Double getDouble() {
-        return MockOptions.DATE_GENERATOR_RULE.getDouble();
+        return rule.getDouble();
     }
 
     public Short getShort() {
-        return MockOptions.DATE_GENERATOR_RULE.getShort();
+        return rule.getShort();
     }
 
     public Byte getByte() {
-        return MockOptions.DATE_GENERATOR_RULE.getByte();
+        return rule.getByte();
     }
 
     public BigDecimal getBigDecimal() {
-        return MockOptions.DATE_GENERATOR_RULE.getBigDecimal();
+        return rule.getBigDecimal();
     }
 
     public Object get(Class<?> cls) {

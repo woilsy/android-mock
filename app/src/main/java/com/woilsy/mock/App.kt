@@ -9,9 +9,15 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        //导入已有的Mock数据
-        MockUrlData.addFromAssets(this, "mock.json");
-        MockLauncher.start(this, ApiService::class.java)
+        //初始化mock
+        MockLauncher.start(
+            this,
+            MockOptions.Builder()
+                .setDebug(true)
+                .setMockDataFromAssets("mock.json")
+                .build(),
+            ApiService::class.java
+        )
         //初始化http
         HttpManager.init(this, MockOptions.BASE_URL)
     }

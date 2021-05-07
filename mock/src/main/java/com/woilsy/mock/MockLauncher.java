@@ -7,7 +7,6 @@ import android.os.Build;
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.service.MockService;
-import com.woilsy.mock.test.ApiService;
 import com.woilsy.mock.type.Image;
 import com.woilsy.mock.type.Images;
 import com.woilsy.mock.utils.ClassUtils;
@@ -56,17 +55,41 @@ import retrofit2.http.PUT;
  */
 public class MockLauncher {
 
-    private static final Map<String, Type> clsTb = new HashMap<>();
+    private final Map<String, Type> clsTb = new HashMap<>();
 
-    private static final Generator GENERATOR = new Generator();
+    private Generator generator;
 
-    public static void start(Context context, Class<?>... classes) {
+    private MockOptions mockOptions;
+
+    private MockLauncher() {
+
+    }
+
+    public static void start(Context context, MockOptions options, Class<?>... classes) {
+        MockLauncher launcher = new MockLauncher();
+        launcher.initByOptions(context, options);
+        launcher.startMockService(context);
+        launcher.parseClasses(classes);
+    }
+
+    private void initByOptions(Context context, MockOptions options) {
+        MockOptions actMockOptions = options == null ? MockOptions.getDefault() : options;
+        generator = new Generator(actMockOptions.rule);
+        mockOptions = actMockOptions;
+        //导入数据
+        MockUrlData.add(actMockOptions.mockData);
+        MockUrlData.addFromAssets(context, actMockOptions.mockDataAssetsPath);
+    }
+
+    private void startMockService(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(new Intent(context, MockService.class));
         } else {
             context.startService(new Intent(context, MockService.class));
         }
-        //解析class内部并插入map
+    }
+
+    private void parseClasses(Class<?>... classes) {
         for (Class<?> cls : classes) {
             try {
                 parse(cls);
@@ -76,11 +99,7 @@ public class MockLauncher {
         }
     }
 
-    public static void main(String[] args) {
-        parse(ApiService.class);
-    }
-
-    private static void parse(Class<?> cls) {
+    private void parse(Class<?> cls) {
         //第一步：获取url及数据
         Method[] methods = cls.getMethods();
         for (Method m : methods) {
@@ -102,7 +121,7 @@ public class MockLauncher {
     }
 
     //分析静态url
-    private static String actUrl(Method m) {
+    private String actUrl(Method m) {
         Annotation[] annotations = m.getAnnotations();
         for (Annotation a : annotations) {
             if (a instanceof GET) {
@@ -120,22 +139,22 @@ public class MockLauncher {
         return null;
     }
 
-    private static String transString(String s) {
+    private String transString(String s) {
         return s == null || s.isEmpty() ? null : s;
     }
 
-    private static Object actType(Method m) {
+    private Object actType(Method m) {
         return parseType(m.getGenericReturnType());
     }
 
     /**
      * @return 返回一个拥有所有mock属性的对象，将其作为value
      */
-    private static Object parseType(Type type) {
+    private Object parseType(Type type) {
         return handleType(type, null, null);
     }
 
-    private static Object handleType(Type type, Object parent, Field parentField) {
+    private Object handleType(Type type, Object parent, Field parentField) {
         if (type instanceof ParameterizedType) {//带参数类型
             // 强制转型为带参数的泛型类型
             Type rawType1 = ((ParameterizedType) type).getRawType();
@@ -216,7 +235,7 @@ public class MockLauncher {
     }
 
     //尝试创建class对象
-    private static Object createClassObj(Type childType, Object parent, Field parentField) {
+    private Object createClassObj(Type childType, Object parent, Field parentField) {
         String clsName = "";
         if (childType instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) childType).getRawType();
@@ -244,7 +263,7 @@ public class MockLauncher {
         return null;
     }
 
-    private static Object handleClass(Class<?> cls, Object parent, Field parentField) {
+    private Object handleClass(Class<?> cls, Object parent, Field parentField) {
         Object finalObj = getFinalObj(cls, parentField);
         if (finalObj == null) {//表示该类型需要解析
             println("handleClass()->非final类型，需要单独解析" + cls.getName());
@@ -256,7 +275,7 @@ public class MockLauncher {
     }
 
     //处理对象class
-    private static Object handleObjClass(Class<?> cls, Object parent, Field parentField) {
+    private Object handleObjClass(Class<?> cls, Object parent, Field parentField) {
         //获取class对象实例
         Object obj = tryGetClassObj(cls);
         if (obj == null) {
@@ -283,7 +302,7 @@ public class MockLauncher {
         return parent == null ? obj : setParentField(parent, parentField, obj);
     }
 
-    private static Object setParentField(Object parent, Field parentField, Object value) {
+    private Object setParentField(Object parent, Field parentField, Object value) {
         if (parent == null || parentField == null) return null;
         try {
             parentField.setAccessible(true);
@@ -294,7 +313,7 @@ public class MockLauncher {
         return parent;
     }
 
-    private static Object tryGetClassObj(Class<?> cls) {
+    private Object tryGetClassObj(Class<?> cls) {
         try {//默认构造器创建
             Constructor<?> constructor = cls.getConstructor();
             constructor.setAccessible(true);
@@ -304,13 +323,13 @@ public class MockLauncher {
         }
     }
 
-    private static Object getFinalObj(Class<?> cls, Field parentField) {
+    private Object getFinalObj(Class<?> cls, Field parentField) {
         if (parentField != null) {
             Image image = parentField.getAnnotation(Image.class);
             if (image != null) {
                 String defaultUrl = image.value();
-                if (defaultUrl.isEmpty()) {
-                    List<String> images = MockOptions.IMAGES;
+                if (defaultUrl.isEmpty() && mockOptions != null) {
+                    List<String> images = mockOptions.images;
                     List<String> actImages = images == null || images.size() == 0 ? Images.get() : images;
                     if (actImages.size() > 0) {
                         int index = new Random().nextInt(actImages.size());
@@ -321,11 +340,11 @@ public class MockLauncher {
                 }
             }
         }
-        return GENERATOR.get(cls);
+        return generator == null ? null : generator.get(cls);
     }
 
-    private static void println(String msg) {
-        if (MockOptions.DEBUG) {
+    private void println(String msg) {
+        if (mockOptions != null && mockOptions.debug) {
             System.out.println(msg);
         }
     }

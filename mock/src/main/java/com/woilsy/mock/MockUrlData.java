@@ -39,6 +39,14 @@ public class MockUrlData {
         }
     }
 
+    public static void add(List<MockData> mockData) {
+        if (mockData != null) {
+            for (MockData md : mockData) {
+                add(md.url, md.data);
+            }
+        }
+    }
+
     public static void addFromFile(File file) {
         try {
             if (file != null && file.exists()) {
@@ -51,7 +59,9 @@ public class MockUrlData {
 
     public static void addFromAssets(Context context, String fileUrl) {
         try {
-            addFromInputStream(context.getAssets().open(fileUrl));
+            if (fileUrl != null && !fileUrl.isEmpty()) {
+                addFromInputStream(context.getAssets().open(fileUrl));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
