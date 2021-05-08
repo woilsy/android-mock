@@ -2,17 +2,12 @@ package com.woilsy.mock;
 
 import android.util.Log;
 
-import org.nanohttpd.protocols.http.IHTTPSession;
-import org.nanohttpd.protocols.http.NanoHTTPD;
-import org.nanohttpd.protocols.http.request.Method;
-import org.nanohttpd.protocols.http.response.Response;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.nanohttpd.protocols.http.response.Response.newFixedLengthResponse;
+import fi.iki.elonen.NanoHTTPD;
 
 public class HttpService extends NanoHTTPD {
 
@@ -27,7 +22,7 @@ public class HttpService extends NanoHTTPD {
     }
 
     @Override
-    protected Response serve(IHTTPSession session) {
+    public Response serve(IHTTPSession session) {
         try {
             // 这一句话必须要写，否则在获取数据时，获取不到数据
             session.parseBody(new HashMap<>());
@@ -41,7 +36,7 @@ public class HttpService extends NanoHTTPD {
         Log.d(TAG, "客户端请求url->" + uri + ",数据key->" + uriKey + ",将返回mock数据->" + data);
         //
         //Method get post delete put
-        Method method = Method.lookup(session.getMethod().name());
+        Method method = session.getMethod();
         if (method == Method.GET) {
             return newFixedLengthResponse(data);
         } else if (method == Method.POST) {
@@ -79,10 +74,5 @@ public class HttpService extends NanoHTTPD {
             }
         }
         return uri;
-    }
-
-    @Override
-    public Response handle(IHTTPSession session) {
-        return super.handle(session);
     }
 }

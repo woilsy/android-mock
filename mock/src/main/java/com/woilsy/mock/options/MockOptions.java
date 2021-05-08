@@ -22,7 +22,11 @@ public class MockOptions {
     /**
      * Mock服务器Base地址
      */
-    public static final String BASE_URL = "http://127.0.0.1:" + PORT;
+    public static String BASE_URL = "http://127.0.0.1:" + PORT;
+    /**
+     * Mock服务器备用地址，当服务器停止时会切换到改地址
+     */
+    public static String BASE_URL_BACK_UP = BASE_URL;
 
     /**
      * 日志开关
@@ -66,6 +70,8 @@ public class MockOptions {
 
         private String mockDataAssetsPath;
 
+        private String backupBaseUrl;
+
         public Builder setDebug(boolean debug) {
             this.debug = debug;
             return this;
@@ -86,6 +92,11 @@ public class MockOptions {
             return this;
         }
 
+        public Builder setBackupBaseUrl(String url) {
+            this.backupBaseUrl = url;
+            return this;
+        }
+
         public Builder setMockDataFromAssets(String path) {
             this.mockDataAssetsPath = path;
             return this;
@@ -96,6 +107,7 @@ public class MockOptions {
             options.rule = this.generateRule == null ? new RandomRule() : this.generateRule;
             options.debug = this.debug;
             options.mockDataAssetsPath = this.mockDataAssetsPath;
+            MockOptions.BASE_URL_BACK_UP = this.backupBaseUrl;
             if (this.images != null) options.images.addAll(this.images);
             if (this.mockData != null) options.mockData.addAll(this.mockData);
             return options;

@@ -23,6 +23,8 @@ public class MockService extends Service {
 
     private static final String ACTION_STOP = "stop_service";
 
+    private HttpService httpService;
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -35,24 +37,25 @@ public class MockService extends Service {
             //
             NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.createNotificationChannel(
-                    new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+                    new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
             );
             //
-            Notification notification =
-                    new Notification.Builder(this, CHANNEL_ID)
-                            .setContentTitle("Mock服务器已启用")
-                            .setContentIntent(getIntent())
-                            .setContentText("Mock服务器正在运行...")
-                            .setWhen(System.currentTimeMillis())
-                            .setPriority(Notification.PRIORITY_DEFAULT)
-                            .setSubText("Mock")
-                            .build();
+            Notification notification = new Notification.Builder(this, CHANNEL_ID)
+                    .setChannelId(CHANNEL_ID)
+                    .setContentTitle("Mock服务器已启用")
+                    .setContentIntent(getIntent())
+                    .setContentText("Mock服务器正在运行...点击可关闭")
+                    .setWhen(System.currentTimeMillis())
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setSubText("Mock")
+                    .setSmallIcon(android.R.drawable.presence_online)
+                    .build();
             startForeground(1, notification);
         }
         new Thread(() -> {
             int port = MockOptions.PORT;
-            HttpService httpService = new HttpService(port);
             try {
+                httpService = new HttpService(port);
                 httpService.start();
                 Log.d(TAG, "已启动" + port + "mock服务器");
             } catch (Exception e) {
@@ -65,7 +68,7 @@ public class MockService extends Service {
     private PendingIntent getIntent() {
         Intent intent = new Intent(this, MockService.class);
         intent.setAction(ACTION_STOP);
-        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_NO_CREATE);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -76,4 +79,13 @@ public class MockService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (httpService != null) {
+            httpService.stop();
+        }
+        //自动切换到备用地址
+        MockOptions.BASE_URL = MockOptions.BASE_URL_BACK_UP;
+    }
 }
