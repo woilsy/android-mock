@@ -6,12 +6,15 @@ public class MockBean<T> {
 
     public String a;
 
-    public static class Bean2 {
+    public Bean bean;
+
+    public static class Bean {
+
         public int code;
 
         @Override
         public String toString() {
-            return "Bean2{" +
+            return "Bean{" +
                     "code=" + code +
                     '}';
         }

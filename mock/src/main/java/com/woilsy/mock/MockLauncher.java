@@ -99,7 +99,8 @@ public class MockLauncher {
             try {
                 parse(cls);
             } catch (Exception e) {
-                println("解析Service失败");
+                println("解析Service失败，以下为错误信息↓");
+                e.printStackTrace();
             }
         }
     }
@@ -156,29 +157,39 @@ public class MockLauncher {
      * @return 返回一个拥有所有mock属性的对象，将其作为value
      */
     private Object parseType(Type type) {
-        return handleType(type, true);
+        return handleType(type, null, null, true);
     }
 
-    private Object handleType(Type type, boolean isStart) {
+    private Object handleType(Type type, Object parent, Field parentField, boolean isStart) {
         if (type instanceof ParameterizedType) {
             Type rawType1 = ((ParameterizedType) type).getRawType();
             if (rawType1 == Map.class) {//需要获取key value的类型再处理
                 println("handleType()->map带泛型，尝试分析创建" + type);
-
+                Map<Object, Object> map = new HashMap<>();
+                //只处理List的第一层泛型
+                Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+                if (actualTypeArguments.length == 2) {
+                    Object key = handleType(actualTypeArguments[0], null, null, false);
+                    Object value = handleType(actualTypeArguments[1], null, null, false);
+                    if (key != null && value != null) {
+                        map.put(key, value);
+                    }
+                }
+                if (parentField != null) println(map + "已设置到字段" + parentField.getName() + "中");
+                return parent == null ? map : setParentField(parent, parentField, map);
             } else if (rawType1 == List.class) {
                 println("handleType()->List带泛型，尝试分析创建" + type);
                 List<Object> ls = new ArrayList<>();
                 //只处理List的第一层泛型
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 1) {
-                    Object o = handleType(actualTypeArguments[0], false);
+                    Object o = handleType(actualTypeArguments[0], null, null, false);
                     if (o != null) {
-                        println("handleType()->添加数据到List:" + o);
                         ls.add(o);
                     }
                 }
-                println("handleType()->已创建List，返回:" + ls);
-                return ls;
+                if (parentField != null) println(ls + "已设置到字段" + parentField.getName() + "中");
+                return parent == null ? ls : setParentField(parent, parentField, ls);
             } else if (rawType1 == Set.class) {//同上
                 println("handleType()->Set带泛型，尝试分析创建" + type);
             } else {
@@ -189,16 +200,31 @@ public class MockLauncher {
                 } else {
                     if (isStart) {//retrofit2.Call<***>
                         Type type1 = actualTypeArguments[0];
-                        println("handleType()->入口retrofit2.Call<***>，等待" + type1 + "创建完成返回");
-                        return handleType(type1, false);//处理完毕后返回参数1
-                    } else {//OBJ<XXX<xx<x>>>...> 带泛型的cls final类型是不可能带泛型的 但如果handleType死循环了
+                        println("handleType()->入口retrofit2.Call<***>，等待" + type1 + "创建后返回");
+                        return handleType(type1, parent, parentField, false);//处理完毕后返回参数1
+                    } else {//OBJ<XXX<xx<x>>>...>
                         println("handleType()->非入口，正在处理" + type);
-//                        handleType(type, false);
+                        Type rawType = ((ParameterizedType) type).getRawType();
+                        if (rawType instanceof Class<?>) {//带泛型的cls final类型是不可能带泛型的
+                            Class<?> rawClass = (Class<?>) rawType;
+                            //插入泛型类型
+                            if (actualTypeArguments.length >= 1) {
+                                println("handleType()->插入Map==>key:" + rawClass.getName() + " value:" + actualTypeArguments[0]);
+                                clsTb.put(rawClass.getName(), actualTypeArguments[0]);
+                            }
+                            //开始解析
+                            return handleObjFromCls(rawClass, parent, parentField);
+                        } else {
+                            println("handleType()->不可能存在的情况");
+                        }
                     }
                 }
             }
         } else if (type instanceof Class<?>) {//class类型
-            return getObjFromCls((Class<?>) type);
+            Object obj = handleObjFromCls((Class<?>) type, parent, parentField);
+            if (parent == null) {
+                return obj;
+            }
         } else if (type instanceof TypeVariable) {//类型变量 name:T bounds:Object
 //            TypeVariable表示的是类型变量，它用来反映的是JVM编译该泛型前的信息，例如List<T>中的T就是类型变量，它在编译时需要被转换为一个具体的类型后才能正常使用。
 //            该接口常用的方法有3个，分别是：
@@ -206,13 +232,17 @@ public class MockLauncher {
 //            (2) D getGenericDeclaration()——获取声明该类型变量的原始类型，例如Test<K extents Person>中原始类型是Test。
 //            (3) String getName()——获取在源码中定义的名字，上例中为K。
             //尝试从map中获取原始类型
-//            Type actType = clsTb.get(parent.getClass().getName());
-//            if (actType != null) {
-//                println("handleType()->尝试从clsTb中获取对象实际泛型类型" + actType);
-//                handleType(actType, parent, parentField, false);//直接重进
-//            } else {
-//                println("handleType()->从clsTb中获取对象实际泛型类型失败" + type);
-//            }
+            if (parent != null) {
+                Type actType = clsTb.get(parent.getClass().getName());
+                if (actType != null) {
+                    println("handleType()->尝试从clsTb中获取对象实际泛型类型" + actType);
+                    handleType(actType, parent, parentField, false);//直接重进
+                } else {
+                    println("handleType()->从clsTb中获取对象实际泛型类型失败" + type);
+                }
+            } else {
+                println("handleType()->parent为null，无法处理:" + type);
+            }
         } else if (type instanceof GenericArrayType) {
             //GenericArrayType表示的是数组类型且组成元素时ParameterizedType或TypeVariable，例如List<T>或T[]，该接口只有
             // Type getGenericComponentType()一个方法，它返回数组的组成元素类型。
@@ -229,103 +259,52 @@ public class MockLauncher {
         return null;
     }
 
-    private Object getObjFromCls(Class<?> cls) {
-        Object finalObj = getFinalObj(cls);
+    private Object handleObjFromCls(Class<?> cls, Object parent, Field parentField) {
+        Object finalObj = getFinalObj(cls, parentField);
         if (finalObj == null) {//可变对象
             println("getObjFromCls()->非final类型，将尝试获取cls对应的Obj " + cls);
-            return getClsObj(cls);
+            return getClsObj(cls, parent, parentField);
         } else {
-            println("getObjFromCls()->final类型，直接返回 " + cls);
-            return finalObj;
+            println("getObjFromCls()->final类型，直接返回" + cls);
+            return parent == null ? finalObj : setParentField(parent, parentField, finalObj);
         }
     }
 
-    private Object getClsObj(Class<?> cls) {
-        //如果带泛型 那么需要递归处理 直到没有泛型位置
-        println(cls + "等待处理");
-
-        return null;
+    private Object getClsObj(Class<?> cls, Object parent, Field parentField) {
+        //如果带泛型 那么需要递归处理 直到没有泛型为止
+        Object obj = newClassInstance(cls);
+        if (obj != null) {
+            Field[] fields = cls.getFields();
+            for (Field f : fields) {
+                try {
+                    f.setAccessible(true);
+                    Object o = f.get(obj);
+                    if (o == null) {//表示没有默认值 需要mock数据
+                        Type genericType = f.getGenericType();
+                        println("getClsObj()->字段：" + f.getName() + " 类型:" + genericType);
+                        handleType(genericType, obj, f, false);
+                    } else {
+                        println("getClsObj()->字段：" + f.getName() + "已有默认值，无需处理");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return parent == null ? obj : setParentField(parent, parentField, obj);
     }
 
-    //尝试创建class对象
-//    private Object createClassObj(Type childType, Object parent, Field parentField) {
-//        String clsName = "";
-//        if (childType instanceof ParameterizedType) {
-//            Type rawType = ((ParameterizedType) childType).getRawType();
-//            clsName = ((Class<?>) rawType).getName();
-//            //插入泛型类型
-//            Type[] typeArguments = ((ParameterizedType) childType).getActualTypeArguments();
-//            if (typeArguments.length > 0) {
-//                //将泛型实际类型传入到map中，因为反射对象会导致泛型丢失
-//                clsTb.put(clsName, typeArguments[0]);
-//            }
-//        } else {//不带泛型的，尝试获取finalObj
-//            Object obj = handleType(childType);
-//            if (obj != null) {
-//                return obj;
-//            } else {
-//                clsName = childType.toString().replace("class ", "");
-//            }
-//        }
-//        println("handleType()->尝试反射" + clsName);
-//        try {
-//            return handleClass(Class.forName(clsName), parent, parentField);
-//        } catch (Exception e) {
-//            println("handleType()->" + clsName + "反射失败," + e.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    private Object handleClass(Class<?> cls, Object parent, Field parentField) {
-//        Object finalObj = getFinalObj(cls, parentField);
-//        if (finalObj == null) {//表示该类型需要解析
-//            println("handleClass()->非final类型，需要单独解析" + cls.getName());
-//            return handleObjClass(cls, parent, parentField);
-//        } else {//表示该类型不需要解析 直接设置给父类 返回父类 如果父类为null 返回自身
-//            println("handleClass()->" + cls.getName() + "->final类型，直接返回或设置给parent:" + parent);
-//            return parent == null ? finalObj : setParentField(parent, parentField, finalObj);
-//        }
-//    }
-//
-//    //处理对象class
-//    private Object handleObjClass(Class<?> cls, Object parent, Field parentField) {
-//        //获取class对象实例
-//        Object obj = tryGetClassObj(cls);
-//        if (obj == null) {
-//            println("handleObjClass()->获取class实例失败，直接return");
-//            return null;
-//        }
-//        //获取所有字段
-//        Field[] fields = cls.getFields();
-//        for (Field f : fields) {
-//            try {
-//                f.setAccessible(true);
-//                Object o = f.get(obj);
-//                if (o == null) {//表示没有默认值 需要mock数据
-//                    Type genericType = f.getGenericType();
-//                    println("handleObjClass()->字段：" + f.getName() + " 类型:" + genericType);
-//                    handleType(genericType);
-//                } else {
-//                    println("handleObjClass()->字段：" + f.getName() + "已有默认值，无需处理");
-//                }
-//            } catch (IllegalAccessException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return parent == null ? obj : setParentField(parent, parentField, obj);
-//    }
-//
-//    private Object setParentField(Object parent, Field parentField, Object value) {
-//        if (parent == null || parentField == null) return null;
-//        try {
-//            parentField.setAccessible(true);
-//            parentField.set(parent, value);
-//        } catch (IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
-//        return parent;
-//    }
-//
+    private Object setParentField(Object parent, Field parentField, Object value) {
+        if (parent == null || parentField == null) return null;
+        try {
+            parentField.setAccessible(true);
+            parentField.set(parent, value);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return parent;
+    }
+
     private Object newClassInstance(Class<?> cls) {
         try {//默认构造器创建
             Constructor<?> constructor = cls.getConstructor();
@@ -334,10 +313,6 @@ public class MockLauncher {
         } catch (Exception e) {//使用不安全的方式创建
             return ClassUtils.allocateInstance(cls);
         }
-    }
-
-    private Object getFinalObj(Class<?> cls) {
-        return getFinalObj(cls, null);
     }
 
     private Object getFinalObj(Class<?> cls, Field parentField) {
@@ -356,10 +331,8 @@ public class MockLauncher {
                     return defaultUrl;
                 }
             }
-            return null;
-        } else {
-            return generator == null ? null : generator.get(cls);
         }
+        return generator == null ? null : generator.get(cls);
     }
 
     private void println(String msg) {
