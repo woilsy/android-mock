@@ -15,6 +15,7 @@ class App : Application() {
             MockOptions.Builder()
                 .setDebug(true)
                 .setMockDataFromAssets("mock.json")
+                .setBackupBaseUrl("http://www.baidu.com")
                 .build(),
             ApiService::class.java
         )
