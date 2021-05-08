@@ -10,42 +10,47 @@
         android:id="@+id/btn_start0"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求0" />
+        android:text="网络请求0(基本类型)" />
 
     <Button
         android:id="@+id/btn_start1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求1" />
+        android:text="网络请求1(常规类型)" />
 
     <Button
         android:id="@+id/btn_start2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求2" />
+        android:text="网络请求2(常规类型)" />
 
     <Button
         android:id="@+id/btn_start3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求3" />
+        android:text="网络请求3(简单类型)" />
 
     <Button
         android:id="@+id/btn_start4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求4" />
+        android:text="网络请求4(对象复杂嵌套1)" />
 
     <Button
         android:id="@+id/btn_start5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求5" />
+        android:text="网络请求5(对象复杂嵌套2)" />
 
     <Button
         android:id="@+id/btn_start6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求6" />
+        android:text="网络请求6(@Path)类型" />
 
+    <Button
+        android:id="@+id/btn_start7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="网络请求7(单个复杂对象)" />
 </LinearLayout>
