@@ -3,6 +3,7 @@ package com.woilsy.mock.generate;
 import com.woilsy.mock.utils.ClassUtils;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 生成器，根据某种规则生成内容。
@@ -55,9 +56,13 @@ public class Generator implements Rule {
         return rule.getBigDecimal();
     }
 
+    @Override
+    public Date getDate() { return rule.getDate(); }
+
     public Object get(Class<?> cls) {
         Class<?> realClass = ClassUtils.getEncapsulationType(cls);
         if (realClass == String.class) return getString();
+        if (realClass == Date.class) return getDate();
         if (realClass == Integer.class) return getInt();
         if (realClass == Long.class) return getLong();
         if (realClass == Byte.class) return getByte();

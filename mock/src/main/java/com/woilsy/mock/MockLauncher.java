@@ -353,7 +353,14 @@ public class MockLauncher {
                 }
             }
         }
-        return generator == null ? null : generator.get(cls);
+        if (generator != null) {
+            try {
+                return generator.get(cls);
+            } catch (Exception e) {
+                println("生成" + cls.getName() + "失败，" + e.getMessage());
+            }
+        }
+        return null;
     }
 
     private void println(String msg) {

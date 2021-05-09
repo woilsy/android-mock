@@ -3,6 +3,7 @@ package com.woilsy.mock.generate.rule;
 import com.woilsy.mock.generate.Rule;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Random;
 
 public class RandomRule implements Rule {
@@ -73,6 +74,11 @@ public class RandomRule implements Rule {
     @Override
     public BigDecimal getBigDecimal() {
         return BigDecimal.valueOf(getDouble());
+    }
+
+    @Override
+    public Date getDate() {
+        return new Date();
     }
 
 }

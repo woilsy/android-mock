@@ -1,6 +1,7 @@
 package com.woilsy.mock.generate;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 public interface IBaseType {
 
@@ -23,5 +24,7 @@ public interface IBaseType {
     Byte getByte();
 
     BigDecimal getBigDecimal();
+
+    Date getDate();
 
 }
