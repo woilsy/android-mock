@@ -15,6 +15,10 @@ public class MockOptions {
     }
 
     /**
+     * Mock服务器HostName
+     */
+    public static final String HOST_NAME = "127.0.0.1";
+    /**
      * Mock服务器端口
      */
     public static final int PORT = 8080;
@@ -22,7 +26,7 @@ public class MockOptions {
     /**
      * Mock服务器Base地址
      */
-    public static String BASE_URL = "http://127.0.0.1:" + PORT;
+    public static String BASE_URL = "http://" + HOST_NAME + ":" + PORT;
     /**
      * Mock服务器备用地址，当服务器停止时会切换到改地址
      */

@@ -53,9 +53,10 @@ public class MockService extends Service {
             startForeground(1, notification);
         }
         new Thread(() -> {
+            String host = MockOptions.HOST_NAME;
             int port = MockOptions.PORT;
             try {
-                httpService = new HttpService(port);
+                httpService = new HttpService(host, port);
                 httpService.start();
                 Log.d(TAG, "已启动" + port + "mock服务器");
             } catch (Exception e) {
