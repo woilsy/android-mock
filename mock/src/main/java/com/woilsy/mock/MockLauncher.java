@@ -1,7 +1,12 @@
 package com.woilsy.mock;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.options.MockOptions;
+import com.woilsy.mock.service.MockService;
 import com.woilsy.mock.test.ApiService;
 import com.woilsy.mock.type.Image;
 import com.woilsy.mock.type.Images;
@@ -19,6 +24,7 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -56,16 +62,18 @@ public class MockLauncher {
 
     private MockOptions mockOptions;
 
+    private boolean isMethodStart = false;
+
     private MockLauncher() {
 
     }
 
-//    public static void start(Context context, MockOptions options, Class<?>... classes) {
-//        MockLauncher launcher = new MockLauncher();
-//        launcher.initByOptions(context, options);
-//        launcher.startMockService(context);
-//        launcher.parseClasses(classes);
-//    }
+    public static void start(Context context, MockOptions options, Class<?>... classes) {
+        MockLauncher launcher = new MockLauncher();
+        launcher.initByOptions(context, options);
+        launcher.startMockService(context);
+        launcher.parseClasses(classes);
+    }
 
     public static void main(String[] args) {
         MockLauncher launcher = new MockLauncher();
@@ -77,22 +85,22 @@ public class MockLauncher {
         launcher.parseClasses(ApiService.class);
     }
 
-//    private void initByOptions(Context context, MockOptions options) {
-//        MockOptions actMockOptions = options == null ? MockOptions.getDefault() : options;
-//        generator = new Generator(actMockOptions.rule);
-//        mockOptions = actMockOptions;
-//        //导入数据
-//        MockUrlData.add(actMockOptions.mockData);
-//        MockUrlData.addFromAssets(context, actMockOptions.mockDataAssetsPath);
-//    }
-//
-//    private void startMockService(Context context) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            context.startForegroundService(new Intent(context, MockService.class));
-//        } else {
-//            context.startService(new Intent(context, MockService.class));
-//        }
-//    }
+    private void initByOptions(Context context, MockOptions options) {
+        MockOptions actMockOptions = options == null ? MockOptions.getDefault() : options;
+        generator = new Generator(actMockOptions.rule);
+        mockOptions = actMockOptions;
+        //导入数据
+        MockUrlData.add(actMockOptions.mockData);
+        MockUrlData.addFromAssets(context, actMockOptions.mockDataAssetsPath);
+    }
+
+    private void startMockService(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(new Intent(context, MockService.class));
+        } else {
+            context.startService(new Intent(context, MockService.class));
+        }
+    }
 
     private void parseClasses(Class<?>... classes) {
         for (Class<?> cls : classes) {
@@ -110,6 +118,9 @@ public class MockLauncher {
         Method[] methods = cls.getMethods();
         for (Method m : methods) {
             println("====== 解析Method " + m.getName() + " start ======");
+            //init
+            isMethodStart = true;
+            clsTb.clear();//清除map记录 重新尝试
             //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
             String actUrl = actUrl(m);
             println("url:" + actUrl);
@@ -160,71 +171,80 @@ public class MockLauncher {
         return handleType(type, null, null, true);
     }
 
-    private Object handleType(Type type, Object parent, Field parentField, boolean isStart) {
+    //难点：有时需要返回值，有时需要直接设置到Field中，如何区分？以及如何在递归中进行合适的逻辑处理？
+    //解：每一层只需要处理自己与上一级的关系就好了
+    private Object handleType(Type type, Object parent, Field parentField, boolean selfOrParent) {
         if (type instanceof ParameterizedType) {
             Type rawType1 = ((ParameterizedType) type).getRawType();
             if (rawType1 == Map.class) {//需要获取key value的类型再处理
-                println("handleType()->map带泛型，尝试分析创建" + type);
+                println("()->map带泛型，尝试分析创建" + type);
                 Map<Object, Object> map = new HashMap<>();
-                //只处理List的第一层泛型
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 2) {
-                    Object key = handleType(actualTypeArguments[0], null, null, false);
-                    Object value = handleType(actualTypeArguments[1], null, null, false);
+                    Object key = handleType(actualTypeArguments[0], parent, null, true);
+                    Object value = handleType(actualTypeArguments[1], parent, null, true);
                     if (key != null && value != null) {
                         map.put(key, value);
                     }
                 }
-                if (parentField != null) println(map + "已设置到字段" + parentField.getName() + "中");
-                return parent == null ? map : setParentField(parent, parentField, map);
-            } else if (rawType1 == List.class) {
-                println("handleType()->List带泛型，尝试分析创建" + type);
+                return selfOrParent ? map : setParentField(parent, parentField, map);
+            } else if (rawType1 == List.class) {//List<T> List<Bean<T>> 第一种情况如果parent为null则找不到泛型
+                println("()->List带泛型，尝试分析创建" + type);
                 List<Object> ls = new ArrayList<>();
                 //只处理List的第一层泛型
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 1) {
-                    Object o = handleType(actualTypeArguments[0], null, null, false);
-                    if (o != null) {
-                        ls.add(o);
+                    Object obj = handleType(actualTypeArguments[0], parent, null, true);
+                    if (obj != null) {
+                        ls.add(obj);
                     }
                 }
-                if (parentField != null) println(ls + "已设置到字段" + parentField.getName() + "中");
-                return parent == null ? ls : setParentField(parent, parentField, ls);
+                return selfOrParent ? ls : setParentField(parent, parentField, ls);
             } else if (rawType1 == Set.class) {//同上
-                println("handleType()->Set带泛型，尝试分析创建" + type);
+                println("()->Set带泛型，尝试分析创建" + type);
+                Set<Object> set = new HashSet<>();
+                //只处理List的第一层泛型
+                Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+                if (actualTypeArguments.length == 1) {
+                    Object obj = handleType(actualTypeArguments[0], parent, null, true);
+                    if (obj != null) {
+                        set.add(obj);
+                    }
+                }
+                return selfOrParent ? set : setParentField(parent, parentField, set);
             } else {
-                println("handleType()->非集合类型" + type);
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 1 && actualTypeArguments[0] == ResponseBody.class) {
-                    println("handleType()->Response不处理，可自行在mock数据文件中预设值");
+                    println("()->Response不处理，可自行在mock数据文件中预设值");
+                    return null;
                 } else {
-                    if (isStart) {//retrofit2.Call<***>
+                    if (isMethodStart) {
+                        isMethodStart = false;
                         Type type1 = actualTypeArguments[0];
-                        println("handleType()->入口retrofit2.Call<***>，等待" + type1 + "创建后返回");
-                        return handleType(type1, parent, parentField, false);//处理完毕后返回参数1
-                    } else {//OBJ<XXX<xx<x>>>...>
-                        println("handleType()->非入口，正在处理" + type);
+                        println("()->等待" + type1 + "创建后返回");
+                        return handleType(type1, null, null, true);//处理完毕后返回参数1
+                    } else {
+                        println("()->正在处理" + type);
                         Type rawType = ((ParameterizedType) type).getRawType();
                         if (rawType instanceof Class<?>) {//带泛型的cls final类型是不可能带泛型的
                             Class<?> rawClass = (Class<?>) rawType;
                             //插入泛型类型
                             if (actualTypeArguments.length >= 1) {
-                                println("handleType()->插入Map==>key:" + rawClass.getName() + " value:" + actualTypeArguments[0]);
+                                println("()->插入Map中->key:" + rawClass.getName() + " value:" + actualTypeArguments[0]);
                                 clsTb.put(rawClass.getName(), actualTypeArguments[0]);
                             }
-                            //开始解析
-                            return handleObjFromCls(rawClass, parent, parentField);
+                            Object o = handleType(rawType, parent, parentField, true);
+                            return selfOrParent ? o : setParentField(parent, parentField, o);
                         } else {
-                            println("handleType()->不可能存在的情况");
+                            println("()->不可能存在的情况");
+                            return null;
                         }
                     }
                 }
             }
         } else if (type instanceof Class<?>) {//class类型
             Object obj = handleObjFromCls((Class<?>) type, parent, parentField);
-            if (parent == null) {
-                return obj;
-            }
+            return selfOrParent ? obj : setParentField(parent, parentField, obj);
         } else if (type instanceof TypeVariable) {//类型变量 name:T bounds:Object
 //            TypeVariable表示的是类型变量，它用来反映的是JVM编译该泛型前的信息，例如List<T>中的T就是类型变量，它在编译时需要被转换为一个具体的类型后才能正常使用。
 //            该接口常用的方法有3个，分别是：
@@ -235,43 +255,44 @@ public class MockLauncher {
             if (parent != null) {
                 Type actType = clsTb.get(parent.getClass().getName());
                 if (actType != null) {
-                    println("handleType()->尝试从clsTb中获取对象实际泛型类型" + actType);
-                    handleType(actType, parent, parentField, false);//直接重进
+                    println("()->尝试从clsTb中获取对象实际泛型类型" + actType);
+                    Object obj = handleType(actType, parent, parentField, true);
+                    return selfOrParent ? obj : setParentField(parent, parentField, obj);
                 } else {
-                    println("handleType()->从clsTb中获取对象实际泛型类型失败" + type);
+                    println("()->从clsTb中获取对象实际泛型类型失败" + type);
                 }
             } else {
-                println("handleType()->parent为null，无法处理:" + type);
+                println("()->parent为null，无法处理:" + type);
             }
+            return null;
         } else if (type instanceof GenericArrayType) {
             //GenericArrayType表示的是数组类型且组成元素时ParameterizedType或TypeVariable，例如List<T>或T[]，该接口只有
             // Type getGenericComponentType()一个方法，它返回数组的组成元素类型。
-            println("handleType()->GenericArrayType类型" + type + "暂不处理");
+            println("()->GenericArrayType类型" + type + "暂不处理");
+            return null;
         } else if (type instanceof WildcardType) {
             //例如? extends Number 和 ? super Integer。
             //Wildcard接口有两个方法，分别是：
             //(1) Type[] getUpperBounds()——返回类型变量的上边界。
             //(2) Type[] getLowerBounds()——返回类型变量的下边界。
-            println("handleType()->WildcardType类型" + type + "暂不处理");
+            println("()->WildcardType类型" + type + "暂不处理");
+            return null;
         } else {
-            println("handleType()->暂不处理的类型:" + type);
+            println("()->暂不处理的类型:" + type);
+            return null;
         }
-        return null;
     }
 
     private Object handleObjFromCls(Class<?> cls, Object parent, Field parentField) {
         Object finalObj = getFinalObj(cls, parentField);
         if (finalObj == null) {//可变对象
-            println("getObjFromCls()->非final类型，将尝试获取cls对应的Obj " + cls);
-            return getClsObj(cls, parent, parentField);
+            return getClsObj(cls);
         } else {
-            println("getObjFromCls()->final类型，直接返回" + cls);
-            return parent == null ? finalObj : setParentField(parent, parentField, finalObj);
+            return finalObj;
         }
     }
 
-    private Object getClsObj(Class<?> cls, Object parent, Field parentField) {
-        //如果带泛型 那么需要递归处理 直到没有泛型为止
+    private Object getClsObj(Class<?> cls) {
         Object obj = newClassInstance(cls);
         if (obj != null) {
             Field[] fields = cls.getFields();
@@ -281,17 +302,18 @@ public class MockLauncher {
                     Object o = f.get(obj);
                     if (o == null) {//表示没有默认值 需要mock数据
                         Type genericType = f.getGenericType();
-                        println("getClsObj()->字段：" + f.getName() + " 类型:" + genericType);
+                        println("()->字段：" + f.getName() + " 类型:" + genericType + " start==>");
                         handleType(genericType, obj, f, false);
+                        println("()->字段：" + f.getName() + " 类型:" + genericType + " end<==");
                     } else {
-                        println("getClsObj()->字段：" + f.getName() + "已有默认值，无需处理");
+                        println("()->字段：" + f.getName() + "已有默认值，无需处理");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
-        return parent == null ? obj : setParentField(parent, parentField, obj);
+        return obj;
     }
 
     private Object setParentField(Object parent, Field parentField, Object value) {
