@@ -32,6 +32,13 @@ android {
     }
 }
 
+configurations.all {
+    //检查远程依赖是否存在更新
+    resolutionStrategy.cacheChangingModulesFor 1 * 60, 'seconds'
+    // 采用动态版本声明的依赖缓存1分钟
+    resolutionStrategy.cacheDynamicVersionsFor 1 * 60, 'seconds'
+}
+
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
