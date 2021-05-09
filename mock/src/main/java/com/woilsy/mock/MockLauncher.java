@@ -7,7 +7,7 @@ import android.os.Build;
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.service.MockService;
-import com.woilsy.mock.test.ApiService;
+import com.woilsy.mock.test.TestService;
 import com.woilsy.mock.type.Image;
 import com.woilsy.mock.type.Images;
 import com.woilsy.mock.utils.ClassUtils;
@@ -52,7 +52,6 @@ import retrofit2.http.PUT;
  * ]<br/>
  * 的形式传入，可以放在assets文件中，上线前删除该文件，在启动前调用MockUrlData.addFromXXX导入。<br/>
  * 3,如果使用了动态url(@Url String url)，由于其可能不访问MockOptions.BASE_URL，所以暂时无法处理。<br/>
- * 4,目前获取字段是通过getFields，全字段需要过滤某些默认字段，暂时这样处理。<br/>
  */
 public class MockLauncher {
 
@@ -82,7 +81,7 @@ public class MockLauncher {
         launcher.generator = new Generator(mockOptions.rule);
         launcher.mockOptions = mockOptions;
         //
-        launcher.parseClasses(ApiService.class);
+        launcher.parseClasses(TestService.class);
     }
 
     private void initByOptions(Context context, MockOptions options) {
@@ -295,7 +294,7 @@ public class MockLauncher {
     private Object getClsObj(Class<?> cls) {
         Object obj = newClassInstance(cls);
         if (obj != null) {
-            Field[] fields = cls.getFields();
+            Field[] fields = cls.getDeclaredFields();
             for (Field f : fields) {
                 try {
                     f.setAccessible(true);

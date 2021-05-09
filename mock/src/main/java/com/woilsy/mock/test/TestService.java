@@ -1,6 +1,12 @@
 package com.woilsy.mock.test;
 
-public interface ApiService {
+import retrofit2.Call;
+import retrofit2.http.POST;
+
+public interface TestService {
+
+    @POST("/re0")
+    Call<D> getData0();
 
 //    @POST("/re1")
 //    Call<A<D>> getData1();
@@ -11,7 +17,7 @@ public interface ApiService {
 //    @POST("/re3")
 //    Call<A<List<B<List<Integer>>>>> getData3();
 
-//    @POST("/re4")
+    //    @POST("/re4")
 //    Call<MockBean<List<String>>> getData4();
 //
 //    @POST("/re5")
