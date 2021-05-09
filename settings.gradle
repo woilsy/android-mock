@@ -1,3 +1,2 @@
-include ':mock'
 include ':app'
 rootProject.name = "AndroidMock"
