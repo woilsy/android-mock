@@ -1,4 +1,4 @@
-package com.woilsy.mock.api;
+package com.woilsy.mock.test.api;
 
 import com.woilsy.mock.test.MockBean;
 import com.woilsy.mock.test.MockBean2;

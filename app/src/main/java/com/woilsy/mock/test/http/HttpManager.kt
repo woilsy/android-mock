@@ -1,8 +1,9 @@
-package com.woilsy.mock.http
+package com.woilsy.mock.test.http
 
 import android.content.Context
 import com.google.gson.Gson
-import com.woilsy.mock.BuildConfig
+import com.woilsy.mock.test.BuildConfig
+
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory

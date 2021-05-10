@@ -1,8 +1,9 @@
-package com.woilsy.mock
+package com.woilsy.mock.test
 
 import android.app.Application
-import com.woilsy.mock.api.ApiService
-import com.woilsy.mock.http.HttpManager
+import com.woilsy.mock.MockLauncher
+import com.woilsy.mock.test.api.ApiService
+import com.woilsy.mock.test.http.HttpManager
 import com.woilsy.mock.options.MockOptions
 
 class App : Application() {

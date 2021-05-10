@@ -1,4 +1,4 @@
-package com.woilsy.mock.http;
+package com.woilsy.mock.test.http;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
