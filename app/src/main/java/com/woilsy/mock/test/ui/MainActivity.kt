@@ -1,12 +1,12 @@
-package com.woilsy.mock.ui
+package com.woilsy.mock.test.ui
 
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.woilsy.mock.R
-import com.woilsy.mock.ext.getApiService
 import com.woilsy.mock.options.MockOptions
+import com.woilsy.mock.test.R
+import com.woilsy.mock.test.ext.getApiService
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.ResponseBody

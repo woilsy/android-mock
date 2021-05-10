@@ -1,4 +1,4 @@
-package com.woilsy.mock.api;
+package com.woilsy.mock.test.api;
 
 import com.woilsy.mock.test.MockBean;
 import com.woilsy.mock.test.MockBean2;
@@ -28,6 +28,7 @@ public interface ApiService {
     @GET("/request2")
     Observable<MockBean<String>> getData2();
 
+    @MockExclude
     @GET("/request3")
     Observable<String> getData3();
 
