@@ -29,6 +29,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btn_start4).setOnClickListener { httpTest4() }
         findViewById<View>(R.id.btn_start5).setOnClickListener { httpTest5() }
         findViewById<View>(R.id.btn_start6).setOnClickListener { httpTest6() }
+        findViewById<View>(R.id.btn_start7).setOnClickListener { httpTest7() }
+        findViewById<View>(R.id.btn_start8).setOnClickListener { httpTest8() }
+        findViewById<View>(R.id.btn_start9).setOnClickListener { httpTest9() }
     }
 
     private fun httpTest0() {
@@ -136,5 +139,39 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "httpTest6: 请求失败", it)
                 }
             )
+    }
+
+    private fun httpTest7() {
+        getApiService()
+            .hotKey
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "httpTest7: 请求成功:$it")
+                },
+                {
+                    Log.e(TAG, "httpTest7: 请求失败", it)
+                }
+            )
+    }
+
+    private fun httpTest8() {
+        getApiService()
+            .login("woilsy", "wszbmmqd")
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "httpTest8: 请求成功:$it")
+                },
+                {
+                    Log.e(TAG, "httpTest8: 请求失败", it)
+                }
+            )
+    }
+
+    private fun httpTest9() {
+
     }
 }

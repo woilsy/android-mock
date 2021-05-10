@@ -3,12 +3,15 @@ package com.woilsy.mock.api;
 import com.woilsy.mock.test.MockBean;
 import com.woilsy.mock.test.MockBean2;
 import com.woilsy.mock.test.MockBeanChild;
+import com.woilsy.mock.type.MockExclude;
 
 import java.util.List;
 
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -37,5 +40,13 @@ public interface ApiService {
     @GET("/request6/{id}")
     Observable<String> getData6(@Path("id") String id);
 
+    @MockExclude
+    @GET("/hotkey/json")
+    Observable<ResponseBody> getHotKey();
+
+    @MockExclude
+    @FormUrlEncoded
+    @POST("/user/login")
+    Observable<ResponseBody> login(@Field("username") String name, @Field("password") String pass);
 
 }

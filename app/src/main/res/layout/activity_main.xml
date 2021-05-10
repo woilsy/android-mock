@@ -52,5 +52,18 @@
         android:id="@+id/btn_start7"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求7(单个复杂对象)" />
+        android:text="MockExclude时会进行重定向GET" />
+
+    <Button
+        android:id="@+id/btn_start8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MockExclude时会进行重定向POST表单" />
+
+    <Button
+        android:id="@+id/btn_start9"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MockExclude时会进行重定向POST json" />
+
 </LinearLayout>

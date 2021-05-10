@@ -2,8 +2,10 @@ package com.woilsy.mock
 
 import android.app.Application
 import com.woilsy.mock.api.ApiService
+import com.woilsy.mock.entity.MockObj
 import com.woilsy.mock.http.HttpManager
 import com.woilsy.mock.options.MockOptions
+import com.woilsy.mock.type.MockStrategy
 
 class App : Application() {
 
@@ -14,10 +16,10 @@ class App : Application() {
             this,
             MockOptions.Builder()
                 .setDebug(true)
-                .setMockDataFromAssets("mock.json")
-                .setBackupBaseUrl("http://www.baidu.com")
+                .setDataSource("mock.json")
+                .setBackupBaseUrl("https://www.wanandroid.com")
                 .build(),
-            ApiService::class.java
+            MockObj(ApiService::class.java, MockStrategy.RESOLVE_WITH_EXCLUDE)
         )
         //初始化http
         HttpManager.init(this, MockOptions.BASE_URL)
