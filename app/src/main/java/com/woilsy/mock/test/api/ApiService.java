@@ -1,9 +1,9 @@
 package com.woilsy.mock.test.api;
 
+import com.woilsy.mock.annotations.MockExclude;
 import com.woilsy.mock.test.MockBean;
 import com.woilsy.mock.test.MockBean2;
 import com.woilsy.mock.test.MockBeanChild;
-import com.woilsy.mock.type.MockExclude;
 
 import java.util.List;
 
