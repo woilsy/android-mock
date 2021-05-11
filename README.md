@@ -41,7 +41,7 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 
 导入aar  
 
-`implementation "com.woilsy:android-mock:1.0.0"`
+`implementation "com.woilsy:android-mock:v1.0.0"`
 
 #### 使用说明
 
