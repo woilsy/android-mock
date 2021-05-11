@@ -49,7 +49,6 @@ dependencies {
     //保持依赖一致
     implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
-    //
-//    implementation project(path: ':mock')
-    implementation 'com.woilsy:android-mock:v1.0.0-beta'
+    //依赖mock lib
+    implementation project(path: ':mock')
 }
