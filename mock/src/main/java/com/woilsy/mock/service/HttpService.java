@@ -75,7 +75,7 @@ public class HttpService extends NanoHTTPD {
         String backUrl = MockOptions.BASE_URL_BACK_UP;
         if (!uri.isEmpty() && !backUrl.isEmpty()) {
             String url = backUrl + uri;
-            LogUtil.i("重定向的url：" + url);
+            LogUtil.i("请求BackUpUrl：" + url);
             //创建builder
             Request.Builder builder = new Request.Builder();
             //header

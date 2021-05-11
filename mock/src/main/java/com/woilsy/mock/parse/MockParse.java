@@ -35,7 +35,7 @@ public class MockParse {
     /**
      * 函数标记，用于区分入口
      */
-    private boolean isMethodStart = false;
+    private boolean isParseStart = false;
 
     public MockParse(MockOptions mMockOptions) {
         this.mMockOptions = mMockOptions;
@@ -46,6 +46,7 @@ public class MockParse {
     }
 
     public Object parseType(Type type) {
+        isParseStart = true;
         return handleType(type, null, null, true);
     }
 
@@ -96,9 +97,9 @@ public class MockParse {
                     LogUtil.i("()->Response不处理，可自行在mock数据文件中预设值");
                     return null;
                 } else {
-                    if (isMethodStart) {
+                    if (isParseStart) {
                         clsTb.clear();
-                        isMethodStart = false;
+                        isParseStart = false;
                         Type type1 = actualTypeArguments[0];
                         LogUtil.i("()->等待" + type1 + "创建后返回");
                         return handleType(type1, null, null, true);//处理完毕后返回参数1
@@ -194,7 +195,6 @@ public class MockParse {
             return finalObj;
         }
     }
-
 
     //只处理带Mock注解的情况，其他情况直接返回null表示没有通过该注解获取到内容
     private Object getMockFieldData(Class<?> cls, Field field) {
