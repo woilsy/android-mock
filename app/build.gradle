@@ -51,5 +51,5 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     //
 //    implementation project(path: ':mock')
-    implementation 'com.woilsy:android-mock:1.0.0'
+    implementation 'com.woilsy:android-mock:v1.0.0-beta'
 }
