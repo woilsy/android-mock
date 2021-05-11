@@ -37,11 +37,11 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 #### 安装教程
 加入maven仓库依赖  
 
-` maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }`
+`maven { url 'https://jitpack.io' }`
 
 导入aar  
 
-`implementation "com.woilsy:mock:1.0.0-SNAPSHOT"`
+`implementation "com.woilsy:android-mock:1.0.0"`
 
 #### 使用说明
 
