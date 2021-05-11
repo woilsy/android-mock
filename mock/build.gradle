@@ -1,0 +1,42 @@
+apply plugin: 'com.android.library'
+
+android {
+
+    compileSdkVersion 29
+    buildToolsVersion '30.0.3'
+
+    defaultConfig {
+        minSdkVersion 21
+        //noinspection OldTargetApi
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0.0"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    def retrofitVersion = "2.9.0"
+    //http 需要依赖这3个
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation "com.parkingwang:okhttp3-loginterceptor:0.5"
+    //httpd
+    implementation "org.nanohttpd:nanohttpd:2.2.0"
+}
+
+apply from: "../upload.gradle"
