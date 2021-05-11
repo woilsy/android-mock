@@ -18,7 +18,7 @@ class App : Application() {
             MockOptions.Builder()
                 .setDebug(true)
                 .setDataSource("mock.json")
-                .setBackupBaseUrl("http://www.baidu.com")
+                .setBackupBaseUrl("https://www.wanandroid.com")
                 .build(),
             MockObj(ApiService::class.java, MockStrategy.RESOLVE_WITH_EXCLUDE),
         )
