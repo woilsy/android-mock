@@ -20,7 +20,7 @@ afterEvaluate {
                 from components.debug
 
                 groupId = 'com.woilsy.mock'
-                artifactId = 'moke-debug'
+                artifactId = 'mock-debug'
                 version = '1.0.0'
             }
         }
