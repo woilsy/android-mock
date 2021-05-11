@@ -54,8 +54,8 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 
  **其他**   
 1，导入自定义mock数据  
-如果需要自定义mock数据，可以通过assets中、文件、List\<MockData\>等形式在配置阶段导入，返回值为ResponseBody时，只有导入了数据才会有返回值.  
-2，使用@Mock注解  
+如果需要自定义mock数据，可以通过assets中、文件、List\<MockData\>等形式在配置阶段导入，函数返回类型为ResponseBody时，只有导入了数据，本地Http服务器才会有返回值.  
+2，使用@Mock注解
 ```
 @Mock("自定义的数据")  
 String name;  
