@@ -14,7 +14,7 @@ As an android developer, you define some network requests in an interface, like 
 
 ```
 
-But the server developer did not go to work, emmmmm.....  
+But the server developer did not go to work, emmmmmmmmm......  
 
 You have to build a mock server yourself and define the data you want.  
 
