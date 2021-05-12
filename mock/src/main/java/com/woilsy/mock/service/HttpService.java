@@ -171,7 +171,8 @@ public class HttpService extends NanoHTTPD {
         String[] split1 = uri.split("/");
         Set<Map.Entry<String, String>> entries = MockUrlData.getMap().entrySet();
         for (Map.Entry<String, String> en : entries) {
-            String key = en.getKey();
+            String key = en.getKey();//key中可能包含{}
+            //如果包含{，则表示有{code}之类的，那么分割里面比较肯定就不会相等，直接跳过。
             if (key.contains("{") && split1.length > 2) {//表示有@Path形式的url，那么需要进行匹配 且
                 String[] split2 = key.split("/");
                 if (split1.length == split2.length) {//可比较
@@ -180,9 +181,13 @@ public class HttpService extends NanoHTTPD {
                     for (int j = 0; j < max; j++) {
                         if (split1[j].equals(split2[j])) {
                             count++;
+                        } else if (split2[j].matches("\\{.*}")) {
+                            count++;
+                        } else {
+                            continue;
                         }
                     }
-                    if (count >= max - 1) {
+                    if (count == max) {
                         return key;
                     }
                 }
