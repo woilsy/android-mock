@@ -14,7 +14,7 @@ A：对于Retrofit形式的请求，一般都是在函数的返回值中以Obser
 Q：支持哪些方法？  
 A：目前支持GET、POST、PUT、DELETE。
 
-Q：什么叫静态url？  
+Q：静态url？  
 A：静态url是以@GET("url")这种能够直接在注解中获取到的url，能直接获取的url。而@Get Call\<ResponseBody\> test(@Url String url)这种在运行时才能获取到具体请求地址，被称为动态url，所以这种没办法直接拿到它的值，除非可以监听函数执行，并能拿到参数（AOP是可以实现的，去监听Retrofit的Invoke过程，函数调用时再进行数据导入，但代价是还需要接入插件到Project中）。
 
 Q：Call\<ResponseBody\>返回如何处理？  
@@ -41,7 +41,7 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 
 导入aar  
 
-`implementation "com.woilsy:android-mock:1.0.0"`
+`implementation "com.woilsy:android-mock:v1.0.0"`
 
 #### 使用说明
 
@@ -53,8 +53,24 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
  **MockObj：** 待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去备用的地址同步返回请求结果。
 
  **其他**   
-自定义mock数据  
-如果需要自定义mock数据，可以通过assets中、文件、List\<MockData\>等形式在配置阶段导入，返回值为ResponseBody时，只有导入了数据才会有返回值。
+1，导入自定义mock数据  
+如果需要自定义mock数据，可以通过assets中、文件、List\<MockData\>等形式在配置阶段导入，函数返回类型为ResponseBody时，只有导入了数据，本地Http服务器才会有返回值.  
+2，使用@Mock注解
+```
+@Mock("自定义的数据")  
+String name;  
+@Mock("18")  
+int age;  
+@Mock(type=Type.Image)  
+String photo;  
+```
+使用@Mock注解，传入某种类型，在解析时，即便是有默认值，也是优先读取@Mock中的data；  
+由于注解的限制不能使用obj，所以只能传入String，解析时，会尝试将data转换成字段本身的类型并将其值赋予；  
+@Mock还可以指定特定的Type，如IMAGE/NAME/PHONE等，在字段解析时会通过生成器去生成。  
+3，字段带默认值时不会处理，会直接使用该值，除非它被@Mock标记。标记的作用，字段有没有默认值是有不同的业务场景的，在反序列化中，如果一个json里面没有该字段，那么它就将不会被处理，生成的对象将会使用其默认值，所以@Mock注解进行数据的赋予并不会影响到非mock的场景。  
+4，自定义Rule  
+mock数据生成使用的默认基本类型和扩展类型，可以实现Rule并传入到MockOption中自定义数据生成。  
+5，MockService停止后（点击通知关闭），会将BASE_URL切换到BASE_URL_BACK_UP。  
 
 #### 参与贡献
 
