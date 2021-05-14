@@ -59,11 +59,11 @@ MockOptions：进行mock相关的一些配置：开启日志、设置mock数据�
 MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去备用的地址同步返回请求结果。
 
 **第二步**  
-将MockOptions.BASE_URL作为BaseUrl传递给Retrofit
+将MockDefault.BASE_URL作为BaseUrl传递给Retrofit
 
  **其他**   
 自定义mock数据  
-如果需要自定义mock数据，可以通过assets中、文件、List\<MockData\>等形式在配置阶段导入，返回值为ResponseBody时，只有导入了数据才会有返回值。
+如果需要自定义mock数据，可以通过MockOptions.setDataSource()传入，返回值为ResponseBody时，只有导入了数据才会有返回值。
 
 #### 参与贡献
 

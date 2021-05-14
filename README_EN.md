@@ -32,7 +32,7 @@ But now, you only need to do the following things to forget about this trouble.
 
 `MockLauncher.start(Context context, MockOptions options, MockObj... objs)`
 
- **Step 4 Take MockOptions.BASEURL as baseUrl to Retrofit**  
+ **Step 4 Take MockDefault.BASE_URL as baseUrl to Retrofit**  
 
  **OK!**  
 
@@ -50,7 +50,7 @@ File 'mock.json' in assets
   }
 ] 
 ```
-MockOptions.setDataSource("mock.json");   
+MockOptions.setDataSource(AssetFileDataSource(context, "mock.json"));   
 
 2.If you want to customize the mock data, you can use the @Mock annotation to mark the field you need to mock, and then pass the data you want to pass.
 
