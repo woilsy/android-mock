@@ -1,15 +1,11 @@
 package com.woilsy.mock.options;
 
 import com.google.gson.Gson;
-import com.woilsy.mock.entity.MockData;
+import com.woilsy.mock.data.DataSource;
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.generate.Rule;
-import com.woilsy.mock.strategy.MockStrategy;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
-
-import java.io.File;
-import java.util.List;
 
 import static com.woilsy.mock.constants.MockDefault.HOST_NAME;
 import static com.woilsy.mock.constants.MockDefault.PORT;
@@ -24,38 +20,18 @@ public class MockOptions {
      */
     public static String BASE_URL = "http://" + HOST_NAME + ":" + PORT;
     /**
-     * Mock服务器备用地址，当服务器停止时会切换到改地址，需要过滤请求重定向时也需要使用
+     * 原始地址，当服务器停止时会切换到改地址，需要过滤请求重定向时也需要使用
      */
-    public static String BASE_URL_BACK_UP;
-
+    private String originalBaseUrl;
     /**
      * 生成规则
      */
     private Rule rule;
-    /**
-     * mock策略
-     */
-    private MockStrategy mockStrategy;
-
-    /*======mock数据导入的几种来源======*/
-    /**
-     * mock数据之集合，可提前导入
-     */
-    private List<MockData> mockData;
-    /**
-     * mock数据来源之assets路径，需要Context，所以延迟加载
-     */
-    private String mockDataAssetsPath;
 
     /**
-     * mock数据来源之File
+     * mock数据来源
      */
-    private File mockDataFile;
-
-    /**
-     * mock数据来源之json
-     */
-    private String mockDataJson;
+    private DataSource[] dataSources;
 
     public static MockOptions getDefault() {
         return new MockOptions
@@ -68,19 +44,13 @@ public class MockOptions {
 
         private boolean debug = false;
 
-        private List<MockData> mockData;
-
-        private String mockDataAssetsPath;
-
-        private File mockDataFile;
-
-        private String mockDataJson;
-
-        private String backupBaseUrl;
-
         private Gson gson;
 
         private Rule rule;
+
+        private String originalBaseUrl;
+
+        private DataSource[] dataSources;
 
         public Builder setDebug(boolean debug) {
             this.debug = debug;
@@ -92,28 +62,13 @@ public class MockOptions {
             return this;
         }
 
-        public Builder setBackupBaseUrl(String url) {
-            this.backupBaseUrl = url;
+        public Builder setOriginalBaseUrl(String originalBaseUrl) {
+            this.originalBaseUrl = originalBaseUrl;
             return this;
         }
 
-        public Builder setData(List<MockData> mockData) {
-            this.mockData = mockData;
-            return this;
-        }
-
-        public Builder setData(String json) {
-            this.mockDataJson = json;
-            return this;
-        }
-
-        public Builder setDataSource(File file) {
-            this.mockDataFile = file;
-            return this;
-        }
-
-        public Builder setDataSource(String assetsFilePath) {
-            this.mockDataAssetsPath = assetsFilePath;
+        public Builder setDataSource(DataSource... dataSources) {
+            this.dataSources = dataSources;
             return this;
         }
 
@@ -125,16 +80,13 @@ public class MockOptions {
         public MockOptions build() {
             MockOptions options = new MockOptions();
             options.rule = this.rule == null ? new Generator() : rule;
+            options.dataSources = this.dataSources;
+            options.originalBaseUrl = this.originalBaseUrl == null ? BASE_URL : this.originalBaseUrl;
+            //
             LogUtil.setDebug(this.debug);
-            MockOptions.BASE_URL_BACK_UP = this.backupBaseUrl == null ? BASE_URL : this.backupBaseUrl;
             if (this.gson != null) {
                 GsonUtil.replaceGson(this.gson);
             }
-            //数据源
-            options.mockDataAssetsPath = this.mockDataAssetsPath;
-            options.mockDataFile = this.mockDataFile;
-            options.mockDataJson = this.mockDataJson;
-            options.mockData = this.mockData;
             return options;
         }
     }
@@ -143,20 +95,11 @@ public class MockOptions {
         return rule;
     }
 
-    public List<MockData> getMockData() {
-        return mockData;
+    public DataSource[] getDataSources() {
+        return dataSources;
     }
 
-    public String getMockDataAssetsPath() {
-        return mockDataAssetsPath;
+    public String getOriginalBaseUrl() {
+        return originalBaseUrl;
     }
-
-    public File getMockDataFile() {
-        return mockDataFile;
-    }
-
-    public String getMockDataJson() {
-        return mockDataJson;
-    }
-
 }

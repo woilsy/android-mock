@@ -1,19 +1,8 @@
 package com.woilsy.mock.data;
 
-import android.content.Context;
-
-import com.google.gson.reflect.TypeToken;
 import com.woilsy.mock.entity.MockData;
 import com.woilsy.mock.utils.GsonUtil;
-import com.woilsy.mock.utils.LogUtil;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +15,6 @@ public class MockUrlData {
      * key值为url，value为url对应的json数据
      */
     private final Map<String, String> urlDataMap = new HashMap<>();
-    /**
-     * 被排除的url集合，将对其进行二次请求
-     */
-    public static final Map<String, String> excludeUrlMap = new HashMap<>();
 
     private MockUrlData() {
     }
@@ -47,72 +32,35 @@ public class MockUrlData {
         }
     }
 
-    public static void add(List<MockData> mockData) {
-        if (mockData != null) {
-            for (MockData md : mockData) {
-                add(md.url, md.data);
+    public static void add(DataSource dataSource) {
+        if (dataSource != null) {
+            List<MockData> mockData = dataSource.getMockData();
+            if (mockData != null) {
+                for (MockData md : mockData) {
+                    add(md.url, md.data);
+                }
             }
         }
     }
 
-    public static void addFromFile(File file) {
-        try {
-            if (file != null && file.exists()) {
-                addFromInputStream(new FileInputStream(file));
+    public static void add(DataSource[] dataSources) {
+        if (dataSources != null) {
+            for (DataSource ds : dataSources) {
+                add(ds);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void addFromAssets(Context context, String fileUrl) {
-        try {
-            if (fileUrl != null && !fileUrl.isEmpty()) {
-                addFromInputStream(context.getAssets().open(fileUrl));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void addFromInputStream(InputStream inputStream) {
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder sb = new StringBuilder();
-            while (br.ready()) {
-                String line = br.readLine();
-                sb.append(line.trim().replaceAll(" ", ""));
-            }
-            br.close();
-            addFromJson(sb.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void addFromJson(String json) {
-        LogUtil.i("addFromAssets()->尝试导入：" + json);
-        List<MockData> mockDatas = GsonUtil.jsonToObj(json, new TypeToken<List<MockData>>() {
-        }.getType());
-        if (mockDatas != null) {
-            for (MockData md : mockDatas) {
-                add(md.url, md.data);
-            }
-        } else {
-            LogUtil.i("addFromAssets()->转换mock数据列表失败");
         }
     }
 
     public static boolean contain(String key) {
-        return INSTANCE.urlDataMap.containsKey(key);
+        return getInstance().urlDataMap.containsKey(key);
     }
 
     public static String get(String key) {
-        return INSTANCE.urlDataMap.get(key);
+        return getInstance().urlDataMap.get(key);
     }
 
     public static Map<String, String> getMap() {
-        return INSTANCE.urlDataMap;
+        return getInstance().urlDataMap;
     }
 
 }

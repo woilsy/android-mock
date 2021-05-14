@@ -1,8 +1,9 @@
 package com.woilsy.mock.server;
 
 import com.parkingwang.okhttp3.LogInterceptor.LogInterceptor;
+import com.woilsy.mock.MockLauncher;
 import com.woilsy.mock.data.MockUrlData;
-import com.woilsy.mock.options.MockOptions;
+import com.woilsy.mock.entity.ExcludeInfo;
 import com.woilsy.mock.utils.LogUtil;
 
 import java.util.HashMap;
@@ -42,12 +43,10 @@ public class HttpServer extends NanoHTTPD {
         //uri
         String uri = session.getUri();
         //获取BaseUrl
-        String s = MockUrlData.excludeUrlMap.get(uri);
-        if (s != null && !s.isEmpty()) {
-            boolean needRedirect = MockOptions.BASE_URL_BACK_UP.equals(s);
-            if (needRedirect) {//需要重定向 并返回该数据
-                return synRequest(session, bodyMap);
-            }
+        ExcludeInfo s = MockLauncher.excludeInfoMap.get(uri);
+        if (s != null && s.isNeedRedirect()) {
+            //需要重定向 并返回该数据
+            return synRequest(s.getRedirectBaseUrl(), session, bodyMap);
         }
         String uriKey = getUriKey(uri);
         String data = MockUrlData.get(uriKey);
@@ -68,11 +67,10 @@ public class HttpServer extends NanoHTTPD {
         }
     }
 
-    private Response synRequest(IHTTPSession session, HashMap<String, String> bodyMap) {
+    private Response synRequest(String redirectBaseUrl, IHTTPSession session, HashMap<String, String> bodyMap) {
         String uri = session.getUri();
-        String backUrl = MockOptions.BASE_URL_BACK_UP;
-        if (!uri.isEmpty() && !backUrl.isEmpty()) {
-            String url = backUrl + uri;
+        if (!uri.isEmpty() && !redirectBaseUrl.isEmpty()) {
+            String url = redirectBaseUrl + uri;
             LogUtil.i("请求BackUpUrl：" + url);
             //创建builder
             Request.Builder builder = new Request.Builder();

@@ -7,17 +7,19 @@ import android.os.Build;
 import com.woilsy.mock.annotations.MockExclude;
 import com.woilsy.mock.annotations.MockInclude;
 import com.woilsy.mock.data.MockUrlData;
+import com.woilsy.mock.entity.ExcludeInfo;
 import com.woilsy.mock.entity.MockObj;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.parse.MockParse;
 import com.woilsy.mock.service.MockService;
 import com.woilsy.mock.strategy.MockStrategy;
-import com.woilsy.mock.test.TestService;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
@@ -43,26 +45,39 @@ import retrofit2.http.PUT;
  */
 public class MockLauncher {
 
+    /**
+     * 启动器单例
+     */
+    private static final MockLauncher LAUNCHER = new MockLauncher();
+    /**
+     * 被排除的url集合，将对其进行重定向
+     */
+    public static final Map<String, ExcludeInfo> excludeInfoMap = new HashMap<>();
+
     private MockParse mockParse;
+
+    private MockOptions mockOptions;
 
     private MockLauncher() {
     }
 
     public static void start(Context context, MockOptions options, MockObj... objs) {
-        MockLauncher launcher = new MockLauncher();
-        launcher.initByOptions(context, options);
-        launcher.startMockService(context);
-        launcher.parseClasses(objs);
+        LAUNCHER.initByOptions(options);
+        LAUNCHER.startMockService(context);
+        LAUNCHER.parseClasses(objs);
     }
 
-    private void initByOptions(Context context, MockOptions options) {
+    public static void stop(Context context) {
+        MockOptions.BASE_URL = LAUNCHER.mockOptions.getOriginalBaseUrl();
+        context.stopService(new Intent(context, MockService.class));
+    }
+
+    private void initByOptions(MockOptions options) {
         MockOptions mMockOptions = options == null ? MockOptions.getDefault() : options;
-        mockParse = new MockParse(mMockOptions);
+        this.mockOptions = mMockOptions;
+        this.mockParse = new MockParse(mMockOptions);
         //导入数据
-        MockUrlData.add(mMockOptions.getMockData());
-        MockUrlData.addFromFile(mMockOptions.getMockDataFile());
-        MockUrlData.addFromJson(mMockOptions.getMockDataJson());
-        MockUrlData.addFromAssets(context, mMockOptions.getMockDataAssetsPath());
+        MockUrlData.add(mMockOptions.getDataSources());
     }
 
     private void startMockService(Context context) {
@@ -71,18 +86,6 @@ public class MockLauncher {
         } else {
             context.startService(new Intent(context, MockService.class));
         }
-    }
-
-    public static void main(String[] args) {
-        MockLauncher launcher = new MockLauncher();
-        //
-        MockOptions options = new MockOptions.Builder()
-                .setDebug(true)
-                .setBackupBaseUrl("https://www.wanandroid.com")
-                .build();
-        launcher.mockParse = new MockParse(options);
-        //
-        launcher.parseClasses(new MockObj(TestService.class, MockStrategy.RESOLVE_WITH_EXCLUDE));
     }
 
     private void parseClasses(MockObj... objs) {
@@ -95,8 +98,7 @@ public class MockLauncher {
                     LogUtil.e(mockClass.getName() + "非接口，无法处理");
                 }
             } catch (Exception e) {
-                LogUtil.e("解析Service失败，以下为错误信息↓");
-                e.printStackTrace();
+                LogUtil.e("解析Service失败，以下为错误信息↓", e);
             }
         }
     }
@@ -140,7 +142,7 @@ public class MockLauncher {
                     MockUrlData.add(actUrl, o);
                 }
             } else {
-                MockUrlData.excludeUrlMap.put(actUrl, MockOptions.BASE_URL_BACK_UP);
+                excludeInfoMap.put(actUrl, new ExcludeInfo(true, mockOptions.getOriginalBaseUrl()));
             }
         }
         LogUtil.i("====== 停止解析 " + m.getName() + " ======");

@@ -10,19 +10,17 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 
+import com.woilsy.mock.MockLauncher;
 import com.woilsy.mock.constants.MockDefault;
-import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.server.HttpServer;
 import com.woilsy.mock.utils.LogUtil;
 
 public class MockService extends Service {
 
-    private static final String TAG = "MockService";
-
     private static final String CHANNEL_ID = "channel_mock_service";
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
 
-    private static final String ACTION_STOP = "stop_service";
+    private static final String ACTION_WANT_STOP = "stop_service";
 
     private HttpServer httpServer;
 
@@ -69,14 +67,17 @@ public class MockService extends Service {
 
     private PendingIntent getIntent() {
         Intent intent = new Intent(this, MockService.class);
-        intent.setAction(ACTION_STOP);
+        intent.setAction(ACTION_WANT_STOP);
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
-            stopSelf();
+        if (intent != null) {
+            String action = intent.getAction();
+            if (ACTION_WANT_STOP.equals(action)) {
+                MockLauncher.stop(this);
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -87,7 +88,6 @@ public class MockService extends Service {
         if (httpServer != null) {
             httpServer.stop();
         }
-        //自动切换到备用地址
-        MockOptions.BASE_URL = MockOptions.BASE_URL_BACK_UP;
+        LogUtil.i("MockService已销毁");
     }
 }
