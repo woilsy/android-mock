@@ -6,8 +6,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.woilsy.mock.constants.MockDefault
 import com.woilsy.mock.test.R
-import com.woilsy.mock.test.entity.DeleteExtraRequest
 import com.woilsy.mock.test.entity.LoginRequest
+import com.woilsy.mock.test.entity.RegisterRequest
 import com.woilsy.mock.test.ext.getApiService
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     fun getUserInfo(view: View) {
         getApiService()
-            .getUserInfo("1")
+            .getUserInfo("1", "missss")
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     fun delete(view: View) {
         getApiService()
-            .deleteExtra("record", "1", DeleteExtraRequest("some"))
+            .deleteExtra("record", "1")
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -142,6 +142,36 @@ class MainActivity : AppCompatActivity() {
                 },
                 {
                     Log.e(TAG, "multipleGeneric: error", it)
+                }
+            )
+    }
+
+    fun register(view: View) {
+        getApiService()
+            .register(RegisterRequest("leo", "123456"))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "register: succeed $it")
+                },
+                {
+                    Log.e(TAG, "register: error", it)
+                }
+            )
+    }
+
+    fun update(view: View) {
+        getApiService()
+            .updateUserInfo("name1", "address1")
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "update: succeed $it")
+                },
+                {
+                    Log.e(TAG, "update: error", it)
                 }
             )
     }

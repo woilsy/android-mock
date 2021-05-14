@@ -11,48 +11,70 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="testRequest"
-        android:text="test request" />
+        android:text="Test request (GET)"
+        android:textAllCaps="false" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="login"
-        android:text="mock login" />
+        android:text="Login (POST)"
+        android:textAllCaps="false" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="update"
+        android:text="Update (POST FORM)"
+        android:textAllCaps="false" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="getUserInfo"
-        android:text="mock getUserInfo" />
+        android:text="GetUserInfo (GET)"
+        android:textAllCaps="false" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="register"
+        android:text="Register (PUT)"
+        android:textAllCaps="false" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="logout"
-        android:text="mock logout" />
+        android:text="Logout (POST)"
+        android:textAllCaps="false" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="redirectRequest"
-        android:text="mock redirect" />
+        android:text="Redirect (GET)"
+        android:textAllCaps="false" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="delete"
-        android:text="mock delete" />
+        android:text="Delete (DELETE)"
+        android:textAllCaps="false" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="singleGeneric"
-        android:text="mock single-generic" />
+        android:text="Single-generic (POST)"
+        android:textAllCaps="false" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="multipleGeneric"
-        android:text="mock multiple-generic" />
+        android:text="Multiple-generic (GET)"
+        android:textAllCaps="false" />
 
 </LinearLayout>

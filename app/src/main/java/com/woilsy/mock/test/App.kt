@@ -24,8 +24,6 @@ class App : Application() {
                 .build(),
             MockObj(ApiService::class.java, MockStrategy.RESOLVE_WITH_EXCLUDE),
         )
-        //TODO remove
-        MockLauncher.setBaseUrlOrOriginalUrl(false);
         //初始化http
         HttpManager.init(this, MockDefault.BASE_URL)
     }
