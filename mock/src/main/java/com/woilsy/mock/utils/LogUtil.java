@@ -15,6 +15,10 @@ public class LogUtil {
         DEBUG = openOrClose;
     }
 
+    public static boolean isOpenDebug() {
+        return LogUtil.DEBUG;
+    }
+
     public static void i(String msg) {
         if (DEBUG) {
             LOGGER.log(Level.INFO, msg);

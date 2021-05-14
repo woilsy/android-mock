@@ -4,18 +4,20 @@ import com.parkingwang.okhttp3.LogInterceptor.LogInterceptor;
 import com.woilsy.mock.MockLauncher;
 import com.woilsy.mock.data.MockUrlData;
 import com.woilsy.mock.entity.ExcludeInfo;
+import com.woilsy.mock.utils.GsonUtil;
+import com.woilsy.mock.utils.IoUtil;
 import com.woilsy.mock.utils.LogUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import fi.iki.elonen.NanoHTTPD;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -92,37 +94,35 @@ public class HttpServer extends NanoHTTPD {
             Request request = null;
             String contentType = getContentType(headers);
             try {
-                if (method == Method.GET) {
+                if (method == Method.GET) {//没有body 只有地址和参数
                     String queryParameterString = session.getQueryParameterString();
                     String params = (queryParameterString == null || queryParameterString.isEmpty()) ? "" : "?" + queryParameterString;
                     request = builder.url(url + params).get().build();
-                } else if (method == Method.DELETE) {
-                    if (session instanceof HTTPSession) {
-                        long bodySize = ((HTTPSession) session).getBodySize();
-                        LogUtil.i("bodySize：" + bodySize);
-                    }
+                } else if (method == Method.DELETE) {//类似GET 主要是是地址和参数 但也有可能有body
                     String queryParameterString = session.getQueryParameterString();
-                    String content = getContent(session.getParms(), bodyMap, contentType, "");
+                    String content = getContent(session.getParameters(), bodyMap, contentType, "deleteData");
                     String params = (queryParameterString == null || queryParameterString.isEmpty()) ? "" : "?" + queryParameterString;
                     if (isEmpty(contentType) || isEmpty(content)) {
                         request = builder.url(url + params).delete().build();
                     } else {
-                        RequestBody requestBody = RequestBody.create(MediaType.get(contentType), Objects.requireNonNull(content));
+                        RequestBody requestBody = RequestBody.create(MediaType.get(contentType), isNullToEmpty(content));
                         request = builder.url(url + params).delete(requestBody).build();
                     }
-                } else if (method == Method.PUT) {//PUT and POST
-                    String content = getContent(session.getParms(), bodyMap, contentType, "content");
-                    RequestBody body = RequestBody.create(MediaType.get(contentType),
-                            Objects.requireNonNull(content));
+                } else if (method == Method.PUT) {//content是个文件地址 内容在文件中
+                    String content = getContent(session.getParameters(), bodyMap, contentType, "content");
+                    File file = new File(content);
+                    if (file.exists()) {//是个文件 那么读取后继续传递
+                        content = IoUtil.getStringByFile(file);
+                    }
+                    RequestBody body = RequestBody.create(MediaType.get(contentType), isNullToEmpty(content));
                     request = builder.url(url).put(body).build();
-                } else if (method == Method.POST) {
-                    String content = getContent(session.getParms(), bodyMap, contentType, "postData");
-                    RequestBody body = RequestBody.create(MediaType.get(contentType),
-                            Objects.requireNonNull(content));
+                } else if (method == Method.POST) {//一般情况数据在body中 要么键值对 要么json
+                    String content = getContent(session.getParameters(), bodyMap, contentType, "postData");
+                    RequestBody body = RequestBody.create(MediaType.get(contentType), isNullToEmpty(content));
                     request = builder.url(url).post(body).build();
                 }
             } catch (Exception e) {
-                LogUtil.e("请求处理异常，将向外抛出该异常", e);
+                LogUtil.e("请求处理异常，将向外抛出该异常");
                 throw new RuntimeException(e);
             }
             try {
@@ -147,7 +147,7 @@ public class HttpServer extends NanoHTTPD {
                     }
                 }
             } catch (Exception e) {
-                LogUtil.e("重定向网络请求异常，将向外抛出该异常");
+                LogUtil.e("重定向网络请求异常，将向外抛出该异常", e);
                 throw new RuntimeException(e);
             }
         }
@@ -161,22 +161,33 @@ public class HttpServer extends NanoHTTPD {
         return h1 == null ? headers.get(key2) : h1;
     }
 
+    private String isNullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
+
     private boolean isEmpty(String s) {
         return s == null || s.isEmpty();
     }
 
-    private String getContent(Map<String, String> params, HashMap<String, String> bodyMap, String contentType, String key) {
-        LogUtil.i("params:" + params);
-        String content;
+    private String getContent(Map<String, List<String>> parameters, HashMap<String, String> bodyMap, String contentType, String key) {
         if ("application/x-www-form-urlencoded".equals(contentType)) {//从params获取
             StringBuilder sb = new StringBuilder();
-            Set<Map.Entry<String, String>> entrySet = params.entrySet();
-            for (Map.Entry<String, String> en : entrySet) {
-                sb.append(en.getKey()).append("=").append(en.getValue()).append("&");
+            Set<Map.Entry<String, List<String>>> entries = parameters.entrySet();
+            int count = 0;
+            for (Map.Entry<String, List<String>> entry : entries) {
+                List<String> values = entry.getValue();
+                if (count != 0) {
+                    sb.append("&");
+                }
+                if (values.size() > 1) {
+                    sb.append(entry.getKey()).append("=").append(GsonUtil.toJson(values));
+                } else {
+                    sb.append(entry.getKey()).append("=").append(values.get(0));
+                }
+                count++;
             }
-            content = sb.toString();
-        } else {//从body获取后转换为json put "content" post "postData"
-            LogUtil.i("bodyMap:" + bodyMap);
+            return sb.toString();
+        } else {//从body获取后转换为json put->"content" post->"postData" delete->"deleteData"
             if (isEmpty(key)) {//将bodyMap转换后返回
                 JSONObject jo = new JSONObject();
                 Set<Map.Entry<String, String>> entries = bodyMap.entrySet();
@@ -187,13 +198,11 @@ public class HttpServer extends NanoHTTPD {
                         e.printStackTrace();
                     }
                 }
-                content = jo.toString();
+                return jo.toString();
             } else {
-                content = bodyMap.get(key);
+                return bodyMap.get(key);
             }
-            LogUtil.i("content:" + content);
         }
-        return content;
     }
 
     private OkHttpClient getHttpClient() {
@@ -240,4 +249,5 @@ public class HttpServer extends NanoHTTPD {
         }
         return uri;
     }
+
 }
