@@ -26,7 +26,7 @@ But now, you only need to do the following things to forget about this trouble.
 
  **Step 2 Add dependency to your app "build.gradle"**  
 
-`implementation "com.github.woilsy:android-mock:v1.0.0"`  
+`implementation "com.github.woilsy:android-mock:v1.0.1"`  
 
  **Step 3 Launcher the mock server before init Retrofit**  
 
