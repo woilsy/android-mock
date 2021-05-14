@@ -19,9 +19,12 @@ import com.woilsy.mock.utils.LogUtil;
 public class MockService extends Service {
 
     private static final String CHANNEL_ID = "channel_mock_service";
+
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
 
     private static final String ACTION_TRANS_BASEURL = "trans_base_url";
+
+    private static final int NOTIFICATION_ID = 1;
 
     private HttpServer httpServer;
 
@@ -39,18 +42,7 @@ public class MockService extends Service {
             manager.createNotificationChannel(
                     new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
             );
-            //
-            Notification notification = new Notification.Builder(this, CHANNEL_ID)
-                    .setChannelId(CHANNEL_ID)
-                    .setContentTitle("Mock服务器正在运行...")
-                    .setContentIntent(getIntent())
-                    .setContentText("点击可切换BaseUrl")
-                    .setWhen(System.currentTimeMillis())
-                    .setPriority(Notification.PRIORITY_DEFAULT)
-                    .setSubText("Mock")
-                    .setSmallIcon(android.R.drawable.presence_online)
-                    .build();
-            startForeground(1, notification);
+            startForeground(NOTIFICATION_ID, getNotification(MockDefault.BASE_URL));
         }
         new Thread(() -> {
             String host = MockDefault.HOST_NAME;
@@ -66,6 +58,31 @@ public class MockService extends Service {
                 .start();
     }
 
+    private Notification getNotification(String content) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return new Notification.Builder(this, CHANNEL_ID)
+                    .setChannelId(CHANNEL_ID)
+                    .setContentTitle("Mock服务器正在运行...")
+                    .setContentIntent(getIntent())
+                    .setContentText(content)
+                    .setWhen(System.currentTimeMillis())
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setSubText("Mock")
+                    .setSmallIcon(android.R.drawable.presence_online)
+                    .build();
+        } else {
+            return new Notification.Builder(this)
+                    .setContentTitle("Mock服务器正在运行...")
+                    .setContentIntent(getIntent())
+                    .setContentText(content)
+                    .setWhen(System.currentTimeMillis())
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setSubText("Mock")
+                    .setSmallIcon(android.R.drawable.presence_online)
+                    .build();
+        }
+    }
+
     private PendingIntent getIntent() {
         Intent intent = new Intent(this, MockService.class);
         intent.setAction(ACTION_TRANS_BASEURL);
@@ -77,10 +94,10 @@ public class MockService extends Service {
         if (intent != null) {
             String action = intent.getAction();
             if (ACTION_TRANS_BASEURL.equals(action)) {
-                boolean baseUrlOrOriginalUrl = MockLauncher.isBaseUrlOrOriginalUrl();
-                boolean newValue = !baseUrlOrOriginalUrl;
-                Toast.makeText(this, "BaseUrl->" + (newValue ? "MockDefault.BASE_URL" : "OriginalBaseUrl"), Toast.LENGTH_LONG).show();
-                MockLauncher.setBaseUrlOrOriginalUrl(newValue);
+                MockLauncher.setBaseUrlOrOriginalUrl(!MockLauncher.isBaseUrlOrOriginalUrl());
+                String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
+                Toast.makeText(this, originalBaseUrl, Toast.LENGTH_LONG).show();
+                startForeground(NOTIFICATION_ID, getNotification(originalBaseUrl));
             }
         }
         return super.onStartCommand(intent, flags, startId);
