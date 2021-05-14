@@ -1,11 +1,10 @@
-package com.woilsy.mock.service;
+package com.woilsy.mock.server;
 
 import com.parkingwang.okhttp3.LogInterceptor.LogInterceptor;
 import com.woilsy.mock.data.MockUrlData;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.utils.LogUtil;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,15 +19,15 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
-public class HttpService extends NanoHTTPD {
+public class HttpServer extends NanoHTTPD {
 
     private OkHttpClient mOkHttpClient;
 
-    public HttpService(int port) {
+    public HttpServer(int port) {
         super(port);
     }
 
-    public HttpService(String hostname, int port) {
+    public HttpServer(String hostname, int port) {
         super(hostname, port);
     }
 
@@ -36,9 +35,8 @@ public class HttpService extends NanoHTTPD {
     public Response serve(IHTTPSession session) {
         HashMap<String, String> bodyMap = new HashMap<>();
         try {
-            // 这一句话必须要写，否则在获取数据时，获取不到数据
             session.parseBody(bodyMap);
-        } catch (IOException | ResponseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         //uri
@@ -179,12 +177,13 @@ public class HttpService extends NanoHTTPD {
                     int max = split2.length;//允许max-1
                     int count = 0;
                     for (int j = 0; j < max; j++) {
-                        if (split1[j].equals(split2[j])) {
+                        String s2j = split2[j];
+                        if (split1[j].equals(s2j)) {
                             count++;
-                        } else if (split2[j].matches("\\{.*}")) {
+                        } else if (s2j.startsWith("{") && s2j.endsWith("}")) {
                             count++;
                         } else {
-                            continue;
+                            //do nothing
                         }
                     }
                     if (count == max) {

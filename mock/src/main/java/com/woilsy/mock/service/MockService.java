@@ -12,6 +12,7 @@ import android.os.IBinder;
 
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.options.MockOptions;
+import com.woilsy.mock.server.HttpServer;
 import com.woilsy.mock.utils.LogUtil;
 
 public class MockService extends Service {
@@ -23,7 +24,7 @@ public class MockService extends Service {
 
     private static final String ACTION_STOP = "stop_service";
 
-    private HttpService httpService;
+    private HttpServer httpServer;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -56,8 +57,8 @@ public class MockService extends Service {
             String host = MockDefault.HOST_NAME;
             int port = MockDefault.PORT;
             try {
-                httpService = new HttpService(host, port);
-                httpService.start();
+                httpServer = new HttpServer(host, port);
+                httpServer.start();
                 LogUtil.i("已启动" + port + "mock服务器");
             } catch (Exception e) {
                 LogUtil.e("mock服务器启动失败", e);
@@ -83,8 +84,8 @@ public class MockService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (httpService != null) {
-            httpService.stop();
+        if (httpServer != null) {
+            httpServer.stop();
         }
         //自动切换到备用地址
         MockOptions.BASE_URL = MockOptions.BASE_URL_BACK_UP;
