@@ -2,6 +2,7 @@ package com.woilsy.mock.test
 
 import android.app.Application
 import com.woilsy.mock.MockLauncher
+import com.woilsy.mock.data.AssetFileDataSource
 import com.woilsy.mock.entity.MockObj
 import com.woilsy.mock.options.MockOptions
 import com.woilsy.mock.strategy.MockStrategy
@@ -17,8 +18,8 @@ class App : Application() {
             this,
             MockOptions.Builder()
                 .setDebug(true)
-                .setDataSource("mock.json")
-                .setBackupBaseUrl("https://www.wanandroid.com")
+                .setDataSource(AssetFileDataSource(this, "mock.json"))
+                .setOriginalBaseUrl("https://www.wanandroid.com")
                 .build(),
             MockObj(ApiService::class.java, MockStrategy.RESOLVE_WITH_EXCLUDE),
         )
