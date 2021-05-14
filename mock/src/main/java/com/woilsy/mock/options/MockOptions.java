@@ -1,24 +1,18 @@
 package com.woilsy.mock.options;
 
 import com.google.gson.Gson;
+import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.data.DataSource;
 import com.woilsy.mock.generate.Generator;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
 
-import static com.woilsy.mock.constants.MockDefault.HOST_NAME;
-import static com.woilsy.mock.constants.MockDefault.PORT;
-
 public class MockOptions {
 
     private MockOptions() {
     }
 
-    /**
-     * Mock服务器Base地址
-     */
-    public static String BASE_URL = "http://" + HOST_NAME + ":" + PORT;
     /**
      * 原始地址，当服务器停止时会切换到改地址，需要过滤请求重定向时也需要使用
      */
@@ -81,7 +75,7 @@ public class MockOptions {
             MockOptions options = new MockOptions();
             options.rule = this.rule == null ? new Generator() : rule;
             options.dataSources = this.dataSources;
-            options.originalBaseUrl = this.originalBaseUrl == null ? BASE_URL : this.originalBaseUrl;
+            options.originalBaseUrl = this.originalBaseUrl == null ? MockDefault.BASE_URL : this.originalBaseUrl;
             //
             LogUtil.setDebug(this.debug);
             if (this.gson != null) {

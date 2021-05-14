@@ -6,6 +6,7 @@ import com.woilsy.mock.test.B;
 import com.woilsy.mock.test.C;
 import com.woilsy.mock.test.D;
 import com.woilsy.mock.test.E;
+import com.woilsy.mock.test.entity.DeleteExtraRequest;
 import com.woilsy.mock.test.entity.HttpResult;
 import com.woilsy.mock.test.entity.LoginRequest;
 import com.woilsy.mock.test.entity.LoginResponse;
@@ -15,8 +16,8 @@ import io.reactivex.rxjava3.core.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -37,8 +38,12 @@ public interface ApiService {
     @POST("/user/logout")
     Observable<HttpResult<Object>> logout();
 
-    @DELETE("/user/log/{extra}/{id}")
-    Observable<HttpResult<String>> deleteExtra(@Path("extra") String extra, @Path("id") String id);
+//    @DELETE("/user/log/{extra}/{id}")
+//    Observable<HttpResult<String>> deleteExtra(@Path("extra") String extra, @Path("id") String id);
+
+    @HTTP(method = "DELETE", path = "/user/log/{extra}/{id}", hasBody = true)
+    Observable<HttpResult<String>> deleteExtra(@Path("extra") String extra, @Path("id") String id,
+                                               @Body DeleteExtraRequest request);
 
     @MockExclude
     @GET("/hotkey/json")
@@ -49,6 +54,4 @@ public interface ApiService {
 
     @GET("/test/generic2")
     Observable<HttpResult<E<A<Integer>, B<String>, C<Boolean>>>> multipleGeneric();
-
-
 }

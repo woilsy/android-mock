@@ -10,6 +10,10 @@ public class MockDefault {
      * Mock服务器端口
      */
     public static final int PORT = 8080;
+    /**
+     * Mock baseurl
+     */
+    public static final String BASE_URL = "http://" + HOST_NAME + ":" + PORT;
 
     //Mock默认数据 可通过实现Rule 传入后自定义
     public static final String IMAGE = "https://bkimg.cdn.bcebos.com/pic/cb8065380cd79123b9bc93cba7345982b2b78034?x-bce-process=image/resize,m_lfit,h_500,limit_1/format,f_auto";

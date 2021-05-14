@@ -4,8 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.woilsy.mock.options.MockOptions
+import com.woilsy.mock.constants.MockDefault
 import com.woilsy.mock.test.R
+import com.woilsy.mock.test.entity.DeleteExtraRequest
 import com.woilsy.mock.test.entity.LoginRequest
 import com.woilsy.mock.test.ext.getApiService
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     fun testRequest(view: View) {
         getApiService()
-            .test(MockOptions.BASE_URL)
+            .test(MockDefault.BASE_URL)
             .enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(p0: Call<ResponseBody?>, p1: Response<ResponseBody?>) {
                     Log.d(TAG, "onResponse: $p1")
@@ -102,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     fun delete(view: View) {
         getApiService()
-            .deleteExtra("record", "1")
+            .deleteExtra("record", "1", DeleteExtraRequest("some"))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(

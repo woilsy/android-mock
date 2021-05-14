@@ -2,6 +2,7 @@ package com.woilsy.mock.test
 
 import android.app.Application
 import com.woilsy.mock.MockLauncher
+import com.woilsy.mock.constants.MockDefault
 import com.woilsy.mock.data.AssetFileDataSource
 import com.woilsy.mock.entity.MockObj
 import com.woilsy.mock.options.MockOptions
@@ -23,8 +24,10 @@ class App : Application() {
                 .build(),
             MockObj(ApiService::class.java, MockStrategy.RESOLVE_WITH_EXCLUDE),
         )
+        //TODO remove
+        MockLauncher.setBaseUrlOrOriginalUrl(false);
         //初始化http
-        HttpManager.init(this, MockOptions.BASE_URL)
+        HttpManager.init(this, MockDefault.BASE_URL)
     }
 
 }

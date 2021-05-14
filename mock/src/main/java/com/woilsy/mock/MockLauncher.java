@@ -58,6 +58,8 @@ public class MockLauncher {
 
     private MockOptions mockOptions;
 
+    private boolean baseUrlOrOriginalUrl = true;
+
     private MockLauncher() {
     }
 
@@ -67,8 +69,19 @@ public class MockLauncher {
         LAUNCHER.parseClasses(objs);
     }
 
+    public static MockOptions getMockOption() {
+        return LAUNCHER.mockOptions;
+    }
+
+    public static void setBaseUrlOrOriginalUrl(boolean baseUrlOrOriginalUrl) {
+        LAUNCHER.baseUrlOrOriginalUrl = baseUrlOrOriginalUrl;
+    }
+
+    public static boolean isBaseUrlOrOriginalUrl() {
+        return LAUNCHER.baseUrlOrOriginalUrl;
+    }
+
     public static void stop(Context context) {
-        MockOptions.BASE_URL = LAUNCHER.mockOptions.getOriginalBaseUrl();
         context.stopService(new Intent(context, MockService.class));
     }
 

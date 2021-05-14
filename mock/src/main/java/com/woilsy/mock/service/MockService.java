@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import com.woilsy.mock.MockLauncher;
 import com.woilsy.mock.constants.MockDefault;
@@ -20,7 +21,7 @@ public class MockService extends Service {
     private static final String CHANNEL_ID = "channel_mock_service";
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
 
-    private static final String ACTION_WANT_STOP = "stop_service";
+    private static final String ACTION_TRANS_BASEURL = "trans_base_url";
 
     private HttpServer httpServer;
 
@@ -41,9 +42,9 @@ public class MockService extends Service {
             //
             Notification notification = new Notification.Builder(this, CHANNEL_ID)
                     .setChannelId(CHANNEL_ID)
-                    .setContentTitle("Mock服务器已启用")
+                    .setContentTitle("Mock服务器正在运行...")
                     .setContentIntent(getIntent())
-                    .setContentText("Mock服务器正在运行...点击可关闭")
+                    .setContentText("点击可切换BaseUrl")
                     .setWhen(System.currentTimeMillis())
                     .setPriority(Notification.PRIORITY_DEFAULT)
                     .setSubText("Mock")
@@ -67,7 +68,7 @@ public class MockService extends Service {
 
     private PendingIntent getIntent() {
         Intent intent = new Intent(this, MockService.class);
-        intent.setAction(ACTION_WANT_STOP);
+        intent.setAction(ACTION_TRANS_BASEURL);
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -75,8 +76,11 @@ public class MockService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-            if (ACTION_WANT_STOP.equals(action)) {
-                MockLauncher.stop(this);
+            if (ACTION_TRANS_BASEURL.equals(action)) {
+                boolean baseUrlOrOriginalUrl = MockLauncher.isBaseUrlOrOriginalUrl();
+                boolean newValue = !baseUrlOrOriginalUrl;
+                Toast.makeText(this, "BaseUrl->" + (newValue ? "MockDefault.BASE_URL" : "OriginalBaseUrl"), Toast.LENGTH_LONG).show();
+                MockLauncher.setBaseUrlOrOriginalUrl(newValue);
             }
         }
         return super.onStartCommand(intent, flags, startId);
