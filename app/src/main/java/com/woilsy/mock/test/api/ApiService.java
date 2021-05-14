@@ -1,53 +1,54 @@
 package com.woilsy.mock.test.api;
 
 import com.woilsy.mock.annotations.MockExclude;
-import com.woilsy.mock.test.MockBean;
-import com.woilsy.mock.test.MockBean2;
-import com.woilsy.mock.test.MockBeanChild;
-
-import java.util.List;
+import com.woilsy.mock.test.A;
+import com.woilsy.mock.test.B;
+import com.woilsy.mock.test.C;
+import com.woilsy.mock.test.D;
+import com.woilsy.mock.test.E;
+import com.woilsy.mock.test.entity.HttpResult;
+import com.woilsy.mock.test.entity.LoginRequest;
+import com.woilsy.mock.test.entity.LoginResponse;
+import com.woilsy.mock.test.entity.UserInfo;
 
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 public interface ApiService {
 
+    //un support
     @GET
     Call<ResponseBody> test(@Url String url);
 
-    @POST("/request1")
-    Observable<MockBean<List<String>>> getData1();
+    @POST("/user/login")
+    Observable<HttpResult<LoginResponse>> login(@Body LoginRequest request);
 
-    @GET("/request2")
-    Observable<MockBean<String>> getData2();
+    @GET("/user/info")
+    Observable<HttpResult<UserInfo>> getUserInfo(@Query("id") String id);
 
-    @MockExclude
-    @GET("/request3")
-    Observable<String> getData3();
+    @POST("/user/logout")
+    Observable<HttpResult<Object>> logout();
 
-    @GET("/request4")
-    Observable<MockBean<MockBean2<MockBeanChild>>> getData4();
-
-    @GET("/request5")
-    Observable<MockBean<MockBean2<List<MockBeanChild>>>> getData5();
-
-    @GET("/request6/{id}")
-    Observable<String> getData6(@Path("id") String id);
+    @DELETE("/user/log/{extra}/{id}")
+    Observable<HttpResult<String>> deleteExtra(@Path("extra") String extra, @Path("id") String id);
 
     @MockExclude
     @GET("/hotkey/json")
     Observable<ResponseBody> getHotKey();
 
-    @MockExclude
-    @FormUrlEncoded
-    @POST("/user/login")
-    Observable<ResponseBody> login(@Field("username") String name, @Field("password") String pass);
+    @POST("/test/generic1")
+    Observable<HttpResult<A<B<C<D>>>>> singleGeneric();
+
+    @GET("/test/generic2")
+    Observable<HttpResult<E<A<Integer>, B<String>, C<Boolean>>>> multipleGeneric();
+
 
 }

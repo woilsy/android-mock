@@ -2,6 +2,7 @@ package com.woilsy.mock.test.http
 
 import android.content.Context
 import com.google.gson.Gson
+import com.parkingwang.okhttp3.LogInterceptor.LogInterceptor
 import com.woilsy.mock.test.BuildConfig
 
 import okhttp3.OkHttpClient
@@ -9,6 +10,8 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import java.util.logging.Level
+import java.util.logging.Logger
 
 object HttpManager {
 
@@ -27,11 +30,8 @@ object HttpManager {
             .readTimeout(1000 * 60.toLong(), TimeUnit.SECONDS)
             .hostnameVerifier { _, _ -> true }
         if (BuildConfig.DEBUG) {
-            builder.addInterceptor(HttpLoggingInterceptor("网络").apply {
-                setPrintLevel(
-                    HttpLoggingInterceptor.Level.BODY
-                )
-            })
+            val logger = Logger.getLogger("Http")
+            builder.addInterceptor(LogInterceptor { logger.log(Level.INFO, it) })
         }
         retrofit = Retrofit.Builder()
             .client(builder.build())

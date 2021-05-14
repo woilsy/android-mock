@@ -4,66 +4,55 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="18dp"
     tools:context=".ui.MainActivity">
 
     <Button
-        android:id="@+id/btn_start0"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求0(基本类型)" />
+        android:onClick="testRequest"
+        android:text="test request" />
 
     <Button
-        android:id="@+id/btn_start1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求1(常规类型)" />
+        android:onClick="login"
+        android:text="mock login" />
 
     <Button
-        android:id="@+id/btn_start2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求2(常规类型)" />
+        android:onClick="getUserInfo"
+        android:text="mock getUserInfo" />
 
     <Button
-        android:id="@+id/btn_start3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求3(简单类型)" />
+        android:onClick="logout"
+        android:text="mock logout" />
 
     <Button
-        android:id="@+id/btn_start4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求4(对象复杂嵌套1)" />
+        android:onClick="redirectRequest"
+        android:text="mock redirect" />
 
     <Button
-        android:id="@+id/btn_start5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求5(对象复杂嵌套2)" />
+        android:onClick="delete"
+        android:text="mock delete" />
 
     <Button
-        android:id="@+id/btn_start6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网络请求6(@Path)类型" />
+        android:onClick="singleGeneric"
+        android:text="mock single-generic" />
 
     <Button
-        android:id="@+id/btn_start7"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="MockExclude时会进行重定向GET" />
-
-    <Button
-        android:id="@+id/btn_start8"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="MockExclude时会进行重定向POST表单" />
-
-    <Button
-        android:id="@+id/btn_start9"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="MockExclude时会进行重定向POST json" />
+        android:onClick="multipleGeneric"
+        android:text="mock multiple-generic" />
 
 </LinearLayout>
