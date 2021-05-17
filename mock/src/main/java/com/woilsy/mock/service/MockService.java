@@ -94,10 +94,12 @@ public class MockService extends Service {
         if (intent != null) {
             String action = intent.getAction();
             if (ACTION_TRANS_BASEURL.equals(action)) {
-                MockLauncher.setBaseUrlOrOriginalUrl(!MockLauncher.isBaseUrlOrOriginalUrl());
+                boolean newValue = !MockLauncher.isBaseUrlOrOriginalUrl();
+                MockLauncher.setBaseUrlOrOriginalUrl(newValue);
                 String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
-                Toast.makeText(this, originalBaseUrl, Toast.LENGTH_LONG).show();
-                startForeground(NOTIFICATION_ID, getNotification(originalBaseUrl));
+                String newUrl = newValue ? MockDefault.BASE_URL : originalBaseUrl;
+                Toast.makeText(this, newUrl, Toast.LENGTH_LONG).show();
+                startForeground(NOTIFICATION_ID, getNotification(newUrl));
             }
         }
         return super.onStartCommand(intent, flags, startId);
