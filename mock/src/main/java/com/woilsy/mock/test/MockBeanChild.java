@@ -10,8 +10,11 @@ public class MockBeanChild {
 
     public String nickname1 = "带默认属性的不会被替换";
 
-    @Mock("我是会被解析的值")
+    @Mock("默认值已被替换")
     public String nickname2 = "带默认属性的不会被替换，除非带mock注解";
+
+    @Mock(value = "{\"a\":\"1234\"}", type = Type.JSON)
+    public ChildA childA;
 
     @Mock(type = Type.IMAGE)
     public String avatar;
@@ -22,4 +25,7 @@ public class MockBeanChild {
     @Mock(type = Type.AGE)
     public Integer age;
 
+    static class ChildA {
+        public String a;
+    }
 }

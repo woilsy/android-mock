@@ -4,6 +4,7 @@ import com.woilsy.mock.annotations.Mock;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.utils.ClassUtils;
+import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
 
 import java.lang.reflect.Constructor;
@@ -124,15 +125,16 @@ public class MockParse {
             Object obj = handleObjFromCls((Class<?>) type, parent, parentField);
             return selfOrParent ? obj : setParentField(parent, parentField, obj);
         } else if (type instanceof TypeVariable) {//类型变量 name:T bounds:Object
-//            TypeVariable表示的是类型变量，它用来反映的是JVM编译该泛型前的信息，例如List<T>中的T就是类型变量，它在编译时需要被转换为一个具体的类型后才能正常使用。
-//            该接口常用的方法有3个，分别是：
-//            (1) Type[] getBounds()——获取类型变量的上边界，如果未明确声明上边界则默认为Object。例如Class<K extents Person>中K的上边界就是Person。
-//            (2) D getGenericDeclaration()——获取声明该类型变量的原始类型，例如Test<K extents Person>中原始类型是Test。
-//            (3) String getName()——获取在源码中定义的名字，上例中为K。
-            //尝试从map中获取原始类型
+            /*
+             * TypeVariable表示的是类型变量，它用来反映的是JVM编译该泛型前的信息，例如List<T>中的T就是类型变量，它在
+             * 编译时需要被转换为一个具体的类型后才能正常使用。该接口常用的方法有3个，分别是：
+             * (1) Type[] getBounds()——获取类型变量的上边界，如果未明确声明上边界则默认为Object。例如Class<K extents Person>中K的上边界就是Person。
+             * (2) D getGenericDeclaration()——获取声明该类型变量的原始类型，例如Test<K extents Person>中原始类型是Test。
+             * (3) String getName()——获取在源码中定义的名字，上例中为K。
+             */
             if (parent != null) {
                 String key = parent.getClass().getName();
-                Type actType = getAndRemoveType(key);
+                Type actType = getAndRemoveType(key);//尝试从map中获取原始类型
                 if (actType != null) {
                     LogUtil.i("()->尝试从clsTb中获取对象实际泛型类型" + actType);
                     Object obj = handleType(actType, parent, parentField, true);
@@ -145,15 +147,19 @@ public class MockParse {
             }
             return null;
         } else if (type instanceof GenericArrayType) {
-            //GenericArrayType表示的是数组类型且组成元素时ParameterizedType或TypeVariable，例如List<T>或T[]，该接口只有
-            // Type getGenericComponentType()一个方法，它返回数组的组成元素类型。
+            /*
+             * GenericArrayType表示的是数组类型且组成元素时ParameterizedType或TypeVariable，例如List<T>或T[]，
+             * 该接口只有Type getGenericComponentType()一个方法，它返回数组的组成元素类型。
+             */
             LogUtil.i("()->GenericArrayType类型" + type + "暂不处理");
             return null;
         } else if (type instanceof WildcardType) {
-            //例如? extends Number 和 ? super Integer。
-            //Wildcard接口有两个方法，分别是：
-            //(1) Type[] getUpperBounds()——返回类型变量的上边界。
-            //(2) Type[] getLowerBounds()——返回类型变量的下边界。
+            /*
+             * 例如? extends Number 和 ? super Integer。
+             * Wildcard接口有两个方法，分别是：
+             * (1) Type[] getUpperBounds()——返回类型变量的上边界。
+             * (2) Type[] getLowerBounds()——返回类型变量的下边界。
+             */
             LogUtil.i("()->WildcardType类型" + type + "暂不处理");
             return null;
         } else {
@@ -205,10 +211,16 @@ public class MockParse {
             com.woilsy.mock.type.Type type = mock.type();
             String data = mock.value();
             if (!data.isEmpty()) {
-                return ClassUtils.stringToClass(data, cls);
+                if (type == com.woilsy.mock.type.Type.JSON) {
+                    return GsonUtil.jsonToObj(data, cls);
+                } else {
+                    return ClassUtils.stringToClass(data, cls);
+                }
             } else {//为空 采用默认值
                 Rule rule = mMockOptions.getRule();
                 switch (type) {
+                    case BASE:
+                        return rule.get(cls);
                     case AGE:
                         return rule.getAge();
                     case NAME:
@@ -221,7 +233,7 @@ public class MockParse {
                         return rule.getNickName();
                     case IMAGE:
                         return rule.getImage();
-                    default://NONE
+                    default:
                         break;
                 }
             }
@@ -247,17 +259,28 @@ public class MockParse {
 
     private Object newClassInstance(Class<?> cls) {
         try {//默认构造器创建
-            Constructor<?> constructor = cls.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            return constructor.newInstance();
-        } catch (Exception e) {//使用不安全的方式创建
-            LogUtil.e("()->构造器创建失败，尝试使用Unsafe创建:" + e.getMessage());
-            try {
-                return ClassUtils.allocateInstance(cls);
-            } catch (Exception e2) {
-                LogUtil.e("()->尝试使用Unsafe创建失败:" + e.getMessage());
-                return null;
+            Constructor<?>[] constructors = cls.getDeclaredConstructors();
+            if (constructors != null && constructors.length > 0) {
+                for (Constructor<?> constructor : constructors) {
+                    int len = constructor.getParameterTypes().length;
+                    if (len == 0) {
+                        constructor.setAccessible(true);
+                        return constructor.newInstance();
+                    }
+                }
             }
+        } catch (Exception e) {//使用不安全的方式创建
+            LogUtil.e("()->构造器创建失败，尝试使用Unsafe创建:");
+        }
+        return unsafeCreate(cls);
+    }
+
+    private Object unsafeCreate(Class<?> cls) {
+        try {
+            return ClassUtils.allocateInstance(cls);
+        } catch (Exception e2) {
+            LogUtil.e("()->尝试使用Unsafe创建失败:" + e2.getMessage());
+            return null;
         }
     }
 
