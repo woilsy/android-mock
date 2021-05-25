@@ -203,23 +203,26 @@ public class MockParse {
     }
 
     //只处理带Mock注解的情况，其他情况直接返回null表示没有通过该注解获取到内容
-    private Object getMockFieldData(Class<?> cls, Field field) {
-        if (field == null) return null;
-        Mock mock = field.getAnnotation(Mock.class);
+    private Object getMockFieldData(Class<?> cls, Mock mock) {
         if (mock != null) {
             //如果data有值 尝试将其转换为对应的值 一般是基本类型从string转为xxx等，需要匹配cls
             com.woilsy.mock.type.Type type = mock.type();
             String data = mock.value();
             if (!data.isEmpty()) {
-                if (type == com.woilsy.mock.type.Type.JSON) {
-                    return GsonUtil.jsonToObj(data, cls);
-                } else {
-                    return ClassUtils.stringToClass(data, cls);
+                boolean c1 = data.startsWith("{") && data.endsWith("}");
+                boolean c2 = data.startsWith("[") && data.endsWith("]");
+                if (c1 || c2) {
+                    LogUtil.i("()->是个json类型，尝试解析 " + data);
+                    Object clsObj = GsonUtil.jsonToObj(data, cls);
+                    if (clsObj != null) {
+                        return clsObj;
+                    }
                 }
+                return ClassUtils.stringToClass(data, cls);
             } else {//为空 采用默认值
                 Rule rule = mMockOptions.getRule();
                 switch (type) {
-                    case BASE:
+                    case DEFAULT:
                         return rule.get(cls);
                     case AGE:
                         return rule.getAge();
@@ -245,16 +248,16 @@ public class MockParse {
     private Object getFinalObj(Class<?> cls, Field parentField) {
         if (mMockOptions == null || mMockOptions.getRule() == null) return null;
         try {
-            Object data = getMockFieldData(cls, parentField);
-            if (data != null) {//带mock注解，且解析出数据
-                return data;
-            } else {//如果没有Mock注解，那么该是什么就返回什么
-                return mMockOptions.getRule().get(cls);
+            if (parentField != null) {
+                Object data = getMockFieldData(cls, parentField.getAnnotation(Mock.class));
+                if (data != null) {//带mock注解，且解析出数据
+                    return data;
+                }
             }
         } catch (Exception e) {
             LogUtil.e("()->生成" + cls + "失败", e);
-            return null;
         }
+        return mMockOptions.getRule().get(cls);
     }
 
     private Object newClassInstance(Class<?> cls) {
@@ -290,20 +293,24 @@ public class MockParse {
             Field[] fields = cls.getDeclaredFields();
             for (Field f : fields) {
                 try {
-                    f.setAccessible(true);
-                    Object o = f.get(obj);
                     Type genericType = f.getGenericType();
-                    if (o == null) {//表示没有默认值 需要mock数据
-                        LogUtil.i("()->字段：" + f.getName() + " 类型:" + genericType + " start==>");
-                        handleType(genericType, obj, f, false);
-                        LogUtil.i("()->字段：" + f.getName() + " 类型:" + genericType + " end<==");
-                    } else {
-                        if (hasMockAnnotation(f) && genericType instanceof Class) {
-                            LogUtil.i("()->字段：" + f.getName() + "有默认值，但有Mock标记，需要处理");
-                            setParentField(obj, f, getMockFieldData((Class<?>) genericType, f));
+                    if (hasMockAnnotation(f)) {
+                        LogUtil.i("()->包含@Mock，需要对注解进行解析");
+                        if (genericType instanceof ParameterizedType) {
+                            Type rawType = ((ParameterizedType) genericType).getRawType();
+                            if (rawType instanceof Class) {
+                                handleMockFieldType(obj, (Class<?>) rawType, f);
+                            } else {
+                                handleFieldType(f, obj);
+                            }
+                        } else if (genericType instanceof Class) {
+                            handleMockFieldType(obj, (Class<?>) genericType, f);
                         } else {
-                            LogUtil.i("()->字段：" + f.getName() + "已有默认值，无需处理");
+                            handleFieldType(f, obj);
                         }
+                    } else {
+                        LogUtil.i("()->不包含@Mock，直接处理字段类型");
+                        handleFieldType(f, obj);
                     }
                 } catch (Exception e) {
                     LogUtil.e("()->处理字段时出错：", e);
@@ -311,6 +318,30 @@ public class MockParse {
             }
         }
         return obj;
+    }
+
+    private void handleMockFieldType(Object obj, Class<?> cls, Field f) throws IllegalAccessException {
+        Object fieldData = getMockFieldData(cls, f.getAnnotation(Mock.class));
+        if (fieldData == null) {
+            LogUtil.i("()->解析mock注解失败，使用默认方式");
+            handleFieldType(f, obj);
+        } else {
+            LogUtil.i("()->解析mock注解成功，直接赋值到字段中");
+            setParentField(obj, f, fieldData);
+        }
+    }
+
+    private void handleFieldType(Field f, Object obj) throws IllegalAccessException {
+        Type genericType = f.getGenericType();
+        f.setAccessible(true);
+        Object o = f.get(obj);
+        if (o == null) {
+            LogUtil.i("()->字段：" + f.getName() + " 类型:" + genericType + " start==>");
+            handleType(genericType, obj, f, false);
+            LogUtil.i("()->字段：" + f.getName() + " 类型:" + genericType + " end<==");
+        } else {
+            LogUtil.i("()->字段：" + f.getName() + "已有默认值，无需处理");
+        }
     }
 
     private boolean hasMockAnnotation(Field field) {

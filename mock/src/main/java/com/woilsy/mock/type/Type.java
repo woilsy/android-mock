@@ -2,13 +2,9 @@ package com.woilsy.mock.type;
 
 public enum Type {
     /**
-     * 基本类型
+     * 包含基本类型和Json类型
      */
-    BASE,
-    /**
-     * json类型
-     */
-    JSON,
+    DEFAULT,
     IMAGE,
     AGE,
     NAME,

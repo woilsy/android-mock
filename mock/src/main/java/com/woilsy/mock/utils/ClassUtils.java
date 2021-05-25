@@ -33,37 +33,41 @@ public class ClassUtils {
         return cls;
     }
 
+    public static Object stringToBaseType(String s, Class<?> cls) {
+        Class<?> aClass = getEncapsulationType(cls);
+        try {
+            if (aClass == Long.class) {
+                return Long.valueOf(s);
+            } else if (aClass == Integer.class) {
+                return Integer.valueOf(s);
+            } else if (aClass == Boolean.class) {
+                return Boolean.valueOf(s);
+            } else if (aClass == Float.class) {
+                return new BigDecimal(s).floatValue();
+            } else if (aClass == Character.class) {
+                return s.toCharArray()[0];
+            } else if (aClass == Double.class) {
+                return new BigDecimal(s).doubleValue();
+            } else if (aClass == Date.class) {
+                return DateFormat.getDateTimeInstance().parse(s);
+            } else if (aClass == Byte.class) {
+                return Byte.valueOf(s);
+            } else if (aClass == BigDecimal.class) {
+                return new BigDecimal(s);
+            } else if (aClass == Short.class) {
+                return Short.valueOf(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Object stringToClass(String s, Class<?> cls) {
         if (cls == String.class) {
             return s;
         } else {
-            Class<?> aClass = getEncapsulationType(cls);
-            try {
-                if (aClass == Long.class) {
-                    return Long.valueOf(s);
-                } else if (aClass == Integer.class) {
-                    return Integer.valueOf(s);
-                } else if (aClass == Boolean.class) {
-                    return Boolean.valueOf(s);
-                } else if (aClass == Float.class) {
-                    return new BigDecimal(s).floatValue();
-                } else if (aClass == Character.class) {
-                    return s.toCharArray()[0];
-                } else if (aClass == Double.class) {
-                    return new BigDecimal(s).doubleValue();
-                } else if (aClass == Date.class) {
-                    return DateFormat.getDateTimeInstance().parse(s);
-                } else if (aClass == Byte.class) {
-                    return Byte.valueOf(s);
-                } else if (aClass == BigDecimal.class) {
-                    return new BigDecimal(s);
-                } else if (aClass == Short.class) {
-                    return Short.valueOf(s);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
+            return stringToBaseType(s, cls);
         }
     }
 
