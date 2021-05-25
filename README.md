@@ -1,4 +1,4 @@
-# RetrofitMock
+# RetrofitMock 
 
 [English](https://github.com/woilsy/android-mock/blob/master/README_EN.md)
 
@@ -30,7 +30,8 @@ A：ResponseBody由于其本身是无法被静态解析的，能静态解析的�
 /generate 存在跟数据生成有关的东西  
 /options 配置文件  
 /parse 解析器  
-/service 服务所在，包含本地服务和android service  
+/server 本地Http服务器所在  
+/service android service  
 /strategy 策略相关，跟解析挂钩的  
 /test 测试代码  
 /type mock数据的类型  
@@ -43,7 +44,8 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 
 导入aar  
 
-`implementation "com.github.woilsy:android-mock:v1.0.2"`
+[![](https://jitpack.io/v/com.woilsy/android-mock.svg)](https://jitpack.io/#com.woilsy/android-mock)  
+`implementation "com.github.woilsy:android-mock:latest.version"`
 
 #### 使用说明
 
@@ -56,14 +58,14 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
  **参数说明**   
 Context：为了启动服务和解析assets中的文件。  
 MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置备用地址、设置gson处理对象（在mock Date.class的时候，如果DateFormat不一致，会导致解析失败）。  
-MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去备用的地址同步返回请求结果。
+MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去备用的原始地址重定向同步返回请求结果。
 
 **第二步**  
 将MockDefault.BASE_URL作为BaseUrl传递给Retrofit
 
  **其他**   
-自定义mock数据  
-如果需要自定义mock数据，可以通过MockOptions.setDataSource()传入，返回值为ResponseBody时，只有导入了数据才会有返回值。
+1.如果需要自定义mock数据，可以通过MockOptions.setDataSource()传入，返回值为ResponseBody时，只有导入了数据才会有返回值。  
+2.@Mock注解可以指定字段具体的mock数据，以及类型，可以为基本类型，也可以为Json数据类型。
 
 #### 参与贡献
 
