@@ -27,7 +27,7 @@ But now, you only need to do the following things to forget about this trouble.
  **Step 2 Add dependency to your app "build.gradle"**  
 
 [![](https://jitpack.io/v/com.woilsy/android-mock.svg)](https://jitpack.io/#com.woilsy/android-mock)  
-`implementation "com.github.woilsy:android-mock:latest.version"`
+`implementation "com.woilsy:android-mock:latest.version"`
 
  **Step 3 Launcher the mock server before init Retrofit**  
 

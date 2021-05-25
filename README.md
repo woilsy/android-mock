@@ -45,7 +45,7 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 导入aar  
 
 [![](https://jitpack.io/v/com.woilsy/android-mock.svg)](https://jitpack.io/#com.woilsy/android-mock)  
-`implementation "com.github.woilsy:android-mock:latest.version"`
+`implementation "com.woilsy:android-mock:latest.version"`
 
 #### 使用说明
 
