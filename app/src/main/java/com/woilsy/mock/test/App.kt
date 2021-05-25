@@ -21,6 +21,7 @@ class App : Application() {
                 .setDebug(true)
                 .setDataSource(AssetFileDataSource(this, "mock.json"))
                 .setOriginalBaseUrl("https://www.wanandroid.com")
+                .setPort(8899)
                 .build(),
             MockObj(ApiService::class.java, MockStrategy.RESOLVE_WITH_EXCLUDE),
         )

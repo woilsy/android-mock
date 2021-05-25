@@ -9,7 +9,7 @@ afterEvaluate {
                 // Applies the component for the release build variant.
                 from components.release
                 // You can then customize attributes of the publication as shown below.
-                groupId = 'com.woilsy.mock'
+                groupId = 'com.woilsy'
                 artifactId = 'mock'
                 version = '1.0.0'
             }

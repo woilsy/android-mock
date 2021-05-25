@@ -6,6 +6,7 @@ import com.woilsy.mock.test.B;
 import com.woilsy.mock.test.C;
 import com.woilsy.mock.test.D;
 import com.woilsy.mock.test.E;
+import com.woilsy.mock.test.MockBeanChild;
 import com.woilsy.mock.test.entity.HttpResult;
 import com.woilsy.mock.test.entity.LoginRequest;
 import com.woilsy.mock.test.entity.LoginResponse;
@@ -64,4 +65,8 @@ public interface ApiService {
 
     @GET("/test/generic2")
     Observable<HttpResult<E<A<Integer>, B<String>, C<Boolean>>>> multipleGeneric();
+
+    @PUT("/user/register2")
+    Observable<MockBeanChild> register2(@Body RegisterRequest request);
 }
+

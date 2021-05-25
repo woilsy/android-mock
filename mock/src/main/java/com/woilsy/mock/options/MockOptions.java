@@ -27,6 +27,11 @@ public class MockOptions {
      */
     private DataSource[] dataSources;
 
+    /**
+     * mock服务器监听端口
+     */
+    private int port;
+
     public static MockOptions getDefault() {
         return new MockOptions
                 .Builder()
@@ -43,6 +48,8 @@ public class MockOptions {
         private Rule rule;
 
         private String originalBaseUrl;
+
+        private int port;
 
         private DataSource[] dataSources;
 
@@ -66,6 +73,14 @@ public class MockOptions {
             return this;
         }
 
+        public Builder setPort(int port) {
+            if (port < 1024) {
+                throw new IllegalArgumentException("The port must be greater than or equal to 1024.");
+            }
+            this.port = port;
+            return this;
+        }
+
         public Builder setGson(Gson gson) {
             this.gson = gson;
             return this;
@@ -76,6 +91,7 @@ public class MockOptions {
             options.rule = this.rule == null ? new Generator() : rule;
             options.dataSources = this.dataSources;
             options.originalBaseUrl = this.originalBaseUrl == null ? MockDefault.BASE_URL : this.originalBaseUrl;
+            options.port = this.port <= 0 ? MockDefault.PORT : this.port;
             //
             LogUtil.setDebug(this.debug);
             if (this.gson != null) {
@@ -95,5 +111,9 @@ public class MockOptions {
 
     public String getOriginalBaseUrl() {
         return originalBaseUrl;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

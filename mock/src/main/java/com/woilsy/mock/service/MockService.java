@@ -8,11 +8,13 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.Toast;
 
 import com.woilsy.mock.MockLauncher;
 import com.woilsy.mock.constants.MockDefault;
+import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.server.HttpServer;
 import com.woilsy.mock.utils.LogUtil;
 
@@ -21,6 +23,8 @@ public class MockService extends Service {
     private static final String CHANNEL_ID = "channel_mock_service";
 
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
+
+    private static final String ACTION_MOCK_START = "start_mock_server";
 
     private static final String ACTION_TRANS_BASEURL = "trans_base_url";
 
@@ -44,15 +48,17 @@ public class MockService extends Service {
             );
             startForeground(NOTIFICATION_ID, getNotification(MockDefault.BASE_URL));
         }
+    }
+
+    private void startMockServer(int port) {
         new Thread(() -> {
             String host = MockDefault.HOST_NAME;
-            int port = MockDefault.PORT;
             try {
                 httpServer = new HttpServer(host, port);
                 httpServer.start();
                 LogUtil.i("已启动" + port + "mock服务器");
             } catch (Exception e) {
-                LogUtil.e("mock服务器启动失败", e);
+                LogUtil.e("Mock服务器启动失败", e);
             }
         })
                 .start();
@@ -93,7 +99,13 @@ public class MockService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-            if (ACTION_TRANS_BASEURL.equals(action)) {
+            if (ACTION_MOCK_START.equals(action)) {
+                Bundle extras = intent.getExtras();
+                if (extras != null) {
+                    int port = extras.getInt("port");
+                    startMockServer(port);
+                }
+            } else if (ACTION_TRANS_BASEURL.equals(action)) {
                 boolean newValue = !MockLauncher.isBaseUrlOrOriginalUrl();
                 MockLauncher.setBaseUrlOrOriginalUrl(newValue);
                 String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
@@ -112,5 +124,16 @@ public class MockService extends Service {
             httpServer.stop();
         }
         LogUtil.i("MockService已销毁");
+    }
+
+    public static void start(Context context, MockOptions options) {
+        Intent intent = new Intent(context, MockService.class);
+        intent.putExtra("port", options.getPort());
+        intent.setAction(MockService.ACTION_MOCK_START);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
     }
 }

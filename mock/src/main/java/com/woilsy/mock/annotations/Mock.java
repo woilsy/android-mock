@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Mock {
 
-    Type type() default Type.BASE;
+    Type type() default Type.DEFAULT;
 
     String value() default "";
 

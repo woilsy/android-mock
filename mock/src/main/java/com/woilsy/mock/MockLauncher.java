@@ -2,7 +2,6 @@ package com.woilsy.mock;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 
 import com.woilsy.mock.annotations.MockExclude;
 import com.woilsy.mock.annotations.MockInclude;
@@ -63,12 +62,6 @@ public class MockLauncher {
     private MockLauncher() {
     }
 
-    public static void start(Context context, MockOptions options, MockObj... objs) {
-        LAUNCHER.initByOptions(options);
-        LAUNCHER.startMockService(context);
-        LAUNCHER.parseClasses(objs);
-    }
-
     public static MockOptions getMockOption() {
         return LAUNCHER.mockOptions;
     }
@@ -81,8 +74,10 @@ public class MockLauncher {
         return LAUNCHER.baseUrlOrOriginalUrl;
     }
 
-    public static void stop(Context context) {
-        context.stopService(new Intent(context, MockService.class));
+    public static void start(Context context, MockOptions options, MockObj... objs) {
+        LAUNCHER.initByOptions(options);
+        LAUNCHER.startMockService(context, options);
+        LAUNCHER.parseClasses(objs);
     }
 
     private void initByOptions(MockOptions options) {
@@ -93,12 +88,12 @@ public class MockLauncher {
         MockUrlData.add(mMockOptions.getDataSources());
     }
 
-    private void startMockService(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(new Intent(context, MockService.class));
-        } else {
-            context.startService(new Intent(context, MockService.class));
-        }
+    private void startMockService(Context context, MockOptions options) {
+        MockService.start(context, options);
+    }
+
+    public static void stop(Context context) {
+        context.stopService(new Intent(context, MockService.class));
     }
 
     private void parseClasses(MockObj... objs) {
@@ -119,8 +114,8 @@ public class MockLauncher {
     private void parse(Class<?> cls, MockStrategy mockStrategy) {
         Method[] methods = cls.getMethods();
         String ss = mockStrategy == MockStrategy.RESOLVE_WITH_EXCLUDE ?
-                "默认解析：除了被@MockExclude标记的函数都解析，其他Method将访问BackupUrl" :
-                "默认不解析：仅解析被@MockInclude标记的函数，其他Method将访问BackupUrl";
+                "默认解析：除了被@MockExclude标记的函数都解析，其他Method将访问" + mockOptions.getOriginalBaseUrl() :
+                "默认不解析：仅解析被@MockInclude标记的函数，其他Method将访问" + mockOptions.getOriginalBaseUrl();
         LogUtil.i("当前Method解析策略为->" + ss);
         for (Method m : methods) {
             if (mockStrategy == MockStrategy.RESOLVE_WITH_EXCLUDE) {
