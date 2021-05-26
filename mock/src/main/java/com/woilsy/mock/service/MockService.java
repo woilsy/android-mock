@@ -46,8 +46,8 @@ public class MockService extends Service {
             manager.createNotificationChannel(
                     new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
             );
-            startForeground(NOTIFICATION_ID, getNotification(MockDefault.BASE_URL));
         }
+        startForeground(NOTIFICATION_ID, getNotification(MockDefault.BASE_URL));
     }
 
     private void startMockServer(int port) {
@@ -68,7 +68,7 @@ public class MockService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return new Notification.Builder(this, CHANNEL_ID)
                     .setChannelId(CHANNEL_ID)
-                    .setContentTitle("Mock服务器正在运行...")
+                    .setContentTitle("Mock server is running...")
                     .setContentIntent(getIntent())
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())
@@ -78,7 +78,7 @@ public class MockService extends Service {
                     .build();
         } else {
             return new Notification.Builder(this)
-                    .setContentTitle("Mock服务器正在运行...")
+                    .setContentTitle("Mock server is running...")
                     .setContentIntent(getIntent())
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())
