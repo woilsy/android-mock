@@ -1,4 +1,3 @@
-# RetrofitMock 
 
 [English](https://github.com/woilsy/android-mock/blob/master/README_EN.md)
 
