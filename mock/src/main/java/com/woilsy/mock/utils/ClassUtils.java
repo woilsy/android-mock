@@ -1,12 +1,14 @@
 package com.woilsy.mock.utils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import com.google.gson.internal.UnsafeAllocator;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.Date;
 
 public class ClassUtils {
+
+    private static final UnsafeAllocator UNSAFE_ALLOCATOR = UnsafeAllocator.create();
 
     public static Class<?> getEncapsulationType(Class<?> cls) {
         String name = cls.getName();
@@ -73,16 +75,10 @@ public class ClassUtils {
 
     public static <T> Object allocateInstance(Class<T> cls) {
         try {
-            Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-            Field unsafeField = unsafeClass.getDeclaredField("theUnsafe");
-            unsafeField.setAccessible(true);
-            Object unsafe = unsafeField.get(null);
-            Method method = unsafeClass.getMethod("allocateInstance", Class.class);
-            return method.invoke(unsafe, cls);
+            return UNSAFE_ALLOCATOR.newInstance(cls);
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
 }

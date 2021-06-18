@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import com.woilsy.mock.annotations.MockExclude;
 import com.woilsy.mock.annotations.MockInclude;
+import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.data.MockUrlData;
 import com.woilsy.mock.entity.ExcludeInfo;
 import com.woilsy.mock.entity.MockObj;
@@ -80,20 +81,24 @@ public class MockLauncher {
         LAUNCHER.parseClasses(objs);
     }
 
-    private void initByOptions(MockOptions options) {
-        MockOptions mMockOptions = options == null ? MockOptions.getDefault() : options;
-        this.mockOptions = mMockOptions;
-        this.mockParse = new MockParse(mMockOptions);
-        //导入数据
-        MockUrlData.add(mMockOptions.getDataSources());
-    }
-
     private void startMockService(Context context, MockOptions options) {
         MockService.start(context, options);
     }
 
     public static void stop(Context context) {
         context.stopService(new Intent(context, MockService.class));
+    }
+
+    public static String getMockBaseUrl() {
+        return MockDefault.formatBaseUrl(LAUNCHER.mockOptions.getPort());
+    }
+
+    private void initByOptions(MockOptions options) {
+        MockOptions mMockOptions = options == null ? MockOptions.getDefault() : options;
+        this.mockOptions = mMockOptions;
+        this.mockParse = new MockParse(mMockOptions);
+        //导入数据
+        MockUrlData.add(mMockOptions.getDataSources());
     }
 
     private void parseClasses(MockObj... objs) {

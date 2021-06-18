@@ -90,8 +90,9 @@ public class MockOptions {
             MockOptions options = new MockOptions();
             options.rule = this.rule == null ? new Generator() : rule;
             options.dataSources = this.dataSources;
-            options.originalBaseUrl = this.originalBaseUrl == null ? MockDefault.BASE_URL : this.originalBaseUrl;
             options.port = this.port <= 0 ? MockDefault.PORT : this.port;
+            options.originalBaseUrl = this.originalBaseUrl == null ? MockDefault.formatBaseUrl(this.port)
+                    : this.originalBaseUrl;
             //
             LogUtil.setDebug(this.debug);
             if (this.gson != null) {

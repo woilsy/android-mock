@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.woilsy.mock.constants.MockDefault
+import com.woilsy.mock.MockLauncher
 import com.woilsy.mock.test.R
 import com.woilsy.mock.test.entity.LoginRequest
 import com.woilsy.mock.test.entity.RegisterRequest
@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     fun testRequest(view: View) {
         getApiService()
-            .test(MockDefault.BASE_URL)
+            .test(MockLauncher.getMockBaseUrl())
             .enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(p0: Call<ResponseBody?>, p1: Response<ResponseBody?>) {
                     Log.d(TAG, "onResponse: $p1")

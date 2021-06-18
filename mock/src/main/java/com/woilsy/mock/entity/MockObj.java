@@ -8,6 +8,11 @@ public class MockObj {
 
     private final MockStrategy mockStrategy;
 
+    public MockObj(Class<?> mockClass) {
+        this.mockClass = mockClass;
+        this.mockStrategy = MockStrategy.RESOLVE_WITH_EXCLUDE;
+    }
+
     public MockObj(Class<?> mockClass, MockStrategy mockStrategy) {
         this.mockClass = mockClass;
         this.mockStrategy = mockStrategy;

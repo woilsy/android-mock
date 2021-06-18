@@ -28,9 +28,12 @@ public class MockService extends Service {
 
     private static final String ACTION_TRANS_BASEURL = "trans_base_url";
 
+    private static final String MOCK_URL = MockLauncher.getMockBaseUrl();
+
     private static final int NOTIFICATION_ID = 1;
 
     private HttpServer httpServer;
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -47,7 +50,7 @@ public class MockService extends Service {
                     new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
             );
         }
-        startForeground(NOTIFICATION_ID, getNotification(MockDefault.BASE_URL));
+        startForeground(NOTIFICATION_ID, getNotification(MOCK_URL));
     }
 
     private void startMockServer(int port) {
@@ -109,7 +112,7 @@ public class MockService extends Service {
                 boolean newValue = !MockLauncher.isBaseUrlOrOriginalUrl();
                 MockLauncher.setBaseUrlOrOriginalUrl(newValue);
                 String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
-                String newUrl = newValue ? MockDefault.BASE_URL : originalBaseUrl;
+                String newUrl = newValue ? MOCK_URL : originalBaseUrl;
                 Toast.makeText(this, newUrl, Toast.LENGTH_LONG).show();
                 startForeground(NOTIFICATION_ID, getNotification(newUrl));
             }
