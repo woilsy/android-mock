@@ -47,8 +47,6 @@ public class MockOptions {
 
         private Rule rule;
 
-        private String originalBaseUrl;
-
         private int port;
 
         private DataSource[] dataSources;
@@ -60,11 +58,6 @@ public class MockOptions {
 
         public Builder setRule(Rule rule) {
             this.rule = rule;
-            return this;
-        }
-
-        public Builder setOriginalBaseUrl(String originalBaseUrl) {
-            this.originalBaseUrl = originalBaseUrl;
             return this;
         }
 
@@ -91,8 +84,6 @@ public class MockOptions {
             options.rule = this.rule == null ? new Generator() : rule;
             options.dataSources = this.dataSources;
             options.port = this.port <= 0 ? MockDefault.PORT : this.port;
-            options.originalBaseUrl = this.originalBaseUrl == null ? MockDefault.formatBaseUrl(this.port)
-                    : this.originalBaseUrl;
             //
             LogUtil.setDebug(this.debug);
             if (this.gson != null) {
@@ -108,6 +99,10 @@ public class MockOptions {
 
     public DataSource[] getDataSources() {
         return dataSources;
+    }
+
+    public void setOriginalBaseUrl(String originalBaseUrl) {
+        this.originalBaseUrl = originalBaseUrl;
     }
 
     public String getOriginalBaseUrl() {

@@ -5,9 +5,10 @@ import android.content.Intent;
 
 import com.woilsy.mock.annotations.MockExclude;
 import com.woilsy.mock.annotations.MockInclude;
+import com.woilsy.mock.constants.HttpMethod;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.data.MockUrlData;
-import com.woilsy.mock.entity.ExcludeInfo;
+import com.woilsy.mock.entity.HttpInfo;
 import com.woilsy.mock.entity.MockObj;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.parse.MockParse;
@@ -50,14 +51,22 @@ public class MockLauncher {
      */
     private static final MockLauncher LAUNCHER = new MockLauncher();
     /**
-     * 被排除的url集合，将对其进行重定向
+     * 被排除的url集合，将使用原始url请求
      */
-    public static final Map<String, ExcludeInfo> excludeInfoMap = new HashMap<>();
+    public static final Map<String, HttpInfo> excludeInfoMap = new HashMap<>();
 
+    /**
+     * mock数据解析器
+     */
     private MockParse mockParse;
 
     private MockOptions mockOptions;
 
+    /**
+     * mock地址或者原始url
+     * mock地址：127.0.0.1
+     * 原始url：http://xxx.xxx.com:8080
+     */
     private boolean baseUrlOrOriginalUrl = true;
 
     private MockLauncher() {
@@ -67,11 +76,11 @@ public class MockLauncher {
         return LAUNCHER.mockOptions;
     }
 
-    public static void setBaseUrlOrOriginalUrl(boolean baseUrlOrOriginalUrl) {
+    public static void setMockUrlOrOriginalUrl(boolean baseUrlOrOriginalUrl) {
         LAUNCHER.baseUrlOrOriginalUrl = baseUrlOrOriginalUrl;
     }
 
-    public static boolean isBaseUrlOrOriginalUrl() {
+    public static boolean isMockUrlOrOriginalUrl() {
         return LAUNCHER.baseUrlOrOriginalUrl;
     }
 
@@ -90,7 +99,7 @@ public class MockLauncher {
     }
 
     public static String getMockBaseUrl() {
-        return MockDefault.formatBaseUrl(LAUNCHER.mockOptions.getPort());
+        return MockDefault.formatMockUrl(LAUNCHER.mockOptions.getPort());
     }
 
     private void initByOptions(MockOptions options) {
@@ -139,40 +148,43 @@ public class MockLauncher {
     private void parseStart(Method m, boolean localOrBackup) {
         LogUtil.i("====== 开始解析 " + m.getName() + " ======");
         //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
-        String actUrl = actUrl(m);
-        if (actUrl == null || actUrl.isEmpty()) {
-            LogUtil.i("没有意义的url");
-        } else {
-            LogUtil.i("url:" + actUrl);
-            if (localOrBackup) {
-                //解析Data
-                boolean containsKey = MockUrlData.contain(actUrl);
-                if (containsKey) {
-                    LogUtil.i("该url已由其他mock数据占用，无需静态解析");
-                } else {
-                    Object o = actType(m);
-                    LogUtil.i("data:" + (o == null ? "null" : GsonUtil.toJson(o)));
-                    MockUrlData.add(actUrl, o);
-                }
+        HttpInfo httpInfo = actUrl(m);
+        if (httpInfo != null) {
+            String path = httpInfo.getPath();
+            if (path == null || path.isEmpty()) {//需要动态解析
+                LogUtil.i("暂不支持的url");
             } else {
-                excludeInfoMap.put(actUrl, new ExcludeInfo(true, mockOptions.getOriginalBaseUrl()));
+                LogUtil.i("path:" + path);
+                if (localOrBackup) {
+                    //解析Data
+                    boolean containsKey = MockUrlData.contain(path);
+                    if (containsKey) {
+                        LogUtil.i("该url已由其他mock数据占用，无需静态解析");
+                    } else {
+                        Object o = actType(m);
+                        LogUtil.i("data:" + (o == null ? "null" : GsonUtil.toJson(o)));
+                        MockUrlData.add(path, o);
+                    }
+                } else {
+                    excludeInfoMap.put(path, httpInfo);
+                }
             }
         }
         LogUtil.i("====== 停止解析 " + m.getName() + " ======");
     }
 
     //分析静态url
-    private String actUrl(Method m) {
+    private HttpInfo actUrl(Method m) {
         Annotation[] annotations = m.getAnnotations();
         for (Annotation a : annotations) {
             if (a instanceof GET) {
-                return transString(((GET) a).value());
+                return new HttpInfo(HttpMethod.GET, transString(((GET) a).value()));
             } else if (a instanceof POST) {
-                return transString(((POST) a).value());
+                return new HttpInfo(HttpMethod.POST, transString(((POST) a).value()));
             } else if (a instanceof DELETE) {
-                return transString(((DELETE) a).value());
+                return new HttpInfo(HttpMethod.DELETE, transString(((DELETE) a).value()));
             } else if (a instanceof PUT) {
-                return transString(((PUT) a).value());
+                return new HttpInfo(HttpMethod.PUT, transString(((PUT) a).value()));
             } else {
                 LogUtil.i(a.getClass() + "不支持的注解类型，目前只支持GET POST DELETE PUT");
             }

@@ -19,7 +19,7 @@ public class MockDefault {
     public static final String NICKNAME = "我上我也行";
     public static final String PHONE = "18688888888";
 
-    public static String formatBaseUrl(int port) {
+    public static String formatMockUrl(int port) {
         return "http://" + HOST_NAME + ":" + port;
     }
 

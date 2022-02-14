@@ -109,8 +109,8 @@ public class MockService extends Service {
                     startMockServer(port);
                 }
             } else if (ACTION_TRANS_BASEURL.equals(action)) {
-                boolean newValue = !MockLauncher.isBaseUrlOrOriginalUrl();
-                MockLauncher.setBaseUrlOrOriginalUrl(newValue);
+                boolean newValue = !MockLauncher.isMockUrlOrOriginalUrl();
+                MockLauncher.setMockUrlOrOriginalUrl(newValue);
                 String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
                 String newUrl = newValue ? MOCK_URL : originalBaseUrl;
                 Toast.makeText(this, newUrl, Toast.LENGTH_LONG).show();
