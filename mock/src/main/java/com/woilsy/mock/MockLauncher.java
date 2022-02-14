@@ -130,7 +130,7 @@ public class MockLauncher {
         String ss = mockStrategy == MockStrategy.RESOLVE_WITH_EXCLUDE ?
                 "默认解析：除了被@MockExclude标记的函数都解析，其他Method将访问" + mockOptions.getOriginalBaseUrl() :
                 "默认不解析：仅解析被@MockInclude标记的函数，其他Method将访问" + mockOptions.getOriginalBaseUrl();
-        LogUtil.i("当前Method解析策略为->" + ss);
+        LogUtil.i(cls.getSimpleName() + "当前Method解析策略为->" + ss);
         for (Method m : methods) {
             if (mockStrategy == MockStrategy.RESOLVE_WITH_EXCLUDE) {
                 MockExclude mockExclude = m.getAnnotation(MockExclude.class);
