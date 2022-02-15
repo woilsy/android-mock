@@ -10,7 +10,7 @@ import java.util.List;
  * Mock data from json<br/>
  * [<br/>
  * {<br/>
- * "url":"request1",<br/>
+ * "path":"/request1",<br/>
  * "data":["one","two","three"]<br/>
  * }<br/>
  * ] <br/>

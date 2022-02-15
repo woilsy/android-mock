@@ -1,13 +1,17 @@
 [
   {
-    "url": "/",
+    "path": "/",
     "data": {
       "name": "小王",
       "age": 18
     }
   },
   {
-    "url": "/request3",
+    "path": "/request3",
     "data": "我是自定义的mock数据"
+  },
+  {
+    "path": "/index",
+    "data": "{\"name\":\"八八八啊\"}"
   }
 ]

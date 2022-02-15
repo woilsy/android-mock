@@ -18,7 +18,7 @@ public class HttpServer extends NanoHTTPD {
         String uri = session.getUri();
         String uriKey = getUriKey(uri);
         String data = MockUrlData.get(uriKey);
-        LogUtil.i("客户端请求url->" + uri + ",数据key->" + uriKey + ",将返回mock数据->" + data);
+        LogUtil.i("客户端请求path->" + uri + ",数据key->" + uriKey + ",将返回mock数据->" + data);
         //Method get post delete put
         Method method = session.getMethod();
         String contentType = getContentType(session.getHeaders());

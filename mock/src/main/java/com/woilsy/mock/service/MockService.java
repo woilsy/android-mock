@@ -110,11 +110,15 @@ public class MockService extends Service {
                 }
             } else if (ACTION_TRANS_BASEURL.equals(action)) {
                 boolean newValue = !MockLauncher.isMockUrlOrOriginalUrl();
-                MockLauncher.setMockUrlOrOriginalUrl(newValue);
                 String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
-                String newUrl = newValue ? MOCK_URL : originalBaseUrl;
-                Toast.makeText(this, newUrl, Toast.LENGTH_LONG).show();
-                startForeground(NOTIFICATION_ID, getNotification(newUrl));
+                if (originalBaseUrl != null && !originalBaseUrl.isEmpty()) {
+                    MockLauncher.setMockUrlOrOriginalUrl(newValue);
+                    String newUrl = newValue ? MOCK_URL : originalBaseUrl;
+                    Toast.makeText(this, (newValue ? "开启mock:" : "关闭mock:") + newUrl, Toast.LENGTH_LONG).show();
+                    startForeground(NOTIFICATION_ID, getNotification(newUrl));
+                } else {
+                    Toast.makeText(this, "请在至少请求一次网络后再尝试切换", Toast.LENGTH_LONG).show();
+                }
             }
         }
         return super.onStartCommand(intent, flags, startId);

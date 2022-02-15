@@ -37,7 +37,7 @@ import retrofit2.http.PUT;
  * 2,返回值为ResponseBody时或需要自定义mock数据时，需要自行新建一个mock数据文件，以<br/>
  * [<br/>
  * {<br/>
- * "url":"/xxx"<br/>
+ * "path":"/xxx"<br/>
  * "data":{} <br/>
  * }<br/>
  * ]<br/>
@@ -148,7 +148,7 @@ public class MockLauncher {
     private void parseStart(Method m, boolean localOrBackup) {
         LogUtil.i("====== 开始解析 " + m.getName() + " ======");
         //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
-        HttpInfo httpInfo = actUrl(m);
+        HttpInfo httpInfo = getHttpInfo(m);
         if (httpInfo != null) {
             String path = httpInfo.getPath();
             if (path == null || path.isEmpty()) {//需要动态解析
@@ -174,7 +174,7 @@ public class MockLauncher {
     }
 
     //分析静态url
-    private HttpInfo actUrl(Method m) {
+    private HttpInfo getHttpInfo(Method m) {
         Annotation[] annotations = m.getAnnotations();
         for (Annotation a : annotations) {
             if (a instanceof GET) {

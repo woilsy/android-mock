@@ -2,7 +2,7 @@ package com.woilsy.mock.entity;
 
 public class MockData {
 
-    public String url;
+    public String path;
 
     public Object data;
 

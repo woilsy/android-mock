@@ -12,7 +12,7 @@ public class MockUrlData {
     private static final MockUrlData INSTANCE = new MockUrlData();
 
     /**
-     * key值为url，value为url对应的json数据
+     * key值为path，value为path对应的json数据
      */
     private final Map<String, String> urlDataMap = new HashMap<>();
 
@@ -37,7 +37,7 @@ public class MockUrlData {
             List<MockData> mockData = dataSource.getMockData();
             if (mockData != null) {
                 for (MockData md : mockData) {
-                    add(md.url, md.data);
+                    add(md.path, md.data);
                 }
             }
         }
