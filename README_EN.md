@@ -33,7 +33,9 @@ But now, you only need to do the following things to forget about this trouble.
 
 `MockLauncher.start(Context context, MockOptions options, MockObj... objs)`
 
- **Step 4 Take MockLauncher.getMockBaseUrl() as baseUrl to Retrofit**
+ **Step 4 Add interceptor to okhttp client**
+
+`OkHttpClient.Builder.addInterceptor(new MockInterceptor()));`
 
  **OK!**  
 
@@ -46,7 +48,7 @@ File 'mock.json' in assets
 ```
 [
   {
-    "url":"request1",
+    "path":"/request1",
     "data":["one","two","three"]
   }
 ] 

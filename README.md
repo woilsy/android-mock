@@ -60,12 +60,11 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 
 **参数说明**   
 Context：为了启动服务和解析assets中的文件。  
-MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置备用地址、设置gson处理对象（在mock
-Date.class的时候，如果DateFormat不一致，会导致解析失败）。  
-MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去备用的原始地址重定向同步返回请求结果。
+MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置gson处理对象（在mockDate.class的时候，如果DateFormat不一致，会导致解析失败）。  
+MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去原始地址同步返回请求结果。
 
 **第二步**  
-将MockInterceptor添加到拦截器中OkHttpClient.Builder.addInterceptor(new MockInterceptor()))  
+将MockInterceptor添加到拦截器中OkHttpClient.Builder.addInterceptor(new MockInterceptor()));  
 
 **其他**   
 1.如果需要自定义mock数据，可以通过MockOptions.setDataSource()传入，返回值为ResponseBody时，只有导入了数据才会有返回值。  
