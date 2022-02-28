@@ -8,6 +8,7 @@ import com.woilsy.mock.entity.HttpInfo;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
 import okhttp3.HttpUrl;
@@ -27,40 +28,36 @@ public class MockInterceptor implements Interceptor {
         Request request = chain.request();
         //获取到原始地址 然后根据配置切换到本地地址
         HttpUrl httpUrl = request.url();
-        if (MockDefault.HOST_NAME.equals(httpUrl.host())) {//如果一致
-            return chain.proceed(request);
-        } else {//不一致 根据配置进行请求
+        if (!MockDefault.HOST_NAME.equals(httpUrl.host())) {//如果不一致 将根据配置进行请求 否则直接不处理
             URL url = httpUrl.url();
             Log.d(TAG, "请求地址：" + url);
             String originBaseUrl = httpUrl.scheme() + "://" + httpUrl.host() + ":" + httpUrl.port();
             MockLauncher.getMockOption().setOriginalBaseUrl(originBaseUrl);
+            //还存在一种场景 就是没有添加任何apiService 那么就不知道其策略 这类接口需要排除
             boolean mockUrlOrOriginalUrl = MockLauncher.isMockUrlOrOriginalUrl();
             if (mockUrlOrOriginalUrl) {//mock或者不进行mock
-                //处理特殊项
-                HttpInfo httpInfo = findExcludeHttpInfo(httpUrl.encodedPath());
-                String method = request.method();
-                if (httpInfo != null && httpInfo.getHttpMethod().name().equalsIgnoreCase(method)) {//被排除的url+method
-                    return chain.proceed(request);
-                } else {//其他项
+                //查询是否被包含
+                HttpInfo includeInfo = findHttpInfo(httpUrl.encodedPath(), MockLauncher.includeInfoMap);
+                HttpInfo excludeInfo = findHttpInfo(httpUrl.encodedPath(), MockLauncher.excludeInfoMap);
+                if (includeInfo != null && excludeInfo == null) {
                     HttpUrl httpUrl1 = httpUrl
                             .newBuilder()
                             .scheme("http")
                             .host(MockDefault.HOST_NAME)
                             .port(MockLauncher.getMockOption().getPort())
                             .build();
-                    Log.d(TAG, "重定向到：" + httpUrl1.url());
-                    Request request1 = request.newBuilder().url(httpUrl1).build();
-                    return chain.proceed(request1);
+                    Log.d(TAG, "将重定向到：" + httpUrl1.url());
+                    Request newRequest = request.newBuilder().url(httpUrl1).build();
+                    return chain.proceed(newRequest);
                 }
-            } else {
-                return chain.proceed(request);
             }
         }
+        return chain.proceed(request);
     }
 
-    private HttpInfo findExcludeHttpInfo(String encodedPath) {
+    private HttpInfo findHttpInfo(String encodedPath, Map<String, HttpInfo> httpInfoMap) {
         //encodedPath是一个实际地址 例如 /op/globalModuleConfig/{location} 但其实际地址 /op/globalModuleConfig/5 所以需要进行匹配
-        Set<String> keySet = MockLauncher.excludeInfoMap.keySet();
+        Set<String> keySet = httpInfoMap.keySet();
         String[] split1 = encodedPath.split("/");
         String mapKey = "";
         for (String s : keySet) {//op/globalModuleConfig/{location}
@@ -79,7 +76,7 @@ public class MockInterceptor implements Interceptor {
                 }
             }
         }
-        return mapKey.isEmpty() ? null : MockLauncher.excludeInfoMap.get(mapKey);
+        return mapKey.isEmpty() ? null : httpInfoMap.get(mapKey);
     }
 
 }

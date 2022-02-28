@@ -50,6 +50,11 @@ public class MockLauncher {
      * 启动器单例
      */
     private static final MockLauncher LAUNCHER = new MockLauncher();
+
+    /**
+     * 被包含的url结合，将使用mock url请求
+     */
+    public static final Map<String, HttpInfo> includeInfoMap = new HashMap<>();
     /**
      * 被排除的url集合，将使用原始url请求
      */
@@ -60,6 +65,9 @@ public class MockLauncher {
      */
     private MockParse mockParse;
 
+    /**
+     * mock配置
+     */
     private MockOptions mockOptions;
 
     /**
@@ -156,6 +164,8 @@ public class MockLauncher {
             } else {
                 LogUtil.i("path:" + path);
                 if (localOrBackup) {
+                    //添加到包含集合
+                    includeInfoMap.put(path, httpInfo);
                     //解析Data
                     boolean containsKey = MockUrlData.contain(path);
                     if (containsKey) {
@@ -166,6 +176,7 @@ public class MockLauncher {
                         MockUrlData.add(path, o);
                     }
                 } else {
+                    //添加到排除集合
                     excludeInfoMap.put(path, httpInfo);
                 }
             }
