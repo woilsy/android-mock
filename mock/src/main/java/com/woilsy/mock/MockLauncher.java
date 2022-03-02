@@ -81,6 +81,10 @@ public class MockLauncher {
     }
 
     public static MockOptions getMockOption() {
+        if (LAUNCHER.mockOptions == null) {//没有进行初始化
+            LAUNCHER.mockOptions = MockOptions.getDefault();
+            LAUNCHER.baseUrlOrOriginalUrl = false;//默认使用原始地址
+        }
         return LAUNCHER.mockOptions;
     }
 
