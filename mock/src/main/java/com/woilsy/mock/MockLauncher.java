@@ -151,7 +151,7 @@ public class MockLauncher {
                 MockInclude annotation = m.getAnnotation(MockInclude.class);
                 parseStart(m, annotation != null);
             } else {
-                parseStart(m, true);
+                parseStart(m, false);
             }
             LogUtil.i("---------------分割线---------------");
         }
@@ -175,9 +175,15 @@ public class MockLauncher {
                     if (containsKey) {
                         LogUtil.i("该url已由其他mock数据占用，无需静态解析");
                     } else {
-                        Object o = actType(m);
-                        LogUtil.i("data:" + (o == null ? "null" : GsonUtil.toJson(o)));
-                        MockUrlData.add(path, o);
+                        if ("/user/login3".equals(path)) {
+                            Object o = actType(m);
+                            LogUtil.i("data:" + (o == null ? "null" : GsonUtil.toJson(o)));
+                            MockUrlData.add(path, o);
+                        } else {
+                            Object o = actType(m);
+                            LogUtil.i("data:" + (o == null ? "null" : GsonUtil.toJson(o)));
+                            MockUrlData.add(path, o);
+                        }
                     }
                 } else {
                     //添加到排除集合

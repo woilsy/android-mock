@@ -19,9 +19,10 @@ Q：什么叫静态url？
 A：静态url是以@GET("url")这种能够直接在注解中获取到的url，能直接获取的url。而@Get Call\<ResponseBody\> test(@Url String url)
 这种在运行时才能获取到具体请求地址，被称为动态url，所以这种暂时没办法直接拿到它的值，除非可以监听函数执行，并能拿到参数（AOP是可以实现的，去监听Retrofit的Invoke过程，函数调用时再进行数据导入，但代价是还需要接入插件到Project中）。
 
-Q：Call\<ResponseBody\>返回如何处理？  
+Q：Call\<ResponseBody\>返回如何处理？是否支持协程？  
 A：ResponseBody由于其本身是无法被静态解析的，能静态解析的都是可序列化的Bean类(List、Map、class)
 ，所以对于外部，可以通过assets、文件、List\<MockData\>的形式，将其在配置阶段导入，之后在解析到这个url对应的Method时，会优先判断是否已导入，以导入优先，不会再去解析返回对象。
+由于suspend修饰后的函数会将原始函数的返回值替换为object，所以暂时无法自动生成，建议协程使用其他形式来mock。
 
 #### 软件架构
 

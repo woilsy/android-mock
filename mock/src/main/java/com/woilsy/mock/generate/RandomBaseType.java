@@ -18,7 +18,7 @@ public class RandomBaseType implements MockBaseType {
 
     @Override
     public Integer getInt() {
-        return random.nextInt(Integer.MAX_VALUE);
+        return random.nextInt();
     }
 
     @Override
