@@ -31,10 +31,9 @@ android {
 
 dependencies {
     def retrofitVersion = "2.9.0"
-    //http 需要依赖这3个
+    //http 需要依赖这2个
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-    api "com.parkingwang:okhttp3-loginterceptor:0.5"
 }
 
 apply from: "../upload.gradle"
