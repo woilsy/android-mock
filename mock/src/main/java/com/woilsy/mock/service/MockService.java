@@ -18,6 +18,9 @@ import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.server.HttpServer;
 import com.woilsy.mock.utils.LogUtil;
 
+import java.io.IOException;
+import java.net.BindException;
+
 public class MockService extends Service {
 
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
@@ -60,9 +63,14 @@ public class MockService extends Service {
             try {
                 httpServer = new HttpServer(host, port);
                 httpServer.start();
-                LogUtil.i("已启动" + port + "mock服务器");
-            } catch (Exception e) {
-                LogUtil.e("Mock服务器启动失败", e);
+                MockLauncher.getMockOption().updatePort(port);
+                LogUtil.i("已启动mock服务器，端口：" + port);
+            } catch (BindException e) {
+                int newPort = port + 1;
+                LogUtil.e("Mock服务器启动失败，尝试切换到端口：" + newPort, e);
+                startMockServer(newPort);
+            } catch (IOException e) {
+                LogUtil.e("Mock服务器启动失败，请重新尝试", e);
             }
         })
                 .start();

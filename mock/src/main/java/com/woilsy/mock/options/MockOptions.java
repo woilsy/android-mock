@@ -112,4 +112,8 @@ public class MockOptions {
     public int getPort() {
         return port;
     }
+
+    public void updatePort(int port) {
+        this.port = port;
+    }
 }
