@@ -2,7 +2,7 @@ package com.woilsy.mock.test.http
 
 import android.content.Context
 import com.google.gson.Gson
-import com.parkingwang.okhttp3.LogInterceptor.LogInterceptor
+import com.woilsy.mock.interceptor.LogInterceptor
 import com.woilsy.mock.interceptor.MockInterceptor
 import com.woilsy.mock.test.BuildConfig
 
