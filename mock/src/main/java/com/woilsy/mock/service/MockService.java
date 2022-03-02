@@ -20,20 +20,19 @@ import com.woilsy.mock.utils.LogUtil;
 
 public class MockService extends Service {
 
-    private static final String CHANNEL_ID = "channel_mock_service";
-
     private static final String CHANNEL_NAME = "Mock服务器通知渠道";
 
     private static final String ACTION_MOCK_START = "start_mock_server";
 
     private static final String ACTION_TRANS_BASEURL = "trans_base_url";
 
-    private static final String MOCK_URL = MockLauncher.getMockBaseUrl();
-
-    private static final int NOTIFICATION_ID = 1;
-
     private HttpServer httpServer;
 
+    private String channelId;
+
+    private String mockUrl;
+
+    private int notificationId;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -43,14 +42,16 @@ public class MockService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        channelId = this.getApplication().getPackageName();
+        notificationId = channelId.hashCode();
+        mockUrl = MockLauncher.getMockBaseUrl();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //
             NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.createNotificationChannel(
-                    new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
+                    new NotificationChannel(channelId, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
             );
         }
-        startForeground(NOTIFICATION_ID, getNotification(MOCK_URL));
+        startForeground(notificationId, getNotification(mockUrl));
     }
 
     private void startMockServer(int port) {
@@ -69,8 +70,8 @@ public class MockService extends Service {
 
     private Notification getNotification(String content) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new Notification.Builder(this, CHANNEL_ID)
-                    .setChannelId(CHANNEL_ID)
+            return new Notification.Builder(this, channelId)
+                    .setChannelId(channelId)
                     .setContentTitle("Mock server is running...")
                     .setContentIntent(getIntent())
                     .setContentText(content)
@@ -113,9 +114,9 @@ public class MockService extends Service {
                 String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
                 if (originalBaseUrl != null && !originalBaseUrl.isEmpty()) {
                     MockLauncher.setMockUrlOrOriginalUrl(newValue);
-                    String newUrl = newValue ? MOCK_URL : originalBaseUrl;
+                    String newUrl = newValue ? mockUrl : originalBaseUrl;
                     Toast.makeText(this, (newValue ? "开启mock:" : "关闭mock:") + newUrl, Toast.LENGTH_LONG).show();
-                    startForeground(NOTIFICATION_ID, getNotification(newUrl));
+                    startForeground(notificationId, getNotification(newUrl));
                 } else {
                     Toast.makeText(this, "请在至少请求一次网络后再尝试切换", Toast.LENGTH_LONG).show();
                 }
