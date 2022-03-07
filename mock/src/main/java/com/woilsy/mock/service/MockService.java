@@ -59,8 +59,8 @@ public class MockService extends Service {
 
     private void startMockServer(int port) {
         new Thread(() -> {
-            String host = MockDefault.HOST_NAME;
             try {
+                String host = MockDefault.HOST_NAME;
                 httpServer = new HttpServer(host, port);
                 httpServer.start();
                 MockLauncher.getMockOption().updatePort(port);
