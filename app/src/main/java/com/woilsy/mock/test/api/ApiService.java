@@ -6,12 +6,13 @@ import com.woilsy.mock.test.B;
 import com.woilsy.mock.test.C;
 import com.woilsy.mock.test.D;
 import com.woilsy.mock.test.E;
-import com.woilsy.mock.test.MockBeanChild;
 import com.woilsy.mock.test.entity.HttpResult;
 import com.woilsy.mock.test.entity.LoginRequest;
 import com.woilsy.mock.test.entity.LoginResponse;
 import com.woilsy.mock.test.entity.RegisterRequest;
 import com.woilsy.mock.test.entity.UserInfo;
+
+import java.util.List;
 
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.ResponseBody;
@@ -59,6 +60,9 @@ public interface ApiService {
     @PUT("/user/register")
     Observable<ResponseBody> register(@Body RegisterRequest request);
 
+    @PUT("/user/register2")
+    Observable<List<C<String>>> register2(@Body RegisterRequest request);
+
     @MockExclude
     @GET("/hotkey/json")
     Observable<ResponseBody> getHotKey();
@@ -69,7 +73,6 @@ public interface ApiService {
     @GET("/test/generic2")
     Observable<HttpResult<E<A<Integer>, B<String>, C<Boolean>>>> multipleGeneric();
 
-    @PUT("/user/register2")
-    Observable<MockBeanChild> register2(@Body RegisterRequest request);
+
 }
 

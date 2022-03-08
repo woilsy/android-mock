@@ -18,6 +18,7 @@ class App : Application() {
             this,
             MockOptions.Builder()
                 .setDebug(true)
+                .setMockListCount(4)
                 .setDynamicAccess(true, false)
                 .setDataSource(AssetFileDataSource(this, "mock.json"))
                 .build(),

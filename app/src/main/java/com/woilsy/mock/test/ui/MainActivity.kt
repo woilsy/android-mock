@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     fun testRequest2(view: View) {
         getApiService()
-            .test(Mocker.getMockBaseUrl(), "111")
+            .test(Mocker.getMockBaseUrl(), "123")
             .enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(p0: Call<ResponseBody?>, p1: Response<ResponseBody?>) {
                     Log.d(TAG, "onResponse: $p1")
