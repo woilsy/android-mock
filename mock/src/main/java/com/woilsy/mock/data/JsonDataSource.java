@@ -6,15 +6,6 @@ import com.woilsy.mock.utils.GsonUtil;
 
 import java.util.List;
 
-/**
- * Mock data from json<br/>
- * [<br/>
- * {<br/>
- * "path":"/request1",<br/>
- * "data":["one","two","three"]<br/>
- * }<br/>
- * ] <br/>
- */
 public class JsonDataSource implements DataSource {
 
     private final String json;

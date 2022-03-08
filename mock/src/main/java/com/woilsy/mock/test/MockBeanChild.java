@@ -1,7 +1,6 @@
 package com.woilsy.mock.test;
 
 import com.woilsy.mock.annotations.Mock;
-import com.woilsy.mock.type.Type;
 
 import java.util.List;
 
@@ -20,14 +19,11 @@ public class MockBeanChild {
 
     @Mock("[]")
     public List<String> ls;
-
-    @Mock(type = Type.IMAGE)
+    
     public String avatar;
 
-    @Mock(type = Type.ADDRESS)
     public String address;
 
-    @Mock(type = Type.AGE)
     public Integer age;
 
     static class ChildA {

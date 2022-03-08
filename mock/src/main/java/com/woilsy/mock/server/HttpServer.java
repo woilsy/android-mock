@@ -5,9 +5,8 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
-import com.woilsy.mock.data.MockUrlData;
+import com.woilsy.mock.Mocker;
 import com.woilsy.mock.utils.LogUtil;
-import com.woilsy.mock.utils.UriUtil;
 
 import java.io.IOException;
 
@@ -52,10 +51,10 @@ public class HttpServer implements IMockServer, HttpServerRequestCallback {
     public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
         String path = request.getPath();
         Headers headers = request.getHeaders();
+        String method = request.getMethod();
         String contentType = getContentType(headers);
-        String uriKey = UriUtil.getUriKey(path);
-        String data = MockUrlData.get(uriKey);
-        LogUtil.i("客户端请求path->" + path + ",数据key->" + uriKey + ",将返回mock数据->" + data);
+        String data = Mocker.getHttpData(path, method);
+        LogUtil.i("客户端请求path->" + path + ",将返回mock数据->" + data);
         if (data == null) {//部分情况没有mock数据，例如定义返回类型为ResponseBody且没有为其填充数据
             int code = 404;
             AsyncHttpServerResponse httpServerResponse = response.code(404);

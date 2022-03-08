@@ -1,5 +1,6 @@
 package com.woilsy.mock.parse;
 
+import com.woilsy.mock.Mocker;
 import com.woilsy.mock.annotations.Mock;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.options.MockOptions;
@@ -24,7 +25,7 @@ import java.util.Set;
 import okhttp3.ResponseBody;
 
 /**
- * mock数据解析器
+ * mock数据解析器，通过传递Type即可生成实体类
  */
 public class MockParse {
 
@@ -57,7 +58,7 @@ public class MockParse {
         if (type instanceof ParameterizedType) {
             Type rawType1 = ((ParameterizedType) type).getRawType();
             if (rawType1 == Map.class) {//需要获取key value的类型再处理
-                LogUtil.i("()->map带泛型，尝试分析创建" + type);
+                logi("()->map带泛型，尝试分析创建" + type);
                 Map<Object, Object> map = new HashMap<>();
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 2) {
@@ -69,7 +70,7 @@ public class MockParse {
                 }
                 return selfOrParent ? map : setParentField(parent, parentField, map);
             } else if (rawType1 == List.class) {//List<T> List<Bean<T>> 第一种情况如果parent为null则找不到泛型
-                LogUtil.i("()->List带泛型，尝试分析创建" + type);
+                logi("()->List带泛型，尝试分析创建" + type);
                 List<Object> ls = new ArrayList<>();
                 //只处理List的第一层泛型
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
@@ -81,7 +82,7 @@ public class MockParse {
                 }
                 return selfOrParent ? ls : setParentField(parent, parentField, ls);
             } else if (rawType1 == Set.class) {//同上
-                LogUtil.i("()->Set带泛型，尝试分析创建" + type);
+                logi("()->Set带泛型，尝试分析创建" + type);
                 Set<Object> set = new HashSet<>();
                 //只处理List的第一层泛型
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
@@ -95,17 +96,17 @@ public class MockParse {
             } else {
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 1 && actualTypeArguments[0] == ResponseBody.class) {
-                    LogUtil.i("()->Response不处理，可自行在mock数据文件中预设值");
+                    logi("()->Response不处理，可自行在mock数据文件中预设值");
                     return null;
                 } else {
                     if (isParseStart) {
                         clsTb.clear();
                         isParseStart = false;
                         Type type1 = actualTypeArguments[0];
-                        LogUtil.i("()->等待" + type1 + "创建后返回");
+                        logi("()->等待" + type1 + "创建后返回");
                         return handleType(type1, null, null, true);//处理完毕后返回参数1
                     } else {
-                        LogUtil.i("()->正在处理" + type);
+                        logi("()->正在处理" + type);
                         Type rawType = ((ParameterizedType) type).getRawType();
                         if (rawType instanceof Class<?>) {//带泛型的cls final类型是不可能带泛型的
                             Class<?> rawClass = (Class<?>) rawType;
@@ -115,7 +116,7 @@ public class MockParse {
                             Object obj = handleType(rawType, parent, parentField, true);
                             return selfOrParent ? obj : setParentField(parent, parentField, obj);
                         } else {
-                            LogUtil.i("()->不可能存在的情况");
+                            logi("()->不可能存在的情况");
                             return null;
                         }
                     }
@@ -136,14 +137,14 @@ public class MockParse {
                 String key = parent.getClass().getName();
                 Type actType = getAndRemoveType(key);//尝试从map中获取原始类型
                 if (actType != null) {
-                    LogUtil.i("()->尝试从clsTb中获取对象实际泛型类型" + actType);
+                    logi("()->尝试从clsTb中获取对象实际泛型类型" + actType);
                     Object obj = handleType(actType, parent, parentField, true);
                     return selfOrParent ? obj : setParentField(parent, parentField, obj);
                 } else {
-                    LogUtil.i("()->从clsTb中获取对象实际泛型类型失败" + type);
+                    logi("()->从clsTb中获取对象实际泛型类型失败" + type);
                 }
             } else {
-                LogUtil.i("()->parent为null，无法处理:" + type);
+                logi("()->parent为null，无法处理:" + type);
             }
             return null;
         } else if (type instanceof GenericArrayType) {
@@ -151,7 +152,7 @@ public class MockParse {
              * GenericArrayType表示的是数组类型且组成元素时ParameterizedType或TypeVariable，例如List<T>或T[]，
              * 该接口只有Type getGenericComponentType()一个方法，它返回数组的组成元素类型。
              */
-            LogUtil.i("()->GenericArrayType类型" + type + "暂不处理");
+            logi("()->GenericArrayType类型" + type + "暂不处理");
             return null;
         } else if (type instanceof WildcardType) {
             /*
@@ -160,16 +161,16 @@ public class MockParse {
              * (1) Type[] getUpperBounds()——返回类型变量的上边界。
              * (2) Type[] getLowerBounds()——返回类型变量的下边界。
              */
-            LogUtil.i("()->WildcardType类型" + type + "暂不处理");
+            logi("()->WildcardType类型" + type + "暂不处理");
             return null;
         } else {
-            LogUtil.i("()->暂不处理的类型:" + type);
+            logi("()->暂不处理的类型:" + type);
             return null;
         }
     }
 
     private void putClassArgument(String name, Type childType) {
-        LogUtil.i("()->插入Map中->key->" + name + " value->" + childType);
+        logi("()->插入Map中->key->" + name + " value->" + childType);
         List<Type> typeList = clsTb.get(name);
         if (typeList == null) {
             List<Type> lts = new ArrayList<>();
@@ -194,10 +195,10 @@ public class MockParse {
     private Object handleObjFromCls(Class<?> cls, Object parent, Field parentField) {
         Object finalObj = getFinalObj(cls, parentField);
         if (finalObj == null) {//可变对象
-            LogUtil.i("()->class类型，解析class后返回");
+            logi("()->class类型，解析class后返回");
             return getClsObj(cls);
         } else {
-            LogUtil.i("()->final类型，直接返回:" + finalObj);
+            logi("()->final类型，直接返回:" + finalObj);
             return finalObj;
         }
     }
@@ -206,13 +207,12 @@ public class MockParse {
     private Object getMockFieldData(Class<?> cls, Mock mock) {
         if (mock != null) {
             //如果data有值 尝试将其转换为对应的值 一般是基本类型从string转为xxx等，需要匹配cls
-            com.woilsy.mock.type.Type type = mock.type();
             String data = mock.value();
             if (!data.isEmpty()) {
                 boolean c1 = data.startsWith("{") && data.endsWith("}");
                 boolean c2 = data.startsWith("[") && data.endsWith("]");
                 if (c1 || c2) {
-                    LogUtil.i("()->是个json类型，尝试解析 " + data);
+                    logi("()->是个json类型，尝试解析 " + data);
                     Object clsObj = GsonUtil.jsonToObj(data, cls);
                     if (clsObj != null) {
                         return clsObj;
@@ -221,24 +221,7 @@ public class MockParse {
                 return ClassUtils.stringToClass(data, cls);
             } else {//为空 采用默认值
                 Rule rule = mMockOptions.getRule();
-                switch (type) {
-                    case DEFAULT:
-                        return rule.get(cls);
-                    case AGE:
-                        return rule.getAge();
-                    case NAME:
-                        return rule.getName();
-                    case PHONE:
-                        return rule.getPhone();
-                    case ADDRESS:
-                        return rule.getAddress();
-                    case NICKNAME:
-                        return rule.getNickName();
-                    case IMAGE:
-                        return rule.getImage();
-                    default:
-                        break;
-                }
+                return rule.getImpl(cls);
             }
         }
         return null;
@@ -255,15 +238,16 @@ public class MockParse {
                 }
             }
         } catch (Exception e) {
-            LogUtil.e("()->生成" + cls + "失败", e);
+            loge("()->生成final字段" + cls + "失败");
+            e.printStackTrace();
         }
-        return mMockOptions.getRule().get(cls);
+        return mMockOptions.getRule().getImpl(cls);
     }
 
     private Object newClassInstance(Class<?> cls) {
         try {//默认构造器创建
             Constructor<?>[] constructors = cls.getDeclaredConstructors();
-            if (constructors != null && constructors.length > 0) {
+            if (constructors.length > 0) {
                 for (Constructor<?> constructor : constructors) {
                     int len = constructor.getParameterTypes().length;
                     if (len == 0) {
@@ -273,7 +257,7 @@ public class MockParse {
                 }
             }
         } catch (Exception e) {//使用不安全的方式创建
-            LogUtil.e("()->构造器创建失败，尝试使用Unsafe创建:");
+            loge("()->构造器创建失败，尝试使用Unsafe创建:");
         }
         return unsafeCreate(cls);
     }
@@ -282,7 +266,7 @@ public class MockParse {
         try {
             return ClassUtils.allocateInstance(cls);
         } catch (Exception e2) {
-            LogUtil.e("()->尝试使用Unsafe创建失败:" + e2.getMessage());
+            loge("()->尝试使用Unsafe创建失败:" + e2.getMessage());
             return null;
         }
     }
@@ -295,7 +279,7 @@ public class MockParse {
                 try {
                     Type genericType = f.getGenericType();
                     if (hasMockAnnotation(f)) {
-                        LogUtil.i("()->包含@Mock，需要对注解进行解析");
+                        logi("()->包含@Mock，需要对注解进行解析");
                         if (genericType instanceof ParameterizedType) {
                             Type rawType = ((ParameterizedType) genericType).getRawType();
                             if (rawType instanceof Class) {
@@ -309,11 +293,12 @@ public class MockParse {
                             handleFieldType(f, obj);
                         }
                     } else {
-                        LogUtil.i("()->不包含@Mock，直接处理字段类型");
+                        logi("()->不包含@Mock，直接处理字段类型");
                         handleFieldType(f, obj);
                     }
                 } catch (Exception e) {
-                    LogUtil.e("()->处理字段时出错：", e);
+                    loge("()->处理字段时出错");
+                    e.printStackTrace();
                 }
             }
         }
@@ -323,10 +308,10 @@ public class MockParse {
     private void handleMockFieldType(Object obj, Class<?> cls, Field f) throws IllegalAccessException {
         Object fieldData = getMockFieldData(cls, f.getAnnotation(Mock.class));
         if (fieldData == null) {
-            LogUtil.i("()->解析mock注解失败，使用默认方式");
+            logi("()->解析mock注解失败，使用默认方式");
             handleFieldType(f, obj);
         } else {
-            LogUtil.i("()->解析mock注解成功，直接赋值到字段中");
+            logi("()->解析mock注解成功，直接赋值到字段中");
             setParentField(obj, f, fieldData);
         }
     }
@@ -336,11 +321,11 @@ public class MockParse {
         f.setAccessible(true);
         Object o = f.get(obj);
         if (o == null) {
-            LogUtil.i("()->字段：" + f.getName() + " 类型:" + genericType + " start==>");
+            logi("()->字段：" + f.getName() + " 类型:" + genericType + " start==>");
             handleType(genericType, obj, f, false);
-            LogUtil.i("()->字段：" + f.getName() + " 类型:" + genericType + " end<==");
+            logi("()->字段：" + f.getName() + " 类型:" + genericType + " end<==");
         } else {
-            LogUtil.i("()->字段：" + f.getName() + "已有默认值，无需处理");
+            logi("()->字段：" + f.getName() + "已有默认值，无需处理");
         }
     }
 
@@ -354,8 +339,20 @@ public class MockParse {
             parentField.setAccessible(true);
             parentField.set(parent, value);
         } catch (Exception e) {
-            LogUtil.e("()->设置字段时出错:" + e.getMessage());
+            loge("()->设置字段时出错:" + e.getMessage());
         }
         return parent;
+    }
+
+    private void logi(String msg) {
+        if (Mocker.getMockOption().isShowParseLog()) {
+            LogUtil.i(msg);
+        }
+    }
+
+    private void loge(String msg) {
+        if (Mocker.getMockOption().isShowParseLog()) {
+            LogUtil.e(msg);
+        }
     }
 }

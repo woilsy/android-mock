@@ -1,24 +1,23 @@
 package com.woilsy.mock.generate;
 
+import com.woilsy.mock.utils.ClassUtils;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
 /**
  * 生成器，根据某种规则生成内容。
  */
-public class Generator implements Rule {
+public class Generator implements Rule, MockBaseType {
 
     private final MockBaseType mockBaseType;
 
-    private final MockExpend mockExpend;
-
     public Generator() {
-        this(new RandomBaseType(), new DefaultMockExpend());
+        this(new RandomBaseType());
     }
 
-    public Generator(MockBaseType mockBaseType, MockExpend mockExpend) {
+    public Generator(MockBaseType mockBaseType) {
         this.mockBaseType = mockBaseType == null ? new RandomBaseType() : mockBaseType;
-        this.mockExpend = mockExpend == null ? new DefaultMockExpend() : mockExpend;
     }
 
     public String getString() {
@@ -63,37 +62,23 @@ public class Generator implements Rule {
 
     @Override
     public Date getDate() {
-        return mockExpend.getDate();
+        return mockBaseType.getDate();
     }
 
     @Override
-    public String getImage() {
-        return mockExpend.getImage();
+    public Object getImpl(Class<?> cls) {//这里只处理基本类型
+        Class<?> realClass = ClassUtils.getEncapsulationType(cls);
+        if (realClass == String.class) return getString();
+        if (realClass == Date.class) return getDate();
+        if (realClass == Integer.class) return getInt();
+        if (realClass == Long.class) return getLong();
+        if (realClass == Byte.class) return getByte();
+        if (realClass == Character.class) return getCharacter();
+        if (realClass == Double.class) return getDouble();
+        if (realClass == Float.class) return getFloat();
+        if (realClass == Short.class) return getShort();
+        if (realClass == Boolean.class) return getBoolean();
+        if (realClass == BigDecimal.class) return getBigDecimal();
+        return null;
     }
-
-    @Override
-    public int getAge() {
-        return mockExpend.getAge();
-    }
-
-    @Override
-    public String getName() {
-        return mockExpend.getName();
-    }
-
-    @Override
-    public String getAddress() {
-        return mockExpend.getAddress();
-    }
-
-    @Override
-    public String getNickName() {
-        return mockExpend.getNickName();
-    }
-
-    @Override
-    public String getPhone() {
-        return mockExpend.getPhone();
-    }
-
 }

@@ -12,7 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import com.woilsy.mock.MockLauncher;
+import com.woilsy.mock.Mocker;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.server.HttpServer;
@@ -47,7 +47,7 @@ public class MockService extends Service {
         super.onCreate();
         channelId = this.getApplication().getPackageName();
         notificationId = channelId.hashCode();
-        mockUrl = MockLauncher.getMockBaseUrl();
+        mockUrl = Mocker.getMockBaseUrl();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.createNotificationChannel(
@@ -63,7 +63,7 @@ public class MockService extends Service {
                 String host = MockDefault.HOST_NAME;
                 httpServer = new HttpServer(host, port);
                 httpServer.start();
-                MockLauncher.getMockOption().updatePort(port);
+                Mocker.getMockOption().setPort(port);
                 LogUtil.i("已启动mock服务器，端口：" + port);
             } catch (BindException e) {
                 int newPort = port + 1;
@@ -118,10 +118,10 @@ public class MockService extends Service {
                     startMockServer(port);
                 }
             } else if (ACTION_TRANS_BASEURL.equals(action)) {
-                boolean newValue = !MockLauncher.isMockUrlOrOriginalUrl();
-                String originalBaseUrl = MockLauncher.getMockOption().getOriginalBaseUrl();
+                boolean newValue = !Mocker.isMockUrlOrOriginalUrl();
+                String originalBaseUrl = Mocker.getMockOption().getOriginalBaseUrl();
                 if (originalBaseUrl != null && !originalBaseUrl.isEmpty()) {
-                    MockLauncher.setMockUrlOrOriginalUrl(newValue);
+                    Mocker.setMockUrlOrOriginalUrl(newValue);
                     String newUrl = newValue ? mockUrl : originalBaseUrl;
                     Toast.makeText(this, (newValue ? "开启mock:" : "关闭mock:") + newUrl, Toast.LENGTH_LONG).show();
                     startForeground(notificationId, getNotification(newUrl));

@@ -1,11 +1,12 @@
 package com.woilsy.mock.generate;
 
 import java.math.BigDecimal;
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.Date;
 
 public class RandomBaseType implements MockBaseType {
 
-    private final Random random = new Random();
+    private final SecureRandom random = new SecureRandom();
 
     private final char[] chars = new char[]{
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
@@ -71,6 +72,11 @@ public class RandomBaseType implements MockBaseType {
     @Override
     public BigDecimal getBigDecimal() {
         return BigDecimal.valueOf(getDouble());
+    }
+
+    @Override
+    public Date getDate() {
+        return new Date();
     }
 
 }

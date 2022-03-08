@@ -32,6 +32,16 @@ public class MockOptions {
      */
     private int port;
 
+    /**
+     * 对于自动生成的bean数据，是否每次都重新生成访问
+     */
+    private boolean dynamicAccess;
+
+    /**
+     * 是否显示解析log
+     */
+    private boolean showParseLog;
+
     public static MockOptions getDefault() {
         return new MockOptions
                 .Builder()
@@ -49,6 +59,10 @@ public class MockOptions {
 
         private int port;
 
+        private boolean dynamicAccess;
+
+        private boolean showParseLog;
+
         private DataSource[] dataSources;
 
         public Builder setDebug(boolean debug) {
@@ -63,6 +77,12 @@ public class MockOptions {
 
         public Builder setDataSource(DataSource... dataSources) {
             this.dataSources = dataSources;
+            return this;
+        }
+
+        public Builder setDynamicAccess(boolean dynamicAccess, boolean showLog) {
+            this.dynamicAccess = dynamicAccess;
+            this.showParseLog = showLog;
             return this;
         }
 
@@ -84,6 +104,8 @@ public class MockOptions {
             options.rule = this.rule == null ? new Generator() : rule;
             options.dataSources = this.dataSources;
             options.port = this.port <= 0 ? MockDefault.PORT : this.port;
+            options.dynamicAccess = this.dynamicAccess;
+            options.showParseLog = this.showParseLog;
             //
             LogUtil.setDebug(this.debug);
             if (this.gson != null) {
@@ -113,7 +135,16 @@ public class MockOptions {
         return port;
     }
 
-    public void updatePort(int port) {
+    public boolean isShowParseLog() {
+        return showParseLog;
+    }
+
+    public boolean isDynamicAccess() {
+        return dynamicAccess;
+    }
+
+    public void setPort(int port) {
         this.port = port;
     }
+
 }
