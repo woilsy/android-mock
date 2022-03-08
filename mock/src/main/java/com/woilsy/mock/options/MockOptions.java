@@ -46,7 +46,58 @@ public class MockOptions {
         return new MockOptions
                 .Builder()
                 .setDebug(true)
+                .setRule(new Generator())
+                .setDynamicAccess(true, false)
+                .setPort(MockDefault.PORT)
                 .build();
+    }
+
+    public Rule getRule() {
+        return rule;
+    }
+
+    public DataSource[] getDataSources() {
+        return dataSources;
+    }
+
+    public void setOriginalBaseUrl(String originalBaseUrl) {
+        this.originalBaseUrl = originalBaseUrl;
+    }
+
+    public String getOriginalBaseUrl() {
+        return originalBaseUrl;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setRule(Rule rule) {
+        this.rule = rule;
+    }
+
+    public void setDataSources(DataSource[] dataSources) {
+        this.dataSources = dataSources;
+    }
+
+    public boolean isShowParseLog() {
+        return showParseLog;
+    }
+
+    public void setShowParseLog(boolean showParseLog) {
+        this.showParseLog = showParseLog;
+    }
+
+    public void setDynamicAccess(boolean dynamicAccess) {
+        this.dynamicAccess = dynamicAccess;
+    }
+
+    public boolean isDynamicAccess() {
+        return dynamicAccess;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public static class Builder {
@@ -103,10 +154,9 @@ public class MockOptions {
             MockOptions options = new MockOptions();
             options.rule = this.rule == null ? new Generator() : rule;
             options.dataSources = this.dataSources;
-            options.port = this.port <= 0 ? MockDefault.PORT : this.port;
+            options.port = this.port;
             options.dynamicAccess = this.dynamicAccess;
             options.showParseLog = this.showParseLog;
-            //
             LogUtil.setDebug(this.debug);
             if (this.gson != null) {
                 GsonUtil.replaceGson(this.gson);
@@ -115,36 +165,5 @@ public class MockOptions {
         }
     }
 
-    public Rule getRule() {
-        return rule;
-    }
-
-    public DataSource[] getDataSources() {
-        return dataSources;
-    }
-
-    public void setOriginalBaseUrl(String originalBaseUrl) {
-        this.originalBaseUrl = originalBaseUrl;
-    }
-
-    public String getOriginalBaseUrl() {
-        return originalBaseUrl;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public boolean isShowParseLog() {
-        return showParseLog;
-    }
-
-    public boolean isDynamicAccess() {
-        return dynamicAccess;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
 
 }
