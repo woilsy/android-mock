@@ -29,9 +29,12 @@ import retrofit2.http.Url;
 
 public interface ApiService {
 
-    //un support
     @GET
     Call<ResponseBody> test(@Url String url);
+
+    @POST
+    @FormUrlEncoded
+    Call<ResponseBody> test(@Url String url, @Field("xxx") String a);
 
     @POST("/user/login")
     Observable<HttpResult<LoginResponse>> login(@Body LoginRequest request);

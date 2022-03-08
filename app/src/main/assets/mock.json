@@ -1,17 +1,28 @@
 [
   {
     "path": "/",
+    "method": "GET",
     "data": {
       "name": "小王",
       "age": 18
     }
   },
   {
+    "path": "/",
+    "method": "POST",
+    "data": {
+      "name": "小王8",
+      "age": 20
+    }
+  },
+  {
     "path": "/request3",
+    "method": "POST",
     "data": "我是自定义的mock数据"
   },
   {
     "path": "/index",
+    "method": "PUT",
     "data": "{\"name\":\"八八八啊\"}"
   }
 ]

@@ -17,6 +17,13 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="testRequest2"
+        android:text="Test request (POST)"
+        android:textAllCaps="false" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:onClick="login"
         android:text="Login (POST)"
         android:textAllCaps="false" />
