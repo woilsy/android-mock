@@ -42,6 +42,11 @@ public class MockOptions {
      */
     private boolean showParseLog;
 
+    /**
+     * 生成的List数量，默认为1
+     */
+    private int mockListCount = 1;
+
     public static MockOptions getDefault() {
         return new MockOptions
                 .Builder()
@@ -62,6 +67,14 @@ public class MockOptions {
 
     public void setOriginalBaseUrl(String originalBaseUrl) {
         this.originalBaseUrl = originalBaseUrl;
+    }
+
+    public int getMockListCount() {
+        return mockListCount;
+    }
+
+    public void setMockListCount(int mockListCount) {
+        this.mockListCount = mockListCount;
     }
 
     public String getOriginalBaseUrl() {
@@ -116,6 +129,8 @@ public class MockOptions {
 
         private DataSource[] dataSources;
 
+        private int mockListCount = 1;
+
         public Builder setDebug(boolean debug) {
             this.debug = debug;
             return this;
@@ -123,6 +138,11 @@ public class MockOptions {
 
         public Builder setRule(Rule rule) {
             this.rule = rule;
+            return this;
+        }
+
+        public Builder setMockListCount(int mockListCount) {
+            this.mockListCount = mockListCount;
             return this;
         }
 
@@ -153,8 +173,9 @@ public class MockOptions {
         public MockOptions build() {
             MockOptions options = new MockOptions();
             options.rule = this.rule == null ? new Generator() : rule;
+            options.port = this.port == 0 ? MockDefault.PORT : this.port;
             options.dataSources = this.dataSources;
-            options.port = this.port;
+            options.mockListCount = this.mockListCount;
             options.dynamicAccess = this.dynamicAccess;
             options.showParseLog = this.showParseLog;
             LogUtil.setDebug(this.debug);

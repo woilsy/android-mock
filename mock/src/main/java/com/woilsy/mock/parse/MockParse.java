@@ -75,9 +75,12 @@ public class MockParse {
                 //只处理List的第一层泛型
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 1) {
-                    Object obj = handleType(actualTypeArguments[0], parent, null, true);
-                    if (obj != null) {
-                        ls.add(obj);
+                    int mockListCount = mMockOptions.getMockListCount();
+                    for (int i = 0; i < mockListCount; i++) {
+                        Object obj = handleType(actualTypeArguments[0], parent, null, true);
+                        if (obj != null) {
+                            ls.add(obj);
+                        }
                     }
                 }
                 return selfOrParent ? ls : setParentField(parent, parentField, ls);
