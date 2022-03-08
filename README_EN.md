@@ -48,6 +48,7 @@ File 'mock.json' in assets
 ```
 [
   {
+    "method":"GET",
     "path":"/request1",
     "data":["one","two","three"]
   }
