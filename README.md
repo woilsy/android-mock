@@ -38,7 +38,7 @@ A：ResponseBody由于其本身是无法被静态解析的，能静态解析的�
 /strategy 策略相关，跟解析挂钩的  
 /test 测试代码  
 /type mock数据的类型  
-MockLauncher：启动类，负责初始化参数配置，开启android mock service，开启本地service，对传入的class进行静态解析。
+Mocker：启动类，负责初始化参数配置，开启android mock service，开启本地service，对传入的class进行静态解析。
 
 #### 安装教程
 
@@ -57,7 +57,7 @@ MockLauncher：启动类，负责初始化参数配置，开启android mock serv
 
 在Retrofit创建之前，调用
 
-`MockLauncher.start(Context context, MockOptions options, MockObj... objs)`
+`Mocker.start(Context context, MockOptions options, MockObj... objs)`
 
 **参数说明**   
 Context：为了启动服务和解析assets中的文件。  

@@ -31,7 +31,7 @@ But now, you only need to do the following things to forget about this trouble.
 
  **Step 3 Launcher the mock server before init Retrofit**  
 
-`MockLauncher.start(Context context, MockOptions options, MockObj... objs)`
+`Mocker.start(Context context, MockOptions options, MockObj... objs)`
 
  **Step 4 Add interceptor to okhttp client**
 
