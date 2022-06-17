@@ -57,7 +57,9 @@ Mocker：启动类，负责初始化参数配置，开启android mock service，
 
 在Retrofit创建之前，调用
 
-`Mocker.start(Context context, MockOptions options, MockObj... objs)`
+`Mocker.init(Context context, MockOptions options, MockObj... objs)`  
+或者  
+`Mocker.init(Context context, MockOptions options, MockGroup... groups)`   
 
 **参数说明**   
 Context：为了启动服务和解析assets中的文件。  
@@ -69,7 +71,8 @@ MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就�
 
 **其他**   
 1.如果需要自定义mock数据，可以通过MockOptions.setDataSource()传入，返回值为ResponseBody时，只有导入了数据才会有返回值。  
-2.@Mock注解可以指定字段具体的mock数据，以及类型，可以为基本类型，也可以为Json数据类型。
+2.@Mock注解可以指定字段具体的mock数据，以及类型，可以为基本类型，也可以为Json数据类型。  
+3.你可以自定义mock并将其作为rule添加到rule列表中进行匹配。  
 
 #### 参与贡献
 
