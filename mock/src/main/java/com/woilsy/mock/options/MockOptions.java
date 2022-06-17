@@ -3,7 +3,8 @@ package com.woilsy.mock.options;
 import com.google.gson.Gson;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.data.DataSource;
-import com.woilsy.mock.generate.Generator;
+import com.woilsy.mock.generate.DictionaryRule;
+import com.woilsy.mock.generate.BaseTypeGenerator;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
@@ -56,7 +57,8 @@ public class MockOptions {
         return new MockOptions
                 .Builder()
                 .setDebug(true)
-                .setRule(new Generator())
+                .setRule(new DictionaryRule())
+                .setMockListCount(4, true)
                 .setDynamicAccess(true, false)
                 .setPort(MockDefault.PORT)
                 .build();
@@ -184,7 +186,7 @@ public class MockOptions {
 
         public MockOptions build() {
             MockOptions options = new MockOptions();
-            options.rule = this.rule == null ? new Generator() : rule;
+            options.rule = this.rule == null ? new BaseTypeGenerator() : rule;
             options.port = this.port == 0 ? MockDefault.PORT : this.port;
             options.dataSources = this.dataSources;
             options.mockListCount = this.mockListCount;

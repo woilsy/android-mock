@@ -6,17 +6,17 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 生成器，根据某种规则生成内容。
+ * 基本类型生成器，根据基本类型规则生成内容。
  */
-public class Generator implements Rule, MockBaseType {
+public class BaseTypeGenerator implements Rule, MockBaseType {
 
     private final MockBaseType mockBaseType;
 
-    public Generator() {
+    public BaseTypeGenerator() {
         this(new RandomBaseType());
     }
 
-    public Generator(MockBaseType mockBaseType) {
+    public BaseTypeGenerator(MockBaseType mockBaseType) {
         this.mockBaseType = mockBaseType == null ? new RandomBaseType() : mockBaseType;
     }
 
@@ -65,8 +65,9 @@ public class Generator implements Rule, MockBaseType {
         return mockBaseType.getDate();
     }
 
+    //这里只处理基本类型
     @Override
-    public Object getImpl(Class<?> cls) {//这里只处理基本类型
+    public Object getImpl(Class<?> cls, String name) {
         Class<?> realClass = ClassUtils.getEncapsulationType(cls);
         if (realClass == String.class) return getString();
         if (realClass == Date.class) return getDate();

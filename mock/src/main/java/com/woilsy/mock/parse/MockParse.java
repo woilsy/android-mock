@@ -250,7 +250,7 @@ public class MockParse {
                 return ClassUtils.stringToClass(data, cls);
             } else {//为空 采用默认值
                 Rule rule = mMockOptions.getRule();
-                return rule.getImpl(cls);
+                return rule.getImpl(cls, null);
             }
         }
         return null;
@@ -273,7 +273,7 @@ public class MockParse {
             loge("()->生成final字段" + cls + "失败");
             e.printStackTrace();
         }
-        return mMockOptions.getRule().getImpl(cls);
+        return mMockOptions.getRule().getImpl(cls, parentField == null ? null : parentField.getName());
     }
 
     /**

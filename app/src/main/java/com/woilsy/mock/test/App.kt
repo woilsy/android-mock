@@ -4,6 +4,7 @@ import android.app.Application
 import com.woilsy.mock.Mocker
 import com.woilsy.mock.data.AssetFileDataSource
 import com.woilsy.mock.entity.MockGroup
+import com.woilsy.mock.generate.DictionaryRule
 import com.woilsy.mock.options.MockOptions
 import com.woilsy.mock.strategy.MockStrategy
 import com.woilsy.mock.test.api.ApiService
@@ -21,6 +22,7 @@ class App : Application() {
                 .setDebug(true)
                 .setMockListCount(4, true)
                 .setDynamicAccess(true, false)
+                .setRule(DictionaryRule())
                 .setDataSource(AssetFileDataSource(this, "mock.json"))
                 .build(),
             MockGroup(
