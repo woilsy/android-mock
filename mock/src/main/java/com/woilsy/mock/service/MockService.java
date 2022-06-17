@@ -80,7 +80,7 @@ public class MockService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return new Notification.Builder(this, channelId)
                     .setChannelId(channelId)
-                    .setContentTitle("Mock server is running...")
+                    .setContentTitle("Mock服务已启动，点击切换")
                     .setContentIntent(getIntent())
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())
@@ -90,7 +90,7 @@ public class MockService extends Service {
                     .build();
         } else {
             return new Notification.Builder(this)
-                    .setContentTitle("Mock server is running...")
+                    .setContentTitle("Mock服务已启动，点击切换")
                     .setContentIntent(getIntent())
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())
