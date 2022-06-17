@@ -95,5 +95,12 @@
             android:text="普通String列表(GET)"
             android:textAllCaps="false" />
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="getUserList"
+            android:text="用户列表(GET)"
+            android:textAllCaps="false" />
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

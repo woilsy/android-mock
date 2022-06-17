@@ -205,4 +205,19 @@ class MainActivity : AppCompatActivity() {
             )
     }
 
+    fun getUserList(view: View) {
+        getApiService()
+            .userList
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "getUserList: $it")
+                },
+                {
+                    Log.e(TAG, "getUserList: ", it)
+                }
+            )
+    }
+
 }

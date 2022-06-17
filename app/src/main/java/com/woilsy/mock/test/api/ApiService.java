@@ -9,6 +9,7 @@ import com.woilsy.mock.test.E;
 import com.woilsy.mock.test.entity.HttpResult;
 import com.woilsy.mock.test.entity.LoginRequest;
 import com.woilsy.mock.test.entity.LoginResponse;
+import com.woilsy.mock.test.entity.PageBean;
 import com.woilsy.mock.test.entity.RegisterRequest;
 import com.woilsy.mock.test.entity.UserInfo;
 
@@ -76,6 +77,8 @@ public interface ApiService {
     @GET("/test/normalLs")
     Observable<HttpResult<List<String>>> getNormalList();
 
+    @GET("/test/userList")
+    Observable<HttpResult<PageBean<UserInfo>>> getUserList();
 
 }
 

@@ -16,6 +16,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +41,7 @@ public class MockParse {
      */
     private boolean isParseStart = false;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     public MockParse(MockOptions mMockOptions) {
         this.mMockOptions = mMockOptions;
@@ -55,8 +56,19 @@ public class MockParse {
         return handleType(type, null, null, true);
     }
 
-    //难点：有时需要返回值，有时需要直接设置到Field中，如何区分？以及如何在递归中进行合适的逻辑处理？
-    //解：每一层只需要处理自己与上一级的关系就好了
+    //
+    //
+
+    /**
+     * 难点：有时需要返回值，有时需要直接设置到Field中，如何区分？以及如何在递归中进行合适的逻辑处理？
+     * 解：每一层只需要处理自己与上一级的关系就好了
+     *
+     * @param type         对象的Type
+     * @param parent       父类对象，为了parentField传参设置字段
+     * @param parentField  父类字段对象，为了type实例化后设置到该对象中
+     * @param selfOrParent 如果是true，表示只需要处理自己逻辑，false则表示需要设置到父类的字段中
+     * @return 通过type生成的对象
+     */
     private Object handleType(Type type, Object parent, Field parentField, boolean selfOrParent) {
         if (type instanceof ParameterizedType) {
             Type rawType1 = ((ParameterizedType) type).getRawType();
@@ -75,31 +87,12 @@ public class MockParse {
             } else if (rawType1 == List.class) {//List<T> List<Bean<T>> 第一种情况如果parent为null则找不到泛型
                 logi("()->List带泛型，尝试分析创建" + type);
                 List<Object> ls = new ArrayList<>();
-                //只处理List的第一层泛型
-                Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
-                if (actualTypeArguments.length == 1) {
-                    int mockListCount = mMockOptions.getMockListCount();
-                    boolean mockListCountRandom = mMockOptions.isMockListCountRandom();
-                    int size = mockListCountRandom ? (random.nextInt(mockListCount + 1)) : mockListCount;
-                    for (int i = 0; i < size; i++) {
-                        Object obj = handleType(actualTypeArguments[0], parent, null, true);
-                        if (obj != null) {
-                            ls.add(obj);
-                        }
-                    }
-                }
+                handleCollection((ParameterizedType) type, parent, ls);
                 return selfOrParent ? ls : setParentField(parent, parentField, ls);
             } else if (rawType1 == Set.class) {//同上
                 logi("()->Set带泛型，尝试分析创建" + type);
                 Set<Object> set = new HashSet<>();
-                //只处理List的第一层泛型
-                Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
-                if (actualTypeArguments.length == 1) {
-                    Object obj = handleType(actualTypeArguments[0], parent, null, true);
-                    if (obj != null) {
-                        set.add(obj);
-                    }
-                }
+                handleCollection((ParameterizedType) type, parent, set);
                 return selfOrParent ? set : setParentField(parent, parentField, set);
             } else {
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
@@ -131,7 +124,7 @@ public class MockParse {
                 }
             }
         } else if (type instanceof Class<?>) {//class类型
-            Object obj = handleObjFromCls((Class<?>) type, parent, parentField);
+            Object obj = handleObjFromCls((Class<?>) type, parentField);
             return selfOrParent ? obj : setParentField(parent, parentField, obj);
         } else if (type instanceof TypeVariable) {//类型变量 name:T bounds:Object
             /*
@@ -177,6 +170,29 @@ public class MockParse {
         }
     }
 
+    /**
+     * 处理Collection的数据问题
+     */
+    private void handleCollection(ParameterizedType type, Object parent, Collection<Object> collection) {
+        Type[] actualTypeArguments = type.getActualTypeArguments();
+        if (actualTypeArguments.length == 1) {
+            int mockListCount = mMockOptions.getMockListCount();
+            boolean mockListCountRandom = mMockOptions.isMockListCountRandom();
+            int size = mockListCountRandom ? (random.nextInt(mockListCount + 1)) : mockListCount;
+            //由于getAndRemoveType会移除value，导致只能获取一次示例 所以在此基础上循环生成第一个就好
+            Object one = handleType(actualTypeArguments[0], parent, null, true);
+            if (one != null) {
+                collection.add(one);
+                for (int i = 1; i < size; i++) {
+                    Object o = handleType(one.getClass(), null, null, true);
+                    if (o != null) {
+                        collection.add(o);
+                    }
+                }
+            }
+        }
+    }
+
     private void putClassArgument(String name, Type childType) {
         logi("()->插入Map中->key->" + name + " value->" + childType);
         List<Type> typeList = clsTb.get(name);
@@ -200,7 +216,12 @@ public class MockParse {
         }
     }
 
-    private Object handleObjFromCls(Class<?> cls, Object parent, Field parentField) {
+    /**
+     * 处理对象类型，先尝试直接获取，如果不行再对其进行先字段分解再生成。
+     *
+     * @param parentField cls在父类中的字段对象，通过这个字段可以读取其注解以及创建后设置到该字段中。
+     */
+    private Object handleObjFromCls(Class<?> cls, Field parentField) {
         Object finalObj = getFinalObj(cls, parentField);
         if (finalObj == null) {//可变对象
             logi("()->class类型，解析class后返回");
@@ -235,8 +256,11 @@ public class MockParse {
         return null;
     }
 
-    //纯粹的尝试获取Final字段 需要先判定是否为可解析类型。。。可解析时 直接返回 不可解析时返回null
+    /**
+     * 获取最终对象，比如String，Integer等类型的数据通过规则进行生成。
+     */
     private Object getFinalObj(Class<?> cls, Field parentField) {
+        //纯粹的尝试获取Final字段 需要先判定是否为可解析类型。。。可解析时 直接返回 不可解析时返回null
         if (mMockOptions == null || mMockOptions.getRule() == null) return null;
         try {
             if (parentField != null) {
@@ -252,6 +276,9 @@ public class MockParse {
         return mMockOptions.getRule().getImpl(cls);
     }
 
+    /**
+     * 通过class生成一个对象
+     */
     private Object newClassInstance(Class<?> cls) {
         try {//默认构造器创建
             Constructor<?>[] constructors = cls.getDeclaredConstructors();
@@ -270,6 +297,9 @@ public class MockParse {
         return unsafeCreate(cls);
     }
 
+    /**
+     * 使用Gson UNSAFE方式直接操作内存创建对象
+     */
     private Object unsafeCreate(Class<?> cls) {
         try {
             return ClassUtils.allocateInstance(cls);
@@ -279,6 +309,9 @@ public class MockParse {
         }
     }
 
+    /**
+     * 通过class获取带有mock数据字段的新的示例
+     */
     private Object getClsObj(Class<?> cls) {
         Object obj = newClassInstance(cls);
         if (obj != null) {
