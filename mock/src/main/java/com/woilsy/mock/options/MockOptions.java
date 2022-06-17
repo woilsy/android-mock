@@ -3,11 +3,14 @@ package com.woilsy.mock.options;
 import com.google.gson.Gson;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.data.DataSource;
-import com.woilsy.mock.generate.DictionaryRule;
 import com.woilsy.mock.generate.BaseTypeGenerator;
+import com.woilsy.mock.generate.DictionaryRule;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MockOptions {
 
@@ -21,7 +24,7 @@ public class MockOptions {
     /**
      * 生成规则
      */
-    private Rule rule;
+    private List<Rule> rules;
 
     /**
      * mock数据来源
@@ -57,15 +60,16 @@ public class MockOptions {
         return new MockOptions
                 .Builder()
                 .setDebug(true)
-                .setRule(new DictionaryRule())
+                .addRule(new DictionaryRule())
+                .addRule(new BaseTypeGenerator())
                 .setMockListCount(4, true)
                 .setDynamicAccess(true, false)
                 .setPort(MockDefault.PORT)
                 .build();
     }
 
-    public Rule getRule() {
-        return rule;
+    public List<Rule> getRules() {
+        return rules;
     }
 
     public DataSource[] getDataSources() {
@@ -92,8 +96,8 @@ public class MockOptions {
         return port;
     }
 
-    public void setRule(Rule rule) {
-        this.rule = rule;
+    public void setRules(List<Rule> rules) {
+        this.rules = rules;
     }
 
     public void setDataSources(DataSource[] dataSources) {
@@ -130,7 +134,7 @@ public class MockOptions {
 
         private Gson gson;
 
-        private Rule rule;
+        private List<Rule> rules = new ArrayList<>();
 
         private int port;
 
@@ -149,8 +153,8 @@ public class MockOptions {
             return this;
         }
 
-        public Builder setRule(Rule rule) {
-            this.rule = rule;
+        public Builder addRule(Rule rule) {
+            this.rules.add(rule);
             return this;
         }
 
@@ -186,7 +190,7 @@ public class MockOptions {
 
         public MockOptions build() {
             MockOptions options = new MockOptions();
-            options.rule = this.rule == null ? new BaseTypeGenerator() : rule;
+            options.rules = this.rules;
             options.port = this.port == 0 ? MockDefault.PORT : this.port;
             options.dataSources = this.dataSources;
             options.mockListCount = this.mockListCount;

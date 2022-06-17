@@ -249,8 +249,13 @@ public class MockParse {
                 }
                 return ClassUtils.stringToClass(data, cls);
             } else {//为空 采用默认值
-                Rule rule = mMockOptions.getRule();
-                return rule.getImpl(cls, null);
+                List<Rule> rules = mMockOptions.getRules();
+                for (Rule rule : rules) {
+                    Object impl = rule.getImpl(cls, null);
+                    if (impl != null) {
+                        return impl;
+                    }
+                }
             }
         }
         return null;
@@ -261,7 +266,7 @@ public class MockParse {
      */
     private Object getFinalObj(Class<?> cls, Field parentField) {
         //纯粹的尝试获取Final字段 需要先判定是否为可解析类型。。。可解析时 直接返回 不可解析时返回null
-        if (mMockOptions == null || mMockOptions.getRule() == null) return null;
+        if (mMockOptions == null || mMockOptions.getRules() == null) return null;
         try {
             if (parentField != null) {
                 Object data = getMockFieldData(cls, parentField.getAnnotation(Mock.class));
@@ -273,7 +278,14 @@ public class MockParse {
             loge("()->生成final字段" + cls + "失败");
             e.printStackTrace();
         }
-        return mMockOptions.getRule().getImpl(cls, parentField == null ? null : parentField.getName());
+        List<Rule> rules = mMockOptions.getRules();
+        for (Rule rule : rules) {
+            Object impl = rule.getImpl(cls, parentField == null ? null : parentField.getName());
+            if (impl != null) {
+                return impl;
+            }
+        }
+        return null;
     }
 
     /**

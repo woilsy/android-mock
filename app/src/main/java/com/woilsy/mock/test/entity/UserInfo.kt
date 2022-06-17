@@ -4,7 +4,8 @@ data class UserInfo(
     val nickName: String,
     val age: Int,
     val avatar: String,
-    val address: String
+    val address: String,
+    val aaa: String,
 ) {
 
     override fun toString(): String {
