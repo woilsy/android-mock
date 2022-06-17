@@ -73,6 +73,9 @@ public interface ApiService {
     @GET("/test/generic2")
     Observable<HttpResult<E<A<Integer>, B<String>, C<Boolean>>>> multipleGeneric();
 
+    @GET("/test/normalLs")
+    Observable<HttpResult<List<String>>> getNormalList();
+
 
 }
 

@@ -47,6 +47,11 @@ public class MockOptions {
      */
     private int mockListCount = 1;
 
+    /**
+     * 生产的List数量随机，从0到mockListCount
+     */
+    private boolean mockListCountRandom = false;
+
     public static MockOptions getDefault() {
         return new MockOptions
                 .Builder()
@@ -113,6 +118,10 @@ public class MockOptions {
         this.port = port;
     }
 
+    public boolean isMockListCountRandom() {
+        return mockListCountRandom;
+    }
+
     public static class Builder {
 
         private boolean debug = false;
@@ -131,6 +140,8 @@ public class MockOptions {
 
         private int mockListCount = 1;
 
+        private boolean mockListCountRandom = false;
+
         public Builder setDebug(boolean debug) {
             this.debug = debug;
             return this;
@@ -141,8 +152,9 @@ public class MockOptions {
             return this;
         }
 
-        public Builder setMockListCount(int mockListCount) {
+        public Builder setMockListCount(int mockListCount, boolean random) {
             this.mockListCount = mockListCount;
+            this.mockListCountRandom = random;
             return this;
         }
 
@@ -178,6 +190,7 @@ public class MockOptions {
             options.mockListCount = this.mockListCount;
             options.dynamicAccess = this.dynamicAccess;
             options.showParseLog = this.showParseLog;
+            options.mockListCountRandom = this.mockListCountRandom;
             LogUtil.setDebug(this.debug);
             if (this.gson != null) {
                 GsonUtil.replaceGson(this.gson);

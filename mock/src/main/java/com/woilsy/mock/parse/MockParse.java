@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import okhttp3.ResponseBody;
@@ -38,6 +39,8 @@ public class MockParse {
      * 函数标记，用于区分入口
      */
     private boolean isParseStart = false;
+
+    private Random random = new Random();
 
     public MockParse(MockOptions mMockOptions) {
         this.mMockOptions = mMockOptions;
@@ -76,7 +79,9 @@ public class MockParse {
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
                 if (actualTypeArguments.length == 1) {
                     int mockListCount = mMockOptions.getMockListCount();
-                    for (int i = 0; i < mockListCount; i++) {
+                    boolean mockListCountRandom = mMockOptions.isMockListCountRandom();
+                    int size = mockListCountRandom ? (random.nextInt(mockListCount + 1)) : mockListCount;
+                    for (int i = 0; i < size; i++) {
                         Object obj = handleType(actualTypeArguments[0], parent, null, true);
                         if (obj != null) {
                             ls.add(obj);

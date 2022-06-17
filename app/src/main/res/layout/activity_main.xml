@@ -64,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="redirectRequest"
-            android:text="不使用mock(GET)"
+            android:text="排除部分接口(GET)"
             android:textAllCaps="false" />
 
         <Button
@@ -87,5 +87,13 @@
             android:onClick="multipleGeneric"
             android:text="多泛型嵌套(GET)"
             android:textAllCaps="false" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="getStringList"
+            android:text="普通String列表(GET)"
+            android:textAllCaps="false" />
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

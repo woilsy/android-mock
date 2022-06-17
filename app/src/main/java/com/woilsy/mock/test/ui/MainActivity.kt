@@ -190,4 +190,19 @@ class MainActivity : AppCompatActivity() {
             )
     }
 
+    fun getStringList(view: View) {
+        getApiService()
+            .normalList
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    Log.d(TAG, "getStringList: $it")
+                },
+                {
+                    Log.e(TAG, "getStringList: ", it)
+                }
+            )
+    }
+
 }
