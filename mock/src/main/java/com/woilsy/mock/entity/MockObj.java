@@ -10,7 +10,7 @@ public class MockObj {
 
     public MockObj(Class<?> mockClass) {
         this.mockClass = mockClass;
-        this.mockStrategy = MockStrategy.RESOLVE_WITH_EXCLUDE;
+        this.mockStrategy = MockStrategy.EXCLUDE;
     }
 
     public MockObj(Class<?> mockClass, MockStrategy mockStrategy) {

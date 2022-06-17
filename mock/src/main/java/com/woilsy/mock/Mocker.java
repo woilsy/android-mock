@@ -11,6 +11,7 @@ import com.woilsy.mock.data.DataSource;
 import com.woilsy.mock.entity.HttpData;
 import com.woilsy.mock.entity.HttpInfo;
 import com.woilsy.mock.entity.MockData;
+import com.woilsy.mock.entity.MockGroup;
 import com.woilsy.mock.entity.MockObj;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.parse.MockParse;
@@ -90,14 +91,23 @@ public class Mocker {
         }
     }
 
-    private void parseClasses(MockObj... objs) {
+    private void parseObjs(MockObj... objs) {
         for (MockObj mockObj : objs) {
             try {
                 Class<?> mockClass = mockObj.getMockClass();
-                if (mockClass.isInterface()) {
-                    parseClass(mockClass, mockObj.getMockStrategy());
-                } else {
-                    LogUtil.e(mockClass.getName() + "非接口，无法处理");
+                handleMockObj(mockClass, mockObj.getMockStrategy());
+            } catch (Exception e) {
+                LogUtil.e("解析Service失败，以下为错误信息↓", e);
+            }
+        }
+    }
+
+    private void parseGroups(MockGroup... mockGroups) {
+        for (MockGroup group : mockGroups) {
+            try {
+                MockStrategy mockStrategy = group.getMockStrategy();
+                for (Class<?> mockObj : group.getObjs()) {
+                    handleMockObj(mockObj, mockStrategy);
                 }
             } catch (Exception e) {
                 LogUtil.e("解析Service失败，以下为错误信息↓", e);
@@ -105,17 +115,25 @@ public class Mocker {
         }
     }
 
+    private void handleMockObj(Class<?> mockClass, MockStrategy mockStrategy) {
+        if (mockClass.isInterface()) {
+            parseClass(mockClass, mockStrategy);
+        } else {
+            LogUtil.e(mockClass.getName() + "非接口，无法处理");
+        }
+    }
+
     private void parseClass(Class<?> cls, MockStrategy mockStrategy) {
         Method[] methods = cls.getMethods();
-        String ss = mockStrategy == MockStrategy.RESOLVE_WITH_EXCLUDE ?
+        String ss = mockStrategy == MockStrategy.EXCLUDE ?
                 "默认解析：除了被@MockExclude标记的函数都解析，其他Method将拦截" :
                 "默认不解析：仅解析被@MockInclude标记的函数，其他Method将放行";
         LogUtil.i(cls.getSimpleName() + "当前Method解析策略为->" + ss);
         for (Method m : methods) {
-            if (mockStrategy == MockStrategy.RESOLVE_WITH_EXCLUDE) {
+            if (mockStrategy == MockStrategy.EXCLUDE) {
                 MockExclude mockExclude = m.getAnnotation(MockExclude.class);
                 if (mockExclude == null) parseMethod(m);
-            } else if (mockStrategy == MockStrategy.RESOLVE_NOT_WITH_INCLUDE) {
+            } else if (mockStrategy == MockStrategy.INCLUDE) {
                 MockInclude mockInclude = m.getAnnotation(MockInclude.class);
                 if (mockInclude != null) parseMethod(m);
             }
@@ -226,10 +244,16 @@ public class Mocker {
         return MOCKER.baseUrlOrOriginalUrl;
     }
 
-    public static void start(Context context, MockOptions options, MockObj... objs) {
+    public static void init(Context context, MockOptions options, MockObj... objs) {
         MOCKER.initByOptions(options);
         MOCKER.startMockService(context, options);
-        MOCKER.parseClasses(objs);
+        MOCKER.parseObjs(objs);
+    }
+
+    public static void init(Context context, MockOptions options, MockGroup... groups) {
+        MOCKER.initByOptions(options);
+        MOCKER.startMockService(context, options);
+        MOCKER.parseGroups(groups);
     }
 
     public static String parseType(Type type) {
