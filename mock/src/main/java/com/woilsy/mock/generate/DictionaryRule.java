@@ -18,7 +18,7 @@ public class DictionaryRule implements Rule {
 
     private final Random random = new Random();
 
-    private final Map<String, KeywordGroup> KEYWORD_MAP = new HashMap<>();
+    protected final Map<String, KeywordGroup> KEYWORD_MAP = new HashMap<>();
 
     public static final String KEY_IMAGE = "image";
 
@@ -31,10 +31,10 @@ public class DictionaryRule implements Rule {
     public static final String KEY_AGE = "age";
 
     public DictionaryRule() {
-        addKeyGroup();
+        addKeyGroups();
     }
 
-    protected void addKeyGroup() {
+    protected void addKeyGroups() {
         KEYWORD_MAP.put(KEY_IMAGE, new KeywordGroup() {
             @Override
             public boolean match(String name) {
@@ -112,7 +112,7 @@ public class DictionaryRule implements Rule {
         });
     }
 
-    private boolean contain(String key, String... keys) {
+    protected boolean contain(String key, String... keys) {
         return ArrayUtil.contain(key, keys);
     }
 

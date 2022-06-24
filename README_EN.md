@@ -31,13 +31,15 @@ But now, you only need to do the following things to forget about this trouble.
 
  **Step 3 Launcher the mock server before init Retrofit**  
 
-`Mocker.start(Context context, MockOptions options, MockObj... objs)`
+`Mocker.init(Context context, MockOptions options, MockObj... objs)`  
+or  
+`Mocker.init(Context context, MockOptions options, MockGroup... groups)`  
 
  **Step 4 Add interceptor to okhttp client**
 
 `OkHttpClient.Builder.addInterceptor(new MockInterceptor()));`
 
- **OK!**  
+ **It's OK!**  
 
 
 
@@ -63,7 +65,5 @@ MockOptions.setDataSource(AssetFileDataSource(context, "mock.json"));
 String name;
 @Mock("100")
 Integer age;
-@Mock(type = Type.IMAGE)
-String avatar;
 ```
 
