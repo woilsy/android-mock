@@ -2,6 +2,7 @@ package com.woilsy.mock;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import com.woilsy.mock.annotations.MockExclude;
 import com.woilsy.mock.annotations.MockInclude;
@@ -56,11 +57,9 @@ public class Mocker {
     private MockOptions mockOptions;
 
     /**
-     * mock地址或者原始url
-     * mock地址：127.0.0.1
-     * 原始url：http://xxx.xxx.com:8080
+     * 存储配置相关
      */
-    private boolean baseUrlOrOriginalUrl = true;
+    private SharedPreferences spConfig;
 
     private Mocker() {
 
@@ -193,6 +192,10 @@ public class Mocker {
         return s == null || s.isEmpty() ? null : s;
     }
 
+    private void createSharedPreferences(Context context) {
+        spConfig = context.getSharedPreferences("mock_config", Context.MODE_PRIVATE);
+    }
+
     public static String getHttpData(String path, String method) {
         HttpInfo httpInfo = findHttpInfo(path, method);
         if (httpInfo == null) {
@@ -231,26 +234,27 @@ public class Mocker {
     public static MockOptions getMockOption() {
         if (MOCKER.mockOptions == null) {//没有进行初始化
             MOCKER.mockOptions = MockOptions.getDefault();
-            MOCKER.baseUrlOrOriginalUrl = false;//默认使用原始地址
         }
         return MOCKER.mockOptions;
     }
 
     public static void setMockUrlOrOriginalUrl(boolean baseUrlOrOriginalUrl) {
-        MOCKER.baseUrlOrOriginalUrl = baseUrlOrOriginalUrl;
+        MOCKER.spConfig.edit().putBoolean("mockOrOriginal", baseUrlOrOriginalUrl).apply();
     }
 
     public static boolean isMockUrlOrOriginalUrl() {
-        return MOCKER.baseUrlOrOriginalUrl;
+        return MOCKER.spConfig != null && MOCKER.spConfig.getBoolean("mockOrOriginal", true);
     }
 
     public static void init(Context context, MockOptions options, MockObj... objs) {
+        MOCKER.createSharedPreferences(context);
         MOCKER.initByOptions(options);
         MOCKER.startMockService(context, options);
         MOCKER.parseObjs(objs);
     }
 
     public static void init(Context context, MockOptions options, MockGroup... groups) {
+        MOCKER.createSharedPreferences(context);
         MOCKER.initByOptions(options);
         MOCKER.startMockService(context, options);
         MOCKER.parseGroups(groups);
