@@ -20,6 +20,7 @@ import com.woilsy.mock.service.MockService;
 import com.woilsy.mock.strategy.MockStrategy;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
+import com.woilsy.mock.utils.NetUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -275,5 +276,11 @@ public class Mocker {
 
     public static String getMockBaseUrl() {
         return MockDefault.formatMockUrl(MOCKER.mockOptions.getPort());
+    }
+
+    public static String getLocalUrl(Context context) {
+        String ip = NetUtil.getIp(context);
+        String host = ip == null ? MockDefault.HOST_NAME : ip;
+        return MockDefault.formatMockUrl(host, MOCKER.mockOptions.getPort());
     }
 }

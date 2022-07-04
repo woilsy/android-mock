@@ -20,6 +20,8 @@ import com.woilsy.mock.utils.LogUtil;
 
 import java.io.IOException;
 import java.net.BindException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MockService extends Service {
 
@@ -33,13 +35,17 @@ public class MockService extends Service {
 
     private String channelId;
 
-    private String mockUrl;
-
     private int notificationId;
+
+    private final ExecutorService pool = Executors.newCachedThreadPool();
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private boolean isMockRunning() {
+        return httpServer != null;
     }
 
     @Override
@@ -47,18 +53,23 @@ public class MockService extends Service {
         super.onCreate();
         channelId = this.getApplication().getPackageName();
         notificationId = channelId.hashCode();
-        mockUrl = Mocker.getMockBaseUrl();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.createNotificationChannel(
                     new NotificationChannel(channelId, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
             );
         }
-        startForeground(notificationId, getNotification(mockUrl));
+        startForeground(notificationId, getNotification(getNotifyContent()));
+    }
+
+    private String getNotifyContent() {
+        boolean mockUrlOrOriginalUrl = Mocker.isMockUrlOrOriginalUrl();
+        String mockUrl = Mocker.getLocalUrl(this);
+        return mockUrlOrOriginalUrl ? (mockUrl + "运行中") : (mockUrl + "已关闭");
     }
 
     private void startMockServer(int port) {
-        new Thread(() -> {
+        pool.execute(() -> {
             try {
                 String host = MockDefault.HOST_NAME;
                 httpServer = new HttpServer(host, port);
@@ -72,15 +83,14 @@ public class MockService extends Service {
             } catch (IOException e) {
                 LogUtil.e("Mock服务器启动失败，请重新尝试", e);
             }
-        })
-                .start();
+        });
     }
 
     private Notification getNotification(String content) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return new Notification.Builder(this, channelId)
                     .setChannelId(channelId)
-                    .setContentTitle("Mock服务已启动，点击切换")
+                    .setContentTitle("Mock服务运行中,点击切换")
                     .setContentIntent(getIntent())
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())
@@ -90,7 +100,7 @@ public class MockService extends Service {
                     .build();
         } else {
             return new Notification.Builder(this)
-                    .setContentTitle("Mock服务已启动，点击切换")
+                    .setContentTitle("Mock服务运行中,点击切换")
                     .setContentIntent(getIntent())
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())
@@ -122,9 +132,8 @@ public class MockService extends Service {
                 String originalBaseUrl = Mocker.getMockOption().getOriginalBaseUrl();
                 if (originalBaseUrl != null && !originalBaseUrl.isEmpty()) {
                     Mocker.setMockUrlOrOriginalUrl(newValue);
-                    String newUrl = newValue ? mockUrl : originalBaseUrl;
-                    Toast.makeText(this, (newValue ? "开启mock:" : "关闭mock:") + newUrl, Toast.LENGTH_LONG).show();
-                    startForeground(notificationId, getNotification(newUrl));
+                    startForeground(notificationId, getNotification(getNotifyContent()));
+                    Toast.makeText(this, newValue ? "已开启mock" : "已关闭mock", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(this, "请在至少请求一次网络后再尝试切换", Toast.LENGTH_LONG).show();
                 }
@@ -139,6 +148,7 @@ public class MockService extends Service {
         if (httpServer != null) {
             httpServer.stop();
         }
+        pool.shutdown();
         LogUtil.i("MockService已销毁");
     }
 

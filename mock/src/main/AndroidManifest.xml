@@ -3,6 +3,7 @@
     package="com.woilsy.mock">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application android:usesCleartextTraffic="true">
