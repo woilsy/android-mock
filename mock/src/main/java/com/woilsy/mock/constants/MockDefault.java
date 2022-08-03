@@ -12,7 +12,11 @@ public class MockDefault {
     public static final int PORT = 8080;
 
     public static String formatMockUrl(int port) {
-        return "http://" + HOST_NAME + ":" + port;
+        return formatMockUrl(HOST_NAME, port);
+    }
+
+    public static String formatMockUrl(String host, int port) {
+        return "http://" + host + ":" + port;
     }
 
 }

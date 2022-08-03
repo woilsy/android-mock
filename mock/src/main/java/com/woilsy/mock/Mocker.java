@@ -17,9 +17,11 @@ import com.woilsy.mock.entity.MockObj;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.parse.MockParse;
 import com.woilsy.mock.service.MockService;
+import com.woilsy.mock.strategy.MockPriority;
 import com.woilsy.mock.strategy.MockStrategy;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
+import com.woilsy.mock.utils.NetUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -131,20 +133,21 @@ public class Mocker {
         for (Method m : methods) {
             if (mockStrategy == MockStrategy.EXCLUDE) {
                 MockExclude mockExclude = m.getAnnotation(MockExclude.class);
-                if (mockExclude == null) parseMethod(m);
+                if (mockExclude == null) parseMethod(m, null);
             } else if (mockStrategy == MockStrategy.INCLUDE) {
                 MockInclude mockInclude = m.getAnnotation(MockInclude.class);
-                if (mockInclude != null) parseMethod(m);
+                if (mockInclude != null) parseMethod(m, mockInclude.priority());
             }
             LogUtil.i("---------------分割线---------------");
         }
     }
 
-    private void parseMethod(Method m) {
+    private void parseMethod(Method m, MockPriority mockPriority) {
         LogUtil.i("====== 开始解析 " + m.getName() + " ======");
         //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
         HttpInfo httpInfo = getHttpInfo(m);
         if (httpInfo != null) {
+            httpInfo.setMockPriority(mockPriority);//设置优先级
             String path = httpInfo.getPath();
             if (path == null || path.isEmpty()) {//需要动态解析
                 LogUtil.i("暂不支持的url");
@@ -275,6 +278,12 @@ public class Mocker {
 
     public static String getMockBaseUrl() {
         return MockDefault.formatMockUrl(getMockOption().getPort());
+    }
+
+    public static String getLocalUrl(Context context) {
+        String ip = NetUtil.getIp(context);
+        String host = ip == null ? MockDefault.HOST_NAME : ip;
+        return MockDefault.formatMockUrl(host, getMockOption().getPort());
     }
 
     public static boolean isInit() {

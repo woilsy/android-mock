@@ -5,6 +5,7 @@ import android.util.Log;
 import com.woilsy.mock.Mocker;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.entity.HttpInfo;
+import com.woilsy.mock.strategy.MockPriority;
 
 import java.io.IOException;
 import java.net.URL;
@@ -21,6 +22,7 @@ public class MockInterceptor implements Interceptor {
 
     private static final String TAG = "MockInterceptor";
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
@@ -37,19 +39,35 @@ public class MockInterceptor implements Interceptor {
                 //查询是否被包含
                 HttpInfo httpInfo = Mocker.findHttpInfo(httpUrl.encodedPath(), request.method());
                 if (httpInfo != null) {
-                    HttpUrl httpUrl1 = httpUrl
-                            .newBuilder()
-                            .scheme("http")
-                            .host(MockDefault.HOST_NAME)
-                            .port(Mocker.getMockOption().getPort())
-                            .build();
-                    Log.d(TAG, "将重定向到：" + httpUrl1.url());
-                    Request newRequest = request.newBuilder().url(httpUrl1).build();
-                    return chain.proceed(newRequest);
+                    MockPriority mockPriority = httpInfo.getMockPriority();
+                    if (mockPriority == null || mockPriority == MockPriority.DEFAULT) {
+                        return getMockResponse(chain, request, httpUrl);
+                    } else {//需要等待结果
+                        Response response = chain.proceed(request);
+                        if (mockPriority == MockPriority.ENABLE_ON_ERROR) {
+                            if (response.code() == 200) {
+                                return response;
+                            } else {
+                                return getMockResponse(chain, request, httpUrl);
+                            }
+                        }
+                    }
                 }
             }
         }
         return chain.proceed(request);
+    }
+
+    private Response getMockResponse(Chain chain, Request request, HttpUrl httpUrl) throws IOException {
+        HttpUrl httpUrl1 = httpUrl
+                .newBuilder()
+                .scheme("http")
+                .host(MockDefault.HOST_NAME)
+                .port(Mocker.getMockOption().getPort())
+                .build();
+        Log.d(TAG, "将重定向到：" + httpUrl1.url());
+        Request newRequest = request.newBuilder().url(httpUrl1).build();
+        return chain.proceed(newRequest);
     }
 
 }
