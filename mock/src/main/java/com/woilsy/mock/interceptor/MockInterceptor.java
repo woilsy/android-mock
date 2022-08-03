@@ -26,7 +26,7 @@ public class MockInterceptor implements Interceptor {
         Request request = chain.request();
         //获取到原始地址 然后根据配置切换到本地地址
         HttpUrl httpUrl = request.url();
-        if (!MockDefault.HOST_NAME.equals(httpUrl.host())) {//如果不一致 将根据配置进行请求 否则直接不处理
+        if (Mocker.isInit() && !MockDefault.HOST_NAME.equals(httpUrl.host())) {//如果不一致 将根据配置进行请求 否则直接不处理
             URL url = httpUrl.url();
             Log.d(TAG, "请求地址：" + url);
             String originBaseUrl = httpUrl.scheme() + "://" + httpUrl.host() + ":" + httpUrl.port();

@@ -45,6 +45,11 @@ public class MockService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        //可能存在没有执行初始化 但是服务重启的情况 这种情况下运行服务是没有意义的
+        if (!Mocker.isInit()) {
+            stopSelf();
+            return;
+        }
         channelId = this.getApplication().getPackageName();
         notificationId = channelId.hashCode();
         mockUrl = Mocker.getMockBaseUrl();

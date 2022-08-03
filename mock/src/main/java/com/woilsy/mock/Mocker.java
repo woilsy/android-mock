@@ -274,6 +274,11 @@ public class Mocker {
     }
 
     public static String getMockBaseUrl() {
-        return MockDefault.formatMockUrl(MOCKER.mockOptions.getPort());
+        return MockDefault.formatMockUrl(getMockOption().getPort());
     }
+
+    public static boolean isInit() {
+        return MOCKER.mockOptions != null;
+    }
+
 }
