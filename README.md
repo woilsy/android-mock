@@ -51,7 +51,7 @@ Mocker：启动类，负责初始化参数配置，开启android mock service，
 [![](https://jitpack.io/v/com.woilsy/android-mock.svg)](https://jitpack.io/#com.woilsy/android-mock)  
 `implementation "com.woilsy:android-mock:latest.version"`
 
-#### 使用说明
+#### 简单使用
 
 **第一步**
 
@@ -73,6 +73,40 @@ MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就�
 1.如果需要自定义mock数据，可以通过MockOptions.setDataSource()传入，返回值为ResponseBody时，只有导入了数据才会有返回值。  
 2.@Mock注解可以指定字段具体的mock数据，以及类型，可以为基本类型，也可以为Json数据类型。  
 3.你可以自定义mock并将其作为rule添加到rule列表中进行匹配，例如继承DictionaryRule，并复写其添加逻辑。  
+
+#### 详细说明  
+使用方法：  
+1，初始化。  
+初始化通过MockOptions，设置debug状态，setDebug，可以查看日志。  
+添加mock规则addRule，包含如DictionaryRule、BaseTypeGenerator，可根据自己需求继承或者拓展。  
+设置mockList数据最大元素数量，setMockListCount，对于列表类型会随机生成0-最大元素数量的数据。  
+设置mock数据来源，setDataSource，优先级高于规则，比如将请求地址和返回数据写到assets目录文件中。  
+设置动态访问，setDynamicAccess，每次是否生成新的数据，如果为false，那么每次同一个地址会返回同样的数据。  
+2，策略。  
+通过MockGroup或者MockObj，传入解析策略和具体mock的接口类对象，表示传入的接口类对象会被自动解析并mock，  
+可以通过策略（如MockStrategy.EXCLUDE）和策略注解（@MockExclude）配置。  
+3，使用。  
+通过策略将被mock的接口类对象传入，如PkApi，根据策略在请求函数上加入@MockInclude或者@MockExclude  
+如  
+@MockExclude  
+@POST(“/live/liveRoom/pk/initiate”)  
+fun invitePk(@Body pkCreateInfo: PkCreateInfo): Observable<BaseRsp<String>>  
+这样访问网络时，会自动根据mock规则、mock数据来源等配置返回想要的数据。  
+
+自定义Mock数据  
+在Bean类中，还可以添加@Mock注解，传入需要mock的数据，如以下  
+@Mock(“S”)  
+val timeUnit = “SECONDS”  
+@Mock(“18”)  
+val age: Int? = null  
+@Mock(“{\”a\”:\”1234\”}”)  
+public ChildA childA;  
+@Mock(“[]”)  
+public List<String> ls;  
+@Mock优先级高于默认值，默认值高于自动规则。  
+
+补充：  
+1，点击通知栏，可以切换使用本地地址和服务器地址，且持续生效。  
 
 #### 参与贡献
 
