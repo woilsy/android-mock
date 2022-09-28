@@ -1,11 +1,11 @@
 package com.woilsy.mock.test.api;
 
 import com.woilsy.mock.annotations.MockExclude;
-import com.woilsy.mock.test.A;
-import com.woilsy.mock.test.B;
-import com.woilsy.mock.test.C;
-import com.woilsy.mock.test.D;
-import com.woilsy.mock.test.E;
+import com.woilsy.mock.test.entity.test.A;
+import com.woilsy.mock.test.entity.test.B;
+import com.woilsy.mock.test.entity.test.C;
+import com.woilsy.mock.test.entity.test.D;
+import com.woilsy.mock.test.entity.test.E;
 import com.woilsy.mock.test.entity.HttpResult;
 import com.woilsy.mock.test.entity.LoginRequest;
 import com.woilsy.mock.test.entity.LoginResponse;

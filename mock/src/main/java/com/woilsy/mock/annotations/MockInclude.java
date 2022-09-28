@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 public @interface MockInclude {
 
     /**
-     * mock优先级，请查看MockPriority
+     * mock优先级，请查看{@link MockPriority}
      */
     MockPriority priority() default MockPriority.DEFAULT;
 

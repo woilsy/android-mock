@@ -1,7 +1,7 @@
 package com.woilsy.mock.test.api;
 
 import com.woilsy.mock.annotations.MockInclude;
-import com.woilsy.mock.test.MockBean;
+import com.woilsy.mock.test.entity.test.MockBean;
 
 import java.util.List;
 

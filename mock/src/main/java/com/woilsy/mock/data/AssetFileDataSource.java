@@ -9,6 +9,14 @@ import java.util.List;
 
 /**
  * Mock data from file in 'assets'
+ * 可通过以下语句进行排除
+ * buildTypes {
+ *         release {
+ *             aaptOptions {
+ *                 ignoreAssetsPattern '!aaa.js:!bbb.css:!ccc.json:'
+ *             }
+ *         }
+ * }
  */
 public class AssetFileDataSource implements DataSource {
 

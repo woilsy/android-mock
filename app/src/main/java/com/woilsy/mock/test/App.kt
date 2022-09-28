@@ -5,7 +5,7 @@ import com.woilsy.mock.Mocker
 import com.woilsy.mock.data.AssetFileDataSource
 import com.woilsy.mock.entity.MockGroup
 import com.woilsy.mock.generate.BaseTypeGenerator
-import com.woilsy.mock.generate.DictionaryRule
+import com.woilsy.mock.generate.MatchRule
 import com.woilsy.mock.options.MockOptions
 import com.woilsy.mock.strategy.MockStrategy
 import com.woilsy.mock.test.api.ApiService
@@ -23,7 +23,7 @@ class App : Application() {
                 .setDebug(true)
                 .setMockListCount(4, true)
                 .setDynamicAccess(true, false)
-                .addRule(DictionaryRule())
+                .addRule(MatchRule())
                 .addRule(BaseTypeGenerator())
                 .setDataSource(AssetFileDataSource(this, "mock.json"))
                 .build(),

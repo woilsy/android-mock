@@ -6,7 +6,7 @@ package com.woilsy.mock.strategy;
 public enum MockPriority {
 
     /**
-     * 默认，直接替换掉原始接口数据
+     * 默认，直接替换掉原始接口数据。
      */
     DEFAULT,
 

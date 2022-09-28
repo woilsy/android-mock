@@ -1,4 +1,4 @@
-package com.woilsy.mock.test;
+package com.woilsy.mock.test.entity.test;
 
 import java.util.List;
 

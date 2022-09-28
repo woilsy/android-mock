@@ -1,17 +1,12 @@
 package com.woilsy.mock.service;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
+import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.Toast;
-
 import com.woilsy.mock.Mocker;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.options.MockOptions;
@@ -73,7 +68,7 @@ public class MockService extends Service {
         pool.execute(() -> {
             try {
                 String host = MockDefault.HOST_NAME;
-                httpServer = new HttpServer(host, port);
+                httpServer = new HttpServer(host, port, Mocker::getHttpData);
                 httpServer.start();
                 Mocker.getMockOption().setPort(port);
                 LogUtil.i("已启动mock服务器，端口：" + port);

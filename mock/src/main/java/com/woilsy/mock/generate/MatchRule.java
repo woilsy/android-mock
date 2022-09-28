@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * 字典规则，根据提前插入的数据进行返回
+ * 匹配规则，根据提前插入的数据进行返回
  */
-public class DictionaryRule implements Rule {
+public class MatchRule implements Rule {
 
     private static final String TAG = "DictionaryRule";
 
@@ -30,7 +30,7 @@ public class DictionaryRule implements Rule {
 
     public static final String KEY_AGE = "age";
 
-    public DictionaryRule() {
+    public MatchRule() {
         addKeyGroups();
     }
 

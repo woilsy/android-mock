@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.data.DataSource;
 import com.woilsy.mock.generate.BaseTypeGenerator;
-import com.woilsy.mock.generate.DictionaryRule;
+import com.woilsy.mock.generate.MatchRule;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
@@ -60,7 +60,7 @@ public class MockOptions {
         return new MockOptions
                 .Builder()
                 .setDebug(true)
-                .addRule(new DictionaryRule())
+                .addRule(new MatchRule())
                 .addRule(new BaseTypeGenerator())
                 .setMockListCount(4, true)
                 .setDynamicAccess(true, false)
