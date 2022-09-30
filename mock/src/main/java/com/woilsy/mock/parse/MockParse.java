@@ -7,24 +7,10 @@ import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.utils.ClassUtils;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
 import okhttp3.ResponseBody;
+
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * mock数据解析器，通过传递Type即可生成实体类
@@ -178,15 +164,18 @@ public class MockParse {
         if (actualTypeArguments.length == 1) {
             int mockListCount = mMockOptions.getMockListCount();
             boolean mockListCountRandom = mMockOptions.isMockListCountRandom();
-            int size = mockListCountRandom ? (random.nextInt(mockListCount + 1)) : mockListCount;
-            //由于getAndRemoveType会移除value，导致只能获取一次示例 所以在此基础上循环生成第一个就好
-            Object one = handleType(actualTypeArguments[0], parent, null, true);
-            if (one != null) {
-                collection.add(one);
-                for (int i = 1; i < size; i++) {
-                    Object o = handleType(one.getClass(), null, null, true);
-                    if (o != null) {
-                        collection.add(o);
+            int randomValue = random.nextInt(mockListCount);//0-(mockListCount-1)
+            if (randomValue != 0) {
+                int size = mockListCountRandom ? (randomValue + 1) : mockListCount;
+                //由于getAndRemoveType会移除value，导致只能获取一次示例 所以在此基础上循环生成第一个就好
+                Object one = handleType(actualTypeArguments[0], parent, null, true);
+                if (one != null) {
+                    collection.add(one);
+                    for (int i = 1; i < size; i++) {
+                        Object o = handleType(one.getClass(), null, null, true);
+                        if (o != null) {
+                            collection.add(o);
+                        }
                     }
                 }
             }
