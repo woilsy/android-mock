@@ -15,6 +15,7 @@ import com.woilsy.mock.entity.MockData;
 import com.woilsy.mock.entity.MockGroup;
 import com.woilsy.mock.entity.MockObj;
 import com.woilsy.mock.options.MockOptions;
+import com.woilsy.mock.parse.MockDataStore;
 import com.woilsy.mock.parse.MockParse;
 import com.woilsy.mock.service.MockService;
 import com.woilsy.mock.strategy.MockPriority;
@@ -44,14 +45,9 @@ public class Mocker {
     private static final Mocker MOCKER = new Mocker();
 
     /**
-     * 包含了请求以及其对应的数据内容
+     * mock数据管理中心
      */
-    private static final Map<HttpInfo, HttpData> HTTP_DATA_MAP = new HashMap<>();
-
-    /**
-     * mock数据解析器
-     */
-    private MockParse mockParse;
+    private MockDataStore dataStore;
 
     /**
      * mock配置
@@ -74,7 +70,7 @@ public class Mocker {
     private void initByOptions(MockOptions options) {
         MockOptions mMockOptions = options == null ? MockOptions.getDefault() : options;
         this.mockOptions = mMockOptions;
-        this.mockParse = new MockParse(mMockOptions);
+        this.dataStore = new MockDataStore(new MockParse(mMockOptions));
         //导入数据
         DataSource[] dataSources = mMockOptions.getDataSources();
         if (dataSources != null) {
@@ -85,7 +81,7 @@ public class Mocker {
                         LogUtil.e("没有在数据源path" + mockDatum.path + "中发现请求方式，将被忽略");
                     } else {
                         HttpInfo httpInfo = new HttpInfo(HttpMethod.valueOf(mockDatum.method), mockDatum.path);
-                        HTTP_DATA_MAP.put(httpInfo, new HttpData(GsonUtil.toJson(mockDatum.data)));
+                        dataStore.put(httpInfo,new HttpData(GsonUtil.toJson(mockDatum.data)));
                     }
                 }
             }
@@ -154,17 +150,17 @@ public class Mocker {
             } else {
                 LogUtil.i("path:" + path);
                 //添加到集合
-                if (HTTP_DATA_MAP.containsKey(httpInfo)) {
+                if (dataStore.containsKey(httpInfo)) {
                     LogUtil.i("该url及请求方式已由其他mock数据占用，无需解析");
                 } else {
                     MockOptions mockOption = getMockOption();
                     if (mockOption.isDynamicAccess()) {
                         LogUtil.i("动态访问，只存储返回类型");
-                        HTTP_DATA_MAP.put(httpInfo, new HttpData(m.getGenericReturnType()));
+                        dataStore.put(httpInfo, new HttpData(m.getGenericReturnType()));
                     } else {
                         String json = parseType(m.getGenericReturnType());
                         LogUtil.i("非动态访问，数据:" + json);
-                        HTTP_DATA_MAP.put(httpInfo, new HttpData(json));
+                        dataStore.put(httpInfo, new HttpData(json));
                     }
                 }
             }
@@ -204,7 +200,7 @@ public class Mocker {
         if (httpInfo == null) {
             return null;
         } else {
-            return HttpData.getData(HTTP_DATA_MAP.get(httpInfo));
+            return HttpData.getData(MOCKER.dataStore.get(httpInfo));
         }
     }
 
@@ -212,7 +208,7 @@ public class Mocker {
         //encodedPath是一个实际地址 例如 /op/globalModuleConfig/{location} 但其实际地址 /op/globalModuleConfig/5 所以需要进行匹配
         String[] split1 = encodedPath.split("/");
         HttpInfo targetHttpInfo = null;
-        Set<HttpInfo> httpInfos = HTTP_DATA_MAP.keySet();
+        Set<HttpInfo> httpInfos = MOCKER.dataStore.keySet();
         for (HttpInfo httpInfo : httpInfos) {
             String path = httpInfo.getPath();
             String[] split2 = path.split("/");
@@ -264,7 +260,7 @@ public class Mocker {
     }
 
     public static String parseType(Type type) {
-        Object o = MOCKER.mockParse.parseType(type);
+        Object o = MOCKER.dataStore.parseType(type);
         if (o != null) {
             return GsonUtil.toJson(o);
         } else {
