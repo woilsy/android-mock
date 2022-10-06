@@ -27,9 +27,7 @@ import com.woilsy.mock.utils.NetUtil;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import retrofit2.http.DELETE;
@@ -45,14 +43,14 @@ public class Mocker {
     private static final Mocker MOCKER = new Mocker();
 
     /**
-     * mock数据管理中心
+     * mock数据中心
      */
-    private MockDataStore dataStore;
+    private MockDataStore mDataStore;
 
     /**
      * mock配置
      */
-    private MockOptions mockOptions;
+    private MockOptions mMockOptions;
 
     /**
      * 存储配置相关
@@ -68,9 +66,8 @@ public class Mocker {
     }
 
     private void initByOptions(MockOptions options) {
-        MockOptions mMockOptions = options == null ? MockOptions.getDefault() : options;
-        this.mockOptions = mMockOptions;
-        this.dataStore = new MockDataStore(new MockParse(mMockOptions));
+        this.mMockOptions = options == null ? MockOptions.getDefault() : options;
+        this.mDataStore = new MockDataStore(new MockParse(mMockOptions));
         //导入数据
         DataSource[] dataSources = mMockOptions.getDataSources();
         if (dataSources != null) {
@@ -81,7 +78,7 @@ public class Mocker {
                         LogUtil.e("没有在数据源path" + mockDatum.path + "中发现请求方式，将被忽略");
                     } else {
                         HttpInfo httpInfo = new HttpInfo(HttpMethod.valueOf(mockDatum.method), mockDatum.path);
-                        dataStore.put(httpInfo,new HttpData(GsonUtil.toJson(mockDatum.data)));
+                        mDataStore.put(httpInfo, new HttpData(GsonUtil.toJson(mockDatum.data)));
                     }
                 }
             }
@@ -150,17 +147,16 @@ public class Mocker {
             } else {
                 LogUtil.i("path:" + path);
                 //添加到集合
-                if (dataStore.containsKey(httpInfo)) {
+                if (mDataStore.containsKey(httpInfo)) {
                     LogUtil.i("该url及请求方式已由其他mock数据占用，无需解析");
                 } else {
-                    MockOptions mockOption = getMockOption();
-                    if (mockOption.isDynamicAccess()) {
+                    if (mMockOptions.isDynamicAccess()) {
                         LogUtil.i("动态访问，只存储返回类型");
-                        dataStore.put(httpInfo, new HttpData(m.getGenericReturnType()));
+                        mDataStore.put(httpInfo, new HttpData(m.getGenericReturnType()));
                     } else {
                         String json = parseType(m.getGenericReturnType());
                         LogUtil.i("非动态访问，数据:" + json);
-                        dataStore.put(httpInfo, new HttpData(json));
+                        mDataStore.put(httpInfo, new HttpData(json));
                     }
                 }
             }
@@ -195,12 +191,32 @@ public class Mocker {
         spConfig = context.getSharedPreferences("mock_config", Context.MODE_PRIVATE);
     }
 
+    public static void init(Context context, MockOptions options, MockObj... objs) {
+        Mocker mocker = MOCKER;
+        mocker.createSharedPreferences(context);
+        mocker.initByOptions(options);
+        mocker.startMockService(context, options);
+        mocker.parseObjs(objs);
+    }
+
+    public static void init(Context context, MockOptions options, MockGroup... groups) {
+        Mocker mocker = MOCKER;
+        mocker.createSharedPreferences(context);
+        mocker.initByOptions(options);
+        mocker.startMockService(context, options);
+        mocker.parseGroups(groups);
+    }
+
+    public static void release(Context context) {
+        context.stopService(new Intent(context, MockService.class));
+    }
+
     public static String getHttpData(String path, String method) {
         HttpInfo httpInfo = findHttpInfo(path, method);
         if (httpInfo == null) {
             return null;
         } else {
-            return HttpData.getData(MOCKER.dataStore.get(httpInfo));
+            return HttpData.getData(getMockDataStore().get(httpInfo));
         }
     }
 
@@ -208,7 +224,7 @@ public class Mocker {
         //encodedPath是一个实际地址 例如 /op/globalModuleConfig/{location} 但其实际地址 /op/globalModuleConfig/5 所以需要进行匹配
         String[] split1 = encodedPath.split("/");
         HttpInfo targetHttpInfo = null;
-        Set<HttpInfo> httpInfos = MOCKER.dataStore.keySet();
+        Set<HttpInfo> httpInfos = getMockDataStore().keySet();
         for (HttpInfo httpInfo : httpInfos) {
             String path = httpInfo.getPath();
             String[] split2 = path.split("/");
@@ -230,37 +246,8 @@ public class Mocker {
         return targetHttpInfo;
     }
 
-    public static MockOptions getMockOption() {
-        if (MOCKER.mockOptions == null) {//没有进行初始化
-            MOCKER.mockOptions = MockOptions.getDefault();
-        }
-        return MOCKER.mockOptions;
-    }
-
-    public static void setMockUrlOrOriginalUrl(boolean baseUrlOrOriginalUrl) {
-        MOCKER.spConfig.edit().putBoolean("mockOrOriginal", baseUrlOrOriginalUrl).apply();
-    }
-
-    public static boolean isMockUrlOrOriginalUrl() {
-        return MOCKER.spConfig != null && MOCKER.spConfig.getBoolean("mockOrOriginal", true);
-    }
-
-    public static void init(Context context, MockOptions options, MockObj... objs) {
-        MOCKER.createSharedPreferences(context);
-        MOCKER.initByOptions(options);
-        MOCKER.startMockService(context, options);
-        MOCKER.parseObjs(objs);
-    }
-
-    public static void init(Context context, MockOptions options, MockGroup... groups) {
-        MOCKER.createSharedPreferences(context);
-        MOCKER.initByOptions(options);
-        MOCKER.startMockService(context, options);
-        MOCKER.parseGroups(groups);
-    }
-
     public static String parseType(Type type) {
-        Object o = MOCKER.dataStore.parseType(type);
+        Object o = getMockDataStore().parseType(type);
         if (o != null) {
             return GsonUtil.toJson(o);
         } else {
@@ -268,8 +255,28 @@ public class Mocker {
         }
     }
 
-    public static void stop(Context context) {
-        context.stopService(new Intent(context, MockService.class));
+    public static MockDataStore getMockDataStore() {
+        if (MOCKER.mDataStore == null) {
+            MOCKER.mDataStore = new MockDataStore(new MockParse(getMockOption()));
+        }
+        return MOCKER.mDataStore;
+    }
+
+    public static MockOptions getMockOption() {
+        if (MOCKER.mMockOptions == null) {
+            MOCKER.mMockOptions = MockOptions.getDefault();
+        }
+        return MOCKER.mMockOptions;
+    }
+
+    public static void setMockUrlOrOriginalUrl(boolean baseUrlOrOriginalUrl) {
+        if (MOCKER.spConfig != null) {
+            MOCKER.spConfig.edit().putBoolean("mockOrOriginal", baseUrlOrOriginalUrl).apply();
+        }
+    }
+
+    public static boolean isMockUrlOrOriginalUrl() {
+        return MOCKER.spConfig != null && MOCKER.spConfig.getBoolean("mockOrOriginal", true);
     }
 
     public static String getMockBaseUrl() {
@@ -283,7 +290,6 @@ public class Mocker {
     }
 
     public static boolean isInit() {
-        return MOCKER.mockOptions != null;
+        return MOCKER.mMockOptions != null;
     }
-
 }
