@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * mock数据解析器，通过传递Type即可生成实体类
  */
-public class MockParse {
+public class MockParse implements TypeParser{
 
     private final MockOptions mMockOptions;
     /**
@@ -37,6 +37,7 @@ public class MockParse {
         return parseType(cls);
     }
 
+    @Override
     public Object parseType(Type type) {
         isParseStart = true;
         return handleType(type, null, null, true);
