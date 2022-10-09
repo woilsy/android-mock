@@ -40,7 +40,9 @@ public class MockInterceptor implements Interceptor {
                 HttpInfo httpInfo = Mocker.findHttpInfo(httpUrl.encodedPath(), request.method());
                 if (httpInfo != null) {
                     MockPriority mockPriority = httpInfo.getMockPriority();
-                    if (mockPriority == null || mockPriority == MockPriority.DEFAULT) {
+                    if (mockPriority == null) {//如果为null 表示没有优先级 表示不处理的函数 直接返回原始结果
+                        return chain.proceed(request);
+                    } else if (mockPriority == MockPriority.DEFAULT) {
                         return getMockResponse(chain, request, httpUrl);
                     } else {//需要等待结果
                         Response response = chain.proceed(request);

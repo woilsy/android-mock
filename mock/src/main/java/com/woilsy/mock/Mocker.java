@@ -3,17 +3,12 @@ package com.woilsy.mock;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-
 import com.woilsy.mock.annotations.MockExclude;
 import com.woilsy.mock.annotations.MockInclude;
 import com.woilsy.mock.constants.HttpMethod;
 import com.woilsy.mock.constants.MockDefault;
 import com.woilsy.mock.data.DataSource;
-import com.woilsy.mock.entity.HttpData;
-import com.woilsy.mock.entity.HttpInfo;
-import com.woilsy.mock.entity.MockData;
-import com.woilsy.mock.entity.MockGroup;
-import com.woilsy.mock.entity.MockObj;
+import com.woilsy.mock.entity.*;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.parse.MockParse;
 import com.woilsy.mock.service.MockService;
@@ -22,6 +17,10 @@ import com.woilsy.mock.strategy.MockStrategy;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
 import com.woilsy.mock.utils.NetUtil;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -30,11 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.PUT;
 
 public class Mocker {
 
@@ -133,10 +127,18 @@ public class Mocker {
         for (Method m : methods) {
             if (mockStrategy == MockStrategy.EXCLUDE) {
                 MockExclude mockExclude = m.getAnnotation(MockExclude.class);
-                if (mockExclude == null) parseMethod(m, null);
+                if (mockExclude == null) {
+                    parseMethod(m, MockPriority.DEFAULT);
+                } else {
+                    parseMethod(m, null);//被排除的函数
+                }
             } else if (mockStrategy == MockStrategy.INCLUDE) {
                 MockInclude mockInclude = m.getAnnotation(MockInclude.class);
-                if (mockInclude != null) parseMethod(m, mockInclude.priority());
+                if (mockInclude != null) {
+                    parseMethod(m, mockInclude.priority());
+                } else {
+                    parseMethod(m, null);//不被包含的函数
+                }
             }
             LogUtil.i("---------------分割线---------------");
         }
