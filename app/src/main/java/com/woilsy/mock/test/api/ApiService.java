@@ -44,6 +44,7 @@ public interface ApiService {
     @GET("/user/info/ids/{id}")
     Observable<HttpResult<UserInfo>> getUserInfo(@Path("id") String id, @Query("name") String name);
 
+    @MockExclude
     @FormUrlEncoded
     @POST("/user/info/update")
     Observable<HttpResult<String>> updateUserInfo(@Field("name") String name, @Field("address") String address);

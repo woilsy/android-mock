@@ -149,8 +149,10 @@ public class Mocker {
             } else {
                 LogUtil.i("path:" + path);
                 //添加到集合
-                if (mDataStore.containsKey(httpInfo)) {
-                    LogUtil.i("该url及请求方式已由其他mock数据占用，无需解析");
+                if (mDataStore.containsKey(httpInfo)) {//此httpInfo不和原先的HttpInfo相同但hashcode一致 故需要重新插入
+                    HttpData data = mDataStore.get(httpInfo);
+                    mDataStore.remove(httpInfo);
+                    mDataStore.put(httpInfo, data);
                 } else {
                     if (mMockOptions.isDynamicAccess()) {
                         LogUtil.i("动态访问，只存储返回类型");
