@@ -26,6 +26,7 @@ import retrofit2.http.PUT;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -227,27 +228,33 @@ public class Mocker {
     public static HttpInfo findHttpInfo(String encodedPath, String method) {
         //encodedPath是一个实际地址 例如 /op/globalModuleConfig/{location} 但其实际地址 /op/globalModuleConfig/5 所以需要进行匹配
         String[] split1 = encodedPath.split("/");
-        HttpInfo targetHttpInfo = null;
         Set<HttpInfo> httpInfos = getMockDataStore().keySet();
+        List<HttpInfo> matchList = new ArrayList<>();
         for (HttpInfo httpInfo : httpInfos) {
             String path = httpInfo.getPath();
             String[] split2 = path.split("/");
             int len = split2.length;
             if (split1.length == len) {//长度一致
                 int count = 0;
+                int dCount = 0;
                 for (int i = 0; i < len; i++) {
-                    if (split2[i].startsWith("{") || split1[i].equals(split2[i])) {//匹配元素
+                    if (split1[i].equals(split2[i])) {
                         count++;
+                    } else if (split2[i].startsWith("{")) {
+                        dCount++;
                     }
                 }
-                //长度匹配且方法一致
-                if (count == len && method.equalsIgnoreCase(httpInfo.getHttpMethod().name())) {
-                    targetHttpInfo = httpInfo;
-                    break;
+                if (method.equalsIgnoreCase(httpInfo.getHttpMethod().name())) {//方法一致
+                    if (count == len) {//完全匹配
+                        matchList.add(0, httpInfo);//添加到起始点 结束循环
+                        break;
+                    } else if (len == count + dCount) {//部分匹配 继续循环
+                        matchList.add(httpInfo);
+                    }
                 }
             }
         }
-        return targetHttpInfo;
+        return matchList.size() > 0 ? matchList.get(0) : null;
     }
 
     public static String parseType(Type type) {
