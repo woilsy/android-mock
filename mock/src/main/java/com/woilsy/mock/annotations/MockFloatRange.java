@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * value: choose one at random
- * from&to: [from,to]
+ * from&to: [from,to)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
