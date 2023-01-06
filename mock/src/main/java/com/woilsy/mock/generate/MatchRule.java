@@ -1,7 +1,6 @@
 package com.woilsy.mock.generate;
 
 import android.util.Log;
-
 import com.woilsy.mock.entity.KeywordGroup;
 import com.woilsy.mock.utils.ArrayUtil;
 

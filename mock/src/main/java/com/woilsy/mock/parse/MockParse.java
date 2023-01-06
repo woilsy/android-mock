@@ -1,21 +1,23 @@
 package com.woilsy.mock.parse;
 
 import com.woilsy.mock.Mocker;
-import com.woilsy.mock.annotations.Mock;
+import com.woilsy.mock.annotations.*;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.options.MockOptions;
 import com.woilsy.mock.utils.ClassUtils;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
+import com.woilsy.mock.utils.MockRangeUtil;
 import okhttp3.ResponseBody;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
 /**
  * mock数据解析器，通过传递Type即可生成实体类
  */
-public class MockParse implements TypeParser{
+public class MockParse implements TypeParser {
 
     private final MockOptions mMockOptions;
     /**
@@ -223,32 +225,42 @@ public class MockParse implements TypeParser{
     }
 
     //只处理带Mock注解的情况，其他情况直接返回null表示没有通过该注解获取到内容
-    private Object getMockFieldData(Class<?> cls, Mock mock) {
-        if (mock != null) {
-            //如果data有值 尝试将其转换为对应的值 一般是基本类型从string转为xxx等，需要匹配cls
-            String data = mock.value();
-            if (!data.isEmpty()) {
-                boolean c1 = data.startsWith("{") && data.endsWith("}");
-                boolean c2 = data.startsWith("[") && data.endsWith("]");
-                if (c1 || c2) {
-                    logi("()->是个json类型，尝试解析 " + data);
-                    Object clsObj = GsonUtil.jsonToObj(data, cls);
-                    if (clsObj != null) {
-                        return clsObj;
+    private Object getMockFieldData(Class<?> cls, Field field) {
+        if (field == null) return null;
+        Annotation[] annotations = field.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof Mock) {
+                //如果data有值 尝试将其转换为对应的值 一般是基本类型从string转为xxx等，需要匹配cls
+                String data = ((Mock) annotation).value();
+                if (!data.isEmpty()) {
+                    boolean c1 = data.startsWith("{") && data.endsWith("}");
+                    boolean c2 = data.startsWith("[") && data.endsWith("]");
+                    if (c1 || c2) {
+                        logi("()->是个json类型，尝试解析 " + data);
+                        Object clsObj = GsonUtil.jsonToObj(data, cls);
+                        if (clsObj != null) {
+                            return clsObj;
+                        }
                     }
+                    return ClassUtils.stringToClass(data, cls);
                 }
-                return ClassUtils.stringToClass(data, cls);
-            } else {//为空 采用默认值
-                List<Rule> rules = mMockOptions.getRules();
-                for (Rule rule : rules) {
-                    Object impl = rule.getImpl(cls, null);
-                    if (impl != null) {
-                        return impl;
-                    }
-                }
+            } else if (annotation instanceof MockBooleanRange) {
+                return MockRangeUtil.booleanRange((MockBooleanRange) annotation);
+            } else if (annotation instanceof MockCharRange) {
+                return MockRangeUtil.charRange((MockCharRange) annotation);
+            } else if (annotation instanceof MockDoubleRange) {
+                return MockRangeUtil.doubleRange((MockDoubleRange) annotation);
+            } else if (annotation instanceof MockFloatRange) {
+                return MockRangeUtil.floatRange((MockFloatRange) annotation);
+            } else if (annotation instanceof MockIntRange) {
+                return MockRangeUtil.intRange((MockIntRange) annotation);
+            } else if (annotation instanceof MockLongRange) {
+                return MockRangeUtil.longRange((MockLongRange) annotation);
+            } else if (annotation instanceof MockStringRange) {
+                return MockRangeUtil.stringRange((MockStringRange) annotation);
             }
         }
-        return null;
+        return getImpl(cls, field);
     }
 
     /**
@@ -258,16 +270,18 @@ public class MockParse implements TypeParser{
         //纯粹的尝试获取Final字段 需要先判定是否为可解析类型。。。可解析时 直接返回 不可解析时返回null
         if (mMockOptions == null || mMockOptions.getRules() == null) return null;
         try {
-            if (parentField != null) {
-                Object data = getMockFieldData(cls, parentField.getAnnotation(Mock.class));
-                if (data != null) {//带mock注解，且解析出数据
-                    return data;
-                }
+            Object data = getMockFieldData(cls, parentField);
+            if (data != null) {//带mock注解，且解析出数据
+                return data;
             }
         } catch (Exception e) {
             loge("()->生成final字段" + cls + "失败");
             e.printStackTrace();
         }
+        return getImpl(cls, parentField);
+    }
+
+    private Object getImpl(Class<?> cls, Field parentField) {
         List<Rule> rules = mMockOptions.getRules();
         for (Rule rule : rules) {
             Object impl = rule.getImpl(cls, parentField == null ? null : parentField.getName());
@@ -321,22 +335,16 @@ public class MockParse implements TypeParser{
             for (Field f : fields) {
                 try {
                     Type genericType = f.getGenericType();
-                    if (hasMockAnnotation(f)) {
-                        logi("()->包含@Mock，需要对注解进行解析");
-                        if (genericType instanceof ParameterizedType) {
-                            Type rawType = ((ParameterizedType) genericType).getRawType();
-                            if (rawType instanceof Class) {
-                                handleMockFieldType(obj, (Class<?>) rawType, f);
-                            } else {
-                                handleFieldType(f, obj);
-                            }
-                        } else if (genericType instanceof Class) {
-                            handleMockFieldType(obj, (Class<?>) genericType, f);
+                    if (genericType instanceof ParameterizedType) {
+                        Type rawType = ((ParameterizedType) genericType).getRawType();
+                        if (rawType instanceof Class) {
+                            handleMockFieldType(obj, (Class<?>) rawType, f);
                         } else {
                             handleFieldType(f, obj);
                         }
+                    } else if (genericType instanceof Class) {
+                        handleMockFieldType(obj, (Class<?>) genericType, f);
                     } else {
-                        logi("()->不包含@Mock，直接处理字段类型");
                         handleFieldType(f, obj);
                     }
                 } catch (Exception e) {
@@ -349,7 +357,7 @@ public class MockParse implements TypeParser{
     }
 
     private void handleMockFieldType(Object obj, Class<?> cls, Field f) throws IllegalAccessException {
-        Object fieldData = getMockFieldData(cls, f.getAnnotation(Mock.class));
+        Object fieldData = getMockFieldData(cls, f);
         if (fieldData == null) {
             logi("()->解析mock注解失败，使用默认方式");
             handleFieldType(f, obj);
@@ -370,10 +378,6 @@ public class MockParse implements TypeParser{
         } else {
             logi("()->字段：" + f.getName() + "已有默认值，无需处理");
         }
-    }
-
-    private boolean hasMockAnnotation(Field field) {
-        return field.getAnnotation(Mock.class) != null;
     }
 
     private Object setParentField(Object parent, Field parentField, Object value) {

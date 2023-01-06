@@ -161,7 +161,7 @@ public class MockOptions {
         /**
          * 添加数据mock的规则
          *
-         * @param rule 具体规则，如DictionaryRule、BaseTypeGenerator
+         * @param rule 具体规则，如MatchRule、BaseTypeGenerator
          */
         public Builder addRule(Rule rule) {
             this.rules.add(rule);

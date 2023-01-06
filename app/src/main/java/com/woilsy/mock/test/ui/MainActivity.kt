@@ -1,5 +1,6 @@
 package com.woilsy.mock.test.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,6 +17,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+@SuppressLint("CheckResult")
 class MainActivity : AppCompatActivity() {
 
     companion object {

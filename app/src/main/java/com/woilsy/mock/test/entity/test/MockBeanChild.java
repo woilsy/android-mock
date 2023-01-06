@@ -19,7 +19,7 @@ public class MockBeanChild {
 
     @Mock("[]")
     public List<String> ls;
-    
+
     public String avatar;
 
     public String address;
