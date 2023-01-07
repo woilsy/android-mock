@@ -110,7 +110,11 @@ public class MockService extends Service {
     private PendingIntent getIntent() {
         Intent intent = new Intent(this, MockService.class);
         intent.setAction(ACTION_TRANS_BASEURL);
-        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S){
+            return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_MUTABLE);
+        }else {
+            return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
     }
 
     @Override
