@@ -15,6 +15,7 @@ import com.woilsy.mock.parse.MockParse;
 import com.woilsy.mock.service.MockService;
 import com.woilsy.mock.strategy.MockPriority;
 import com.woilsy.mock.strategy.MockStrategy;
+import com.woilsy.mock.utils.ClassUtils;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
 import com.woilsy.mock.utils.NetUtil;
@@ -155,11 +156,13 @@ public class Mocker {
                     mDataStore.remove(httpInfo);
                     mDataStore.put(httpInfo, data);
                 } else {
+                    Type suspendType = ClassUtils.getSuspendFunctionReturnType(m);
+                    Type realType = suspendType == null ? m.getGenericReturnType() : suspendType;
                     if (mMockOptions.isDynamicAccess()) {
                         LogUtil.i("动态访问，只存储返回类型");
-                        mDataStore.put(httpInfo, new HttpData(m.getGenericReturnType()));
+                        mDataStore.put(httpInfo, new HttpData(realType));
                     } else {
-                        String json = parseType(m.getGenericReturnType());
+                        String json = parseType(realType);
                         LogUtil.i("非动态访问，数据:" + json);
                         mDataStore.put(httpInfo, new HttpData(json));
                     }

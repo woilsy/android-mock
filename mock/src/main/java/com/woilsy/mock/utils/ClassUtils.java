@@ -1,7 +1,13 @@
 package com.woilsy.mock.utils;
 
 import com.google.gson.internal.UnsafeAllocator;
+import kotlin.coroutines.Continuation;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.Date;
@@ -9,6 +15,36 @@ import java.util.Date;
 public class ClassUtils {
 
     private static final UnsafeAllocator UNSAFE_ALLOCATOR = UnsafeAllocator.create();
+
+    @Nullable
+    public static Type getSuspendFunctionReturnType(Method method) {
+        if (method.getGenericReturnType() == Object.class) {
+            Type[] types = method.getGenericParameterTypes();
+            for (Type parameterType : types) {
+                if (parameterType instanceof ParameterizedType) {
+                    ParameterizedType params = (ParameterizedType) parameterType;
+                    Type rawType = params.getRawType();
+                    try {
+                        if (rawType == Continuation.class) {
+                            Type[] actualTypeArguments = params.getActualTypeArguments();
+                            if (actualTypeArguments.length > 0 && actualTypeArguments[0] instanceof WildcardType) {
+                                WildcardType wildcardType = (WildcardType) actualTypeArguments[0];
+                                Type[] lowerBounds = wildcardType.getLowerBounds();
+                                if (lowerBounds.length > 0) {
+                                    return lowerBounds[0];
+                                } else {
+                                    return wildcardType;
+                                }
+                            }
+                        }
+                    }catch (NoClassDefFoundError ignored){
+
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     public static Class<?> getEncapsulationType(Class<?> cls) {
         String name = cls.getName();
