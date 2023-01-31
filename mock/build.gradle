@@ -32,7 +32,7 @@ dependencies {
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation 'com.koushikdutta.async:androidasync:2.2.1'
-    debugImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
+    compileOnly  "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
 }
 
 apply from: "../upload.gradle"

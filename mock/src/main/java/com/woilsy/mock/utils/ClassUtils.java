@@ -2,7 +2,6 @@ package com.woilsy.mock.utils;
 
 import com.google.gson.internal.UnsafeAllocator;
 import kotlin.coroutines.Continuation;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -16,7 +15,6 @@ public class ClassUtils {
 
     private static final UnsafeAllocator UNSAFE_ALLOCATOR = UnsafeAllocator.create();
 
-    @Nullable
     public static Type getSuspendFunctionReturnType(Method method) {
         if (method.getGenericReturnType() == Object.class) {
             Type[] types = method.getGenericParameterTypes();
@@ -37,7 +35,7 @@ public class ClassUtils {
                                 }
                             }
                         }
-                    }catch (NoClassDefFoundError ignored){
+                    } catch (NoClassDefFoundError ignored) {
 
                     }
                 }
