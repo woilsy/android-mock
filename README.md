@@ -36,7 +36,7 @@ A：ResponseBody由于其本身是无法被静态解析的，能静态解析的�
 
 ### 简单使用
 
-**第一步，在Retrofit创建之前，调用（建议加入Buildconfig.debug判断）**
+**第一步，在Retrofit创建之前调用**
 
 `Mocker.init(Context context, MockOptions options, MockObj... objs)`  
 或者  
@@ -47,7 +47,7 @@ Context：为了启动服务和解析assets中的文件。
 MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置gson处理对象（在mockDate.class的时候，如果DateFormat不一致，会导致解析失败）。  
 MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去原始地址同步返回请求结果。
 
-**第二步，将MockInterceptor添加到拦截器中（建议加入Buildconfig.debug判断）**  
+**第二步，将MockInterceptor添加到拦截器中**  
 OkHttpClient.Builder.addInterceptor(new MockInterceptor()));  
 
 **到此接入完成~**
