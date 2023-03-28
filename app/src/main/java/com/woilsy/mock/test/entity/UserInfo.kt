@@ -6,6 +6,10 @@ data class UserInfo(
     @Mock("我是xxx")
     val nickName: String,
     val avatar: String,
+
+    @Mock("[\"icon1.png\",\"icon2.png\"]")
+    val icons: List<String>,
+
     val address: String,
     @MockStringRange("1", "2", "3")
     val aaa: String,
@@ -38,4 +42,4 @@ data class UserInfo(
     @MockLongRange(from = 100, to = 111)
     val k: Long,
 
-)
+    )

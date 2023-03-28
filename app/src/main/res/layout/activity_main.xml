@@ -25,68 +25,68 @@
             android:text="动态url(POST)"
             android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="login"-->
-<!--            android:text="Json类型(POST)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="login"
+            android:text="Json类型(POST)"
+            android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="update"-->
-<!--            android:text="表单类型(POST FORM)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="update"
+            android:text="表单类型(POST FORM)"
+            android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="getUserInfo"-->
-<!--            android:text="路径组合url(GET)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="getUserInfo"
+                android:text="路径组合url(GET)"
+                android:textAllCaps="false"/>
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="register"-->
-<!--            android:text="返回类型为ResponseBody且无DataSource(PUT)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="register"
+            android:text="返回类型为ResponseBody且无DataSource(PUT)"
+            android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="logout"-->
-<!--            android:text="返回类型为object(POST)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="logout"
+            android:text="返回类型为object(POST)"
+            android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="redirectRequest"-->
-<!--            android:text="排除部分接口(GET)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="redirectRequest"
+            android:text="排除部分接口(GET)"
+            android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="delete"-->
-<!--            android:text="多路径组合url(DELETE)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="delete"
+            android:text="多路径组合url(DELETE)"
+            android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="singleGeneric"-->
-<!--            android:text="单泛型嵌套(POST)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="singleGeneric"
+            android:text="单泛型嵌套(POST)"
+            android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="multipleGeneric"-->
-<!--            android:text="多泛型嵌套(GET)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="multipleGeneric"
+            android:text="多泛型嵌套(GET)"
+            android:textAllCaps="false" />
 
         <Button
             android:layout_width="match_parent"
@@ -95,12 +95,12 @@
             android:text="普通String列表(GET)"
             android:textAllCaps="false" />
 
-<!--        <Button-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:onClick="getUserList"-->
-<!--            android:text="用户列表(GET)"-->
-<!--            android:textAllCaps="false" />-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="getUserList"
+            android:text="用户列表(GET)"
+            android:textAllCaps="false" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
