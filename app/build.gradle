@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 32
+    compileSdk app_target_sdk
 
     defaultConfig {
         applicationId "com.woilsy.mock"
-        minSdkVersion 21
-        targetSdkVersion 32
+        minSdk app_min_sdk
+        targetSdk app_target_sdk
         versionCode 1
         versionName "1.0.0"
 
@@ -31,7 +31,7 @@ android {
     }
 }
 
-configurations.all {
+configurations.configureEach {
     //检查远程依赖是否存在更新
     resolutionStrategy.cacheChangingModulesFor 1 * 60, 'seconds'
     // 采用动态版本声明的依赖缓存1分钟
@@ -41,10 +41,10 @@ configurations.all {
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.3.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     //保持依赖一致
     implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'

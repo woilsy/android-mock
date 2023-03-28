@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 
 android {
 
-    compileSdkVersion 32
+    compileSdk app_target_sdk
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 32
+        minSdk app_min_sdk
+        targetSdk app_target_sdk
         versionCode 1
         versionName "1.0.0"
         consumerProguardFiles "consumer-rules.pro"
@@ -32,7 +32,7 @@ dependencies {
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation 'com.koushikdutta.async:androidasync:2.2.1'
-    compileOnly  "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
+    compileOnly  "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1"
 }
 
 apply from: "../upload.gradle"
