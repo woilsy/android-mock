@@ -1,34 +1,17 @@
 package com.woilsy.mock.test.api;
 
 import com.woilsy.mock.annotations.MockExclude;
-import com.woilsy.mock.test.entity.test.A;
-import com.woilsy.mock.test.entity.test.B;
-import com.woilsy.mock.test.entity.test.C;
-import com.woilsy.mock.test.entity.test.D;
-import com.woilsy.mock.test.entity.test.E;
-import com.woilsy.mock.test.entity.HttpResult;
-import com.woilsy.mock.test.entity.LoginRequest;
-import com.woilsy.mock.test.entity.LoginResponse;
-import com.woilsy.mock.test.entity.PageBean;
-import com.woilsy.mock.test.entity.RegisterRequest;
-import com.woilsy.mock.test.entity.UserInfo;
-
-import java.util.List;
-
+import com.woilsy.mock.annotations.MockObj;
+import com.woilsy.mock.test.entity.*;
+import com.woilsy.mock.test.entity.test.*;
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.DELETE;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.PUT;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
-import retrofit2.http.Url;
+import retrofit2.http.*;
 
+import java.util.List;
+
+@MockObj
 public interface ApiService {
 
     @GET
@@ -36,7 +19,7 @@ public interface ApiService {
 
     @POST
     @FormUrlEncoded
-    Call<ResponseBody> test(@Url String url, @Field("xxx") String a);
+    Call<List<String>> test(@Url String url, @Field("xxx") String a);
 
     @POST("/user/login")
     Observable<HttpResult<LoginResponse>> login(@Body LoginRequest request);

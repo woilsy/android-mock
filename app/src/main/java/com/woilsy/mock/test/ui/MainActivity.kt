@@ -45,13 +45,13 @@ class MainActivity : AppCompatActivity() {
 
     fun testRequest2(view: View) {
         getApiService()
-            .test(Mocker.getMockBaseUrl(), "123")
-            .enqueue(object : Callback<ResponseBody?> {
-                override fun onResponse(p0: Call<ResponseBody?>, p1: Response<ResponseBody?>) {
+            .test(Mocker.getMockBaseUrl() + "/hello", "123")
+            .enqueue(object : Callback<List<String>?> {
+                override fun onResponse(p0: Call<List<String>?>, p1: Response<List<String>?>) {
                     Log.d(TAG, "onResponse: $p1")
                 }
 
-                override fun onFailure(p0: Call<ResponseBody?>, p1: Throwable) {
+                override fun onFailure(p0: Call<List<String>?>, p1: Throwable) {
                     Log.e(TAG, "onFailure: ", p1)
                 }
             })
