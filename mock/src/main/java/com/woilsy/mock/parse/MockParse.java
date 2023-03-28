@@ -165,16 +165,26 @@ public class MockParse implements TypeParser {
     private void handleCollection(ParameterizedType type, Object parent, Collection<Object> collection) {
         Type[] actualTypeArguments = type.getActualTypeArguments();
         if (actualTypeArguments.length == 1) {
-            int mockListCount = mMockOptions.getMockListCount();
             boolean mockListCountRandom = mMockOptions.isMockListCountRandom();
-            int randomValue = random.nextInt(mockListCount);//0-(mockListCount-1)
-            if (randomValue != 0) {
-                int size = mockListCountRandom ? (randomValue + 1) : mockListCount;
+            int mockListSize;
+            if (mockListCountRandom) {
+                int minMockListSize = mMockOptions.getMinMockListSize();
+                int maxMockListSize = mMockOptions.getMaxMockListSize();
+                if (minMockListSize > maxMockListSize) {
+                    minMockListSize = mMockOptions.getMaxMockListSize();
+                    maxMockListSize = mMockOptions.getMinMockListSize();
+                }
+                int range = maxMockListSize - minMockListSize + 1;
+                mockListSize = random.nextInt(range) + minMockListSize;//[0+min,max]
+            } else {
+                mockListSize = mMockOptions.getMockListSize();
+            }
+            if (mockListSize != 0) {
                 //由于getAndRemoveType会移除value，导致只能获取一次示例 所以在此基础上循环生成第一个就好
                 Object one = handleType(actualTypeArguments[0], parent, null, true);
                 if (one != null) {
                     collection.add(one);
-                    for (int i = 1; i < size; i++) {
+                    for (int i = 1; i < mockListSize; i++) {
                         Object o = handleType(one.getClass(), null, null, true);
                         if (o != null) {
                             collection.add(o);
@@ -298,13 +308,11 @@ public class MockParse implements TypeParser {
     private Object newClassInstance(Class<?> cls) {
         try {//默认构造器创建
             Constructor<?>[] constructors = cls.getDeclaredConstructors();
-            if (constructors.length > 0) {
-                for (Constructor<?> constructor : constructors) {
-                    int len = constructor.getParameterTypes().length;
-                    if (len == 0) {
-                        constructor.setAccessible(true);
-                        return constructor.newInstance();
-                    }
+            for (Constructor<?> constructor : constructors) {
+                int len = constructor.getParameterTypes().length;
+                if (len == 0) {
+                    constructor.setAccessible(true);
+                    return constructor.newInstance();
                 }
             }
         } catch (Exception e) {//使用不安全的方式创建

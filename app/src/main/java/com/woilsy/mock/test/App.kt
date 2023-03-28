@@ -3,13 +3,9 @@ package com.woilsy.mock.test
 import android.app.Application
 import com.woilsy.mock.Mocker
 import com.woilsy.mock.data.AssetFileDataSource
-import com.woilsy.mock.entity.MockGroup
 import com.woilsy.mock.generate.BaseTypeGenerator
 import com.woilsy.mock.generate.MatchRule
 import com.woilsy.mock.options.MockOptions
-import com.woilsy.mock.strategy.MockStrategy
-import com.woilsy.mock.test.api.ApiService
-import com.woilsy.mock.test.api.ApiService2
 import com.woilsy.mock.test.http.HttpManager
 
 class App : Application() {
@@ -20,18 +16,14 @@ class App : Application() {
         Mocker.init(
             this,
             MockOptions.Builder()
-                .setDebug(true)
-                .setMockListCount(4, true)
+                .enableLog(false)
+                .enableNotification(false)
+                .setMockListRandomSize(1, 3)
                 .setDynamicAccess(true, false)
                 .addRule(MatchRule())
                 .addRule(BaseTypeGenerator())
                 .setDataSource(AssetFileDataSource(this, "mock.json"))
-                .build(),
-            MockGroup(
-                MockStrategy.EXCLUDE,
-                ApiService::class.java,
-                ApiService2::class.java
-            )
+                .build()
         )
         //初始化http
         HttpManager.init(this, "https://www.wanandroid.com")
