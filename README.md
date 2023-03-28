@@ -3,7 +3,15 @@
 
 #### 介绍
 
-每一次的开发迭代客户端总会依赖后端接口，有时候后端给了接口文档，但开发进度却遥遥无期，有时仅仅是一个很简单的获取一个Boolean或者Int这样的简单数据也需要后端返回，这样的开发效率是很慢的。而手动去创建一些mock数据又费时费力，关键是接口好了以后还得重新按照网络请求的形式去获取，本框架就是为了解决这个问题。
+每一次的开发迭代客户端总会依赖后端接口，有时候后端给了接口文档，但开发进度却遥遥无期。而手动去创建一些mock数据或者搭建mock服务器又费时费力，关键是接口好了以后还得重新按照网络请求的形式去获取，本工具就是为了解决这个问题，它有以下特点。  
+* 规范请求流程，减少后续调试修改成本。  
+* Bean类数据不用多次定义。  
+* 可根据需要自行定义字段的固定范围或者数值范围，@MockIntRange、@MockStringRange等。
+* 指定List数据的固定数量，或者最小、最大随机数量，setMockListRandomSize()。
+* 可自定义规则做解析和返回，addRule()。
+* 支持每次请求都生成新的数据，setDynamicAccess()。
+* 支持多种方式的手动Mock数据源进行导入，setDataSource()。
+* 支持不同的解析策略MockStrategy，搭配@MockExclude、@MockInclude更灵活。
 
 **Q：如何返回mock数据？**  
 A：Android的网络请求目前以Retrofit为主流，基本上都是REST风格的接口形式存在，它本身是一个网络请求，所以得按照网络请求的方式返回数据，否则正式接入后就无法做到一键切换。那么我们可以在本地自建一个HTTP服务器，[AndroidAsync](https://github.com/koush/AndroidAsync)正好符合这个需求，通过集成，可以创建一个本地服务器，并且还可以获取到客户端发起的请求数据，也就可以自行根据一些策略来返回想要的数据了。
@@ -13,10 +21,6 @@ A：对于Retrofit形式的请求，一般都是在函数的返回值中以Obser
 
 **Q：支持哪些方法？**  
 A：目前支持GET、POST、PUT、DELETE。
-
-**Q：静态url？动态url？**  
-A：静态url是以@GET("url")这种能够直接在注解中获取到的url，能直接获取的url。而@Get Call\<ResponseBody\> test(@Url String url)
-这种在运行时才能获取到具体请求地址的动态url，暂时没办法直接拿到它的值，除非可以监听函数执行，并能拿到参数（AOP是可以实现的，去监听Retrofit的Invoke过程，函数调用时再进行数据导入，但代价是还需要接入插件到Project中）。
 
 **Q：Call\<ResponseBody\>返回如何处理？是否支持协程？**  
 A：ResponseBody由于其本身是无法被静态解析的，能静态解析的都是可序列化的Bean类(List、Map、class)
@@ -40,25 +44,27 @@ implementation "com.woilsy:android-mock:latest.version"
 
 ### 简单使用
 
-**第一步，在Retrofit创建之前调用**
+**第一步，初始化**
 
 ```
-Mocker.init(context, options, objs)
-```
-或
-```
-Mocker.init(context, options, groups)
+Mocker.init(context, options)
 ```
 
-**参数说明**   
+**参数说明**  
 Context：为了启动服务和解析assets中的文件。  
-MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置gson处理对象（在mockDate.class的时候，如果DateFormat不一致，会导致解析失败）。  
-MockObj：待mock的对象，包含Class和一个MockStrategy策略，Class就是网络请求用的定义的接口，而MockStrategy则是决定是默认进行解析还是默认不解析的mock策略。被排除和不被包含的Method，将会访问去原始地址同步返回请求结果。
+MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置gson处理对象（在mockDate.class的时候，如果DateFormat不一致，会导致解析失败）。
 
 **第二步，将MockInterceptor添加到现有okHttpClient的拦截器中**
 
 ```
 OkHttpClient.Builder.addInterceptor(new MockInterceptor()));
+```
+**第三步，使用@MockObj标记需要被mock的接口，如示例中的ApiService，还可以指定其MockStrategy。**
+```
+@MockObj
+public interface ApiService {
+    ...
+}
 ```
 
 **到此接入完成~**
@@ -105,9 +111,8 @@ public class Data{
 @Mock优先级高于默认值，默认值高于自动规则。  
 @Mock注解可以指定字段具体的mock数据，以及类型，可以为基本类型，也可以为Json数据类型。
 
-补充：  
-1，点击通知栏，可以切换使用本地地址和服务器地址，且持续生效。  
-2，更多内容请查看demo和源码。
+
+**更多内容请查看demo和源码。**
 
 #### 参与贡献
 
