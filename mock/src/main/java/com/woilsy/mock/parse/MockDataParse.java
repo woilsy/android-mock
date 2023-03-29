@@ -13,6 +13,7 @@ import com.woilsy.mock.strategy.MockStrategy;
 import com.woilsy.mock.utils.ClassUtils;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -31,6 +32,7 @@ public class MockDataParse {
         }
     }
 
+    @Nullable
     public static String getHttpData(String path, String method) {
         HttpInfo httpInfo = findHttpInfo(path, method);
         if (httpInfo == null) {
@@ -40,6 +42,7 @@ public class MockDataParse {
         }
     }
 
+    @Nullable
     public static HttpInfo findHttpInfo(String encodedPath, String method) {
         //encodedPath是一个实际地址 例如 /op/globalModuleConfig/{location} 但其实际地址 /op/globalModuleConfig/5 所以需要进行匹配
         String[] split1 = encodedPath.split("/");
@@ -155,6 +158,7 @@ public class MockDataParse {
         parseMethod(m, getMockPriority(mockStrategy, m));
     }
 
+    @Nullable
     public static MockPriority getMockPriority(MockStrategy mockStrategy, Method m) {
         if (mockStrategy == MockStrategy.EXCLUDE) {
             MockExclude mockExclude = m.getAnnotation(MockExclude.class);

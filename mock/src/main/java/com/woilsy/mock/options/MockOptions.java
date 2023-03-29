@@ -15,54 +15,54 @@ import java.util.List;
 public class MockOptions {
 
     /**
-     * 生成规则
-     */
-    private List<Rule> rules;
-
-    /**
-     * mock数据来源
-     */
-    private DataSource[] dataSources;
-
-    /**
      * mock服务器监听端口
      */
     private int port;
 
     /**
+     * 生成规则
+     */
+    private final List<Rule> rules;
+
+    /**
+     * mock数据来源
+     */
+    private final DataSource[] dataSources;
+
+    /**
      * 对于自动生成的bean数据，是否每次都重新生成访问
      */
-    private boolean dynamicAccess;
+    private final boolean dynamicAccess;
 
     /**
      * 是否显示解析log
      */
-    private boolean showParseLog;
+    private final boolean showParseLog;
 
     /**
      * 生成的List数量，默认为1
      */
-    private int mockListSize = 1;
+    private final int mockListSize;
 
     /**
      * 最小mock列表数量
      */
-    private int minMockListSize;
+    private final int minMockListSize;
 
     /**
      * 最大mock列表数量
      */
-    private int maxMockListSize;
+    private final int maxMockListSize;
 
     /**
      * 生产的List数量随机，从0到mockListCount
      */
-    private boolean mockListCountRandom = false;
+    private final boolean mockListCountRandom;
 
     /**
      * 是否开启通知栏
      */
-    private boolean enableNotification = false;
+    private final boolean enableNotification;
 
     public static MockOptions getDefault() {
         return new MockOptions
@@ -104,32 +104,12 @@ public class MockOptions {
         return mockListSize;
     }
 
-    public void setMockListSize(int mockListSize) {
-        this.mockListSize = mockListSize;
-    }
-
     public int getPort() {
         return port;
     }
 
-    public void setRules(List<Rule> rules) {
-        this.rules = rules;
-    }
-
-    public void setDataSources(DataSource[] dataSources) {
-        this.dataSources = dataSources;
-    }
-
     public boolean isShowParseLog() {
         return showParseLog;
-    }
-
-    public void setShowParseLog(boolean showParseLog) {
-        this.showParseLog = showParseLog;
-    }
-
-    public void setDynamicAccess(boolean dynamicAccess) {
-        this.dynamicAccess = dynamicAccess;
     }
 
     public boolean isDynamicAccess() {

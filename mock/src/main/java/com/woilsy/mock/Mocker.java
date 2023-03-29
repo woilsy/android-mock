@@ -17,6 +17,7 @@ import com.woilsy.mock.strategy.MockPriority;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
 import com.woilsy.mock.utils.NetUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -78,6 +79,7 @@ public class Mocker {
         MOCKER.initByOptions(context, options);
     }
 
+    @NotNull
     public static MockDataStore getMockDataStore() {
         if (MOCKER.mDataStore == null) {
             MOCKER.mDataStore = new MockDataStore(new MockParse(getMockOption()));
@@ -85,6 +87,7 @@ public class Mocker {
         return MOCKER.mDataStore;
     }
 
+    @NotNull
     public static MockOptions getMockOption() {
         if (MOCKER.mMockOptions == null) {
             MOCKER.mMockOptions = MockOptions.getDefault();
@@ -92,10 +95,12 @@ public class Mocker {
         return MOCKER.mMockOptions;
     }
 
+    @NotNull
     public static String getMockBaseUrl() {
         return MockDefault.formatMockUrl(getMockOption().getPort());
     }
 
+    @NotNull
     public static String getLocalUrl(Context context) {
         String ip = NetUtil.getIp(context);
         String host = ip == null ? MockDefault.HOST_NAME : ip;
