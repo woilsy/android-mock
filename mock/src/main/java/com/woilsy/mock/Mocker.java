@@ -1,6 +1,7 @@
 package com.woilsy.mock;
 
 import android.content.Context;
+
 import com.woilsy.mock.constants.HttpMethod;
 import com.woilsy.mock.constants.MockDataPriority;
 import com.woilsy.mock.constants.MockDefault;
@@ -17,6 +18,7 @@ import com.woilsy.mock.strategy.MockPriority;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.LogUtil;
 import com.woilsy.mock.utils.NetUtil;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -40,6 +42,11 @@ public class Mocker {
          * mock配置
          */
         private MockOptions mMockOptions;
+
+        /**
+         * 当前运行服务
+         */
+        private MockServerExecutor mockServerExecutor;
 
         private MockerInternal() {
 
@@ -65,11 +72,16 @@ public class Mocker {
                     }
                 }
             }
+            //如果已运行 先停止
+            if (mockServerExecutor != null) {
+                mockServerExecutor.stopMockServer();
+            }
             //开启服务或者不启动
             if (mMockOptions.isEnableNotification()) {
                 MockService.start(context, mMockOptions);
             } else {
-                new MockServerExecutor().runMockServer(mMockOptions.getPort());
+                mockServerExecutor = new MockServerExecutor();
+                mockServerExecutor.runMockServer(mMockOptions.getPort());
             }
         }
 

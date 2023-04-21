@@ -49,6 +49,7 @@ object HttpManager {
     }
 
     private fun initMockConfig(context: Context, builder: OkHttpClient.Builder) {
+        //可选 相当于更新MockOptions
         Mocker.init(
             context,
             MockOptions.Builder()
@@ -59,6 +60,7 @@ object HttpManager {
                 .addRule(MatchRule())
                 .addRule(BaseTypeGenerator())
                 .setDataSource(AssetFileDataSource(context, "mock.json"))
+                .setPort(9090)
                 .build()
         )
         builder.addInterceptor(MockInterceptor())

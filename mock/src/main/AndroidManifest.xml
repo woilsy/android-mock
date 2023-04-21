@@ -8,6 +8,9 @@
 
     <application android:usesCleartextTraffic="true">
         <service android:name=".service.MockService" />
+        <provider
+            android:name=".provider.MockInitProvider"
+            android:authorities="${applicationId}.mock" />
     </application>
 
 </manifest>

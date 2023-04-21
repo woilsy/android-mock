@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+
 import com.woilsy.mock.Mocker;
 import com.woilsy.mock.exe.MockServerExecutor;
 import com.woilsy.mock.options.MockOptions;
@@ -58,9 +59,10 @@ public class MockService extends Service {
     }
 
     private void startMockServer(int port) {
-        if (mockServerExecutor == null) {
-            mockServerExecutor = new MockServerExecutor();
+        if (mockServerExecutor != null) {
+            mockServerExecutor.stopMockServer();
         }
+        mockServerExecutor = new MockServerExecutor();
         mockServerExecutor.runMockServer(port);
     }
 

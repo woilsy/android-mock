@@ -29,7 +29,7 @@ But now, you only need to do the following things to forget about this trouble.
 [![](https://jitpack.io/v/com.woilsy/android-mock.svg)](https://jitpack.io/#com.woilsy/android-mock)  
 `implementation "com.woilsy:android-mock:latest.version"`
 
- **Step 3 Initialize the mock server**  
+ **Step 3 Initialize the mock server -optional**  
 
 `Mocker.init(Context context, MockOptions options)`   
 

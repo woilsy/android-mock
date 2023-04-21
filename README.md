@@ -44,7 +44,7 @@ implementation "com.woilsy:android-mock:latest.version"
 
 ### 简单使用
 
-**第一步，初始化**
+**第一步，初始化(可选，已在MockInitProvider中使用默认配置完成了初始化)**
 
 ```
 Mocker.init(context, options)
@@ -52,7 +52,7 @@ Mocker.init(context, options)
 
 **参数说明**  
 Context：为了启动服务和解析assets中的文件。  
-MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置gson处理对象（在mockDate.class的时候，如果DateFormat不一致，会导致解析失败）。
+MockOptions：进行mock相关的一些配置：开启日志、设置mock数据返回规则、设置gson处理对象（在mock Date.class的时候，如果DateFormat不一致，会导致解析失败）。
 
 **第二步，将MockInterceptor添加到现有okHttpClient的拦截器中**
 
