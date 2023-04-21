@@ -77,12 +77,8 @@ public interface ApiService {
 设置mock数据来源，setDataSource，优先级高于规则，比如将请求地址和返回数据写到assets目录文件中。  
 设置动态访问，setDynamicAccess，每次是否生成新的数据，如果为false，那么每次同一个地址会返回同样的数据。
 
-**2，策略。**  
-通过MockGroup或者MockObj，传入解析策略和具体mock的接口类对象，表示传入的接口类对象会被自动解析并mock，  
-可以通过策略（如MockStrategy.EXCLUDE）和策略注解（@MockExclude）配置。
-
-**3，使用。**  
-通过策略将被mock的接口类对象传入，根据策略在请求函数上加入@MockInclude或者@MockExclude，示例：
+**2，使用。**  
+通过@MockObj标记被mock的接口后，根据@MockObj中的策略配合请求函数加入@MockInclude或者@MockExclude，示例：
 
 ```kotlin
 @MockExclude  
@@ -92,7 +88,7 @@ fun invitePk(@Body pkCreateInfo: PkCreateInfo): Observable<BaseRsp<String>>
 
 这样访问网络时，会自动根据mock规则、mock数据来源等配置返回想要的数据。
 
-**4，自定义Mock数据**  
+**3，自定义Mock数据**  
 在Bean类中，还可以添加@Mock、@MockIntRange等注解，传入需要mock的数据，如以下
 ```java
 public class Data{
