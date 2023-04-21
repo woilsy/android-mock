@@ -7,11 +7,17 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.woilsy.mock.Mocker
 import com.woilsy.mock.test.R
+import com.woilsy.mock.test.api.ApiService2
 import com.woilsy.mock.test.entity.LoginRequest
 import com.woilsy.mock.test.entity.RegisterRequest
 import com.woilsy.mock.test.ext.getApiService
+import com.woilsy.mock.test.http.HttpManager
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -72,21 +78,6 @@ class MainActivity : AppCompatActivity() {
             )
     }
 
-    fun logout(view: View) {
-        getApiService()
-            .logout()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    Log.d(TAG, "logout: succeed $it")
-                },
-                {
-                    Log.e(TAG, "logout: error", it)
-                }
-            )
-    }
-
     fun getUserInfo(view: View) {
         getApiService()
             .getUserInfo("1", "missss")
@@ -128,36 +119,6 @@ class MainActivity : AppCompatActivity() {
                 },
                 {
                     Log.e(TAG, "delete: error", it)
-                }
-            )
-    }
-
-    fun singleGeneric(view: View) {
-        getApiService()
-            .singleGeneric()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    Log.d(TAG, "singleGeneric: succeed $it")
-                },
-                {
-                    Log.e(TAG, "singleGeneric: error", it)
-                }
-            )
-    }
-
-    fun multipleGeneric(view: View) {
-        getApiService()
-            .multipleGeneric()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    Log.d(TAG, "multipleGeneric: succeed $it")
-                },
-                {
-                    Log.e(TAG, "multipleGeneric: error", it)
                 }
             )
     }
@@ -220,6 +181,31 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "getUserList: ", it)
                 }
             )
+    }
+
+    fun suspend1(view: View) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val data = HttpManager.getProxyObject(ApiService2::class.java).method1()
+                Log.d(TAG, "suspend1: $data")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun suspend2(view: View) {
+        CoroutineScope(Dispatchers.IO).launch {
+            HttpManager
+                .getProxyObject(ApiService2::class.java)
+                .method2()
+                .catch {
+                    it.printStackTrace()
+                }
+                .collect {
+                    Log.d(TAG, "suspend2: $it")
+                }
+        }
     }
 
 }

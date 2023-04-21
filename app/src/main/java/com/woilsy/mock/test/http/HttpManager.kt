@@ -1,6 +1,7 @@
 package com.woilsy.mock.test.http
 
 import android.content.Context
+import com.coder.vincent.sharp_retrofit.call_adapter.flow.FlowCallAdapterFactory
 import com.google.gson.Gson
 import com.parkingwang.okhttp3.LogInterceptor.LogInterceptor
 import com.woilsy.mock.Mocker
@@ -43,8 +44,9 @@ object HttpManager {
         retrofit = Retrofit.Builder()
             .client(builder.build())
             .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create(Gson()))
+            .addCallAdapterFactory(FlowCallAdapterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(Gson()))
             .build()
     }
 
@@ -53,10 +55,10 @@ object HttpManager {
         Mocker.init(
             context,
             MockOptions.Builder()
-                .enableLog(false)
+                .enableLog(true)
                 .enableNotification(false)
                 .setMockListRandomSize(1, 3)
-                .setDynamicAccess(true, false)
+                .setDynamicAccess(true, true)
                 .addRule(MatchRule())
                 .addRule(BaseTypeGenerator())
                 .setDataSource(AssetFileDataSource(context, "mock.json"))

@@ -1,7 +1,6 @@
 package com.woilsy.mock.utils;
 
 import com.google.gson.internal.UnsafeAllocator;
-import kotlin.coroutines.Continuation;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -10,6 +9,8 @@ import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.Date;
+
+import kotlin.coroutines.Continuation;
 
 public class ClassUtils {
 
@@ -26,13 +27,7 @@ public class ClassUtils {
                         if (rawType == Continuation.class) {
                             Type[] actualTypeArguments = params.getActualTypeArguments();
                             if (actualTypeArguments.length > 0 && actualTypeArguments[0] instanceof WildcardType) {
-                                WildcardType wildcardType = (WildcardType) actualTypeArguments[0];
-                                Type[] lowerBounds = wildcardType.getLowerBounds();
-                                if (lowerBounds.length > 0) {
-                                    return lowerBounds[0];
-                                } else {
-                                    return wildcardType;
-                                }
+                                return (WildcardType) actualTypeArguments[0];
                             }
                         }
                     } catch (NoClassDefFoundError ignored) {

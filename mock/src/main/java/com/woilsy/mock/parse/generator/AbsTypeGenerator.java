@@ -3,6 +3,7 @@ package com.woilsy.mock.parse.generator;
 import com.woilsy.mock.Mocker;
 import com.woilsy.mock.parse.MockOptionsAgent;
 import com.woilsy.mock.utils.LogUtil;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -23,20 +24,19 @@ abstract class AbsTypeGenerator implements TypeGenerator {
         return mockOptionsAgent;
     }
 
-    protected Object setParentField(Object parent, Field parentField, Object value) {
-        if (parent == null || parentField == null) return null;
+    protected void setParentField(Object parent, Field parentField, Object value) {
+        if (parent == null || parentField == null) return;
         try {
             parentField.setAccessible(true);
             parentField.set(parent, value);
         } catch (Exception e) {
             loge("()->设置字段时出错:" + e.getMessage());
         }
-        return parent;
     }
 
-    protected Object superGenerateType(Type type, Object parent, Field parentField, boolean selfOrParent) {
+    protected Object superGenerateType(Type type, Field typeField,Object parent) {
         TypeGenerator typeGenerator = TypeParseChooser.findType(type, mockOptionsAgent);
-        return typeGenerator == null ? null : typeGenerator.generateType(type, parent, parentField, selfOrParent);
+        return typeGenerator == null ? null : typeGenerator.generateType(type, typeField,parent);
     }
 
     @NotNull

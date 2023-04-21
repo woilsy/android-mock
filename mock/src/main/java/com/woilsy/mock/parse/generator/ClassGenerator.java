@@ -1,6 +1,13 @@
 package com.woilsy.mock.parse.generator;
 
-import com.woilsy.mock.annotations.*;
+import com.woilsy.mock.annotations.Mock;
+import com.woilsy.mock.annotations.MockBooleanRange;
+import com.woilsy.mock.annotations.MockCharRange;
+import com.woilsy.mock.annotations.MockDoubleRange;
+import com.woilsy.mock.annotations.MockFloatRange;
+import com.woilsy.mock.annotations.MockIntRange;
+import com.woilsy.mock.annotations.MockLongRange;
+import com.woilsy.mock.annotations.MockStringRange;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.parse.MockOptionsAgent;
 import com.woilsy.mock.utils.ClassUtils;
@@ -21,9 +28,8 @@ public class ClassGenerator extends AbsTypeGenerator {
     }
 
     @Override
-    public Object generateType(Type type, Object parent, Field parentField, boolean selfOrParent) {
-        Object obj = handleObjFromCls((Class<?>) type, parentField);
-        return selfOrParent ? obj : setParentField(parent, parentField, obj);
+    public Object generateType(Type type, Field typeField, Object parent) {
+        return handleObjFromCls((Class<?>) type, typeField);
     }
 
     /**
@@ -34,8 +40,10 @@ public class ClassGenerator extends AbsTypeGenerator {
     private Object handleObjFromCls(Class<?> cls, Field parentField) {
         Object finalObj = getFinalObj(cls, parentField);
         if (finalObj == null) {//可变对象
-            logi("()->class类型，解析class后返回");
-            return getClsObj(cls);
+            logi("()->class类型，解析class后返回" + cls);
+            Object clsObj = getClsObj(cls);
+            logi("()->class类型，已解析class后返回" + cls);
+            return clsObj;
         } else {
             logi("()->final类型，直接返回:" + finalObj);
             return finalObj;
@@ -125,24 +133,25 @@ public class ClassGenerator extends AbsTypeGenerator {
     private void handleMockFieldType(Object obj, Class<?> cls, Field f) throws IllegalAccessException {
         Object fieldData = getMockFieldData(cls, f);
         if (fieldData == null) {
-            logi("()->解析mock注解失败，使用默认方式");
+            logi("()->没有mock注解数据，使用默认方式");
             handleFieldType(f, obj);
         } else {
-            logi("()->解析mock注解成功，直接赋值到字段中");
+            logi("()->解析mock注解成功，直接赋值到字段中" + f.getName());
             setParentField(obj, f, fieldData);
         }
     }
 
-    private void handleFieldType(Field f, Object obj) throws IllegalAccessException {
-        Type genericType = f.getGenericType();
-        f.setAccessible(true);
-        Object o = f.get(obj);
+    private void handleFieldType(Field field, Object parent) throws IllegalAccessException {
+        Type genericType = field.getGenericType();
+        field.setAccessible(true);
+        Object o = field.get(parent);
         if (o == null) {
-            logi("()->字段：" + f.getName() + " 类型:" + genericType + " start==>");
-            superGenerateType(genericType, obj, f, false);
-            logi("()->字段：" + f.getName() + " 类型:" + genericType + " end<==");
+            logi("()->字段：" + field.getName() + " 类型:" + genericType + " start==>");
+            Object ooo = superGenerateType(genericType, field, parent);
+            setParentField(parent, field, ooo);
+            logi("()->字段：" + field.getName() + " 类型:" + genericType + " end<==");
         } else {
-            logi("()->字段：" + f.getName() + "已有默认值，无需处理");
+            logi("()->字段：" + field.getName() + "已有默认值，无需处理");
         }
     }
 
@@ -191,10 +200,10 @@ public class ClassGenerator extends AbsTypeGenerator {
         return getImpl(cls, field);
     }
 
-    private Object getImpl(Class<?> cls, Field parentField) {
+    private Object getImpl(Class<?> cls, Field typeField) {
         List<Rule> rules = getMockOptions().getRules();
         for (Rule rule : rules) {
-            Object impl = rule.getImpl(cls, parentField == null ? null : parentField.getName());
+            Object impl = rule.getImpl(cls, typeField == null ? null : typeField.getName());
             if (impl != null) {
                 return impl;
             }

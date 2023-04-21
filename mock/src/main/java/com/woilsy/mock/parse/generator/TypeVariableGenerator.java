@@ -13,7 +13,7 @@ public class TypeVariableGenerator extends AbsTypeGenerator {
     }
 
     @Override
-    public Object generateType(Type type, Object parent, Field parentField, boolean selfOrParent) {
+    public Object generateType(Type type, Field typeField, Object parent) {
         /*
          * TypeVariable表示的是类型变量，它用来反映的是JVM编译该泛型前的信息，例如List<T>中的T就是类型变量，它在
          * 编译时需要被转换为一个具体的类型后才能正常使用。该接口常用的方法有3个，分别是：
@@ -26,13 +26,12 @@ public class TypeVariableGenerator extends AbsTypeGenerator {
             Type actType = getAndRemoveType(key);//尝试从map中获取原始类型
             if (actType != null) {
                 logi("()->尝试从clsTb中获取对象实际泛型类型" + actType);
-                Object obj = superGenerateType(actType, parent, parentField, true);
-                return selfOrParent ? obj : setParentField(parent, parentField, obj);
+                return superGenerateType(actType, typeField, parent);
             } else {
                 logi("()->从clsTb中获取对象实际泛型类型失败" + type);
             }
         } else {
-            logi("()->parent为null，无法处理:" + type);
+            logi("()->typeField为null，无法获取parent对象的实际泛型，" + type);
         }
         return null;
     }

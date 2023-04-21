@@ -48,6 +48,8 @@ dependencies {
     //保持依赖一致
     implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    //Flow CallAdapter
+    implementation "io.github.vincent-series:sharp-retrofit:2.0"
     //mock
     implementation project(path: ':mock')
     //log

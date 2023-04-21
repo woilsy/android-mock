@@ -3,7 +3,11 @@ package com.woilsy.mock.parse.generator;
 import com.woilsy.mock.parse.MockOptionsAgent;
 import com.woilsy.mock.utils.LogUtil;
 
-import java.lang.reflect.*;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +36,7 @@ public class TypeParseChooser {
             }
             return null;
         } else if (type instanceof WildcardType) {
-            /*
-             * 例如? extends Number 和 ? super Integer。
-             * Wildcard接口有两个方法，分别是：
-             * (1) Type[] getUpperBounds()——返回类型变量的上边界。
-             * (2) Type[] getLowerBounds()——返回类型变量的下边界。
-             */
-            if (mockOptionsAgent.isShowParseLog()) {
-                LogUtil.i("()->WildcardType类型" + type + "暂不处理");
-            }
-            return null;
+            return new WildcardTypeGenerator(mockOptionsAgent);
         } else {
             if (mockOptionsAgent.isShowParseLog()) {
                 LogUtil.i("()->暂不处理的类型:" + type);
