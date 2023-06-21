@@ -1,99 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="18dp"
-    tools:context=".ui.MainActivity">
+                                       xmlns:tools="http://schemas.android.com/tools"
+                                       android:layout_width="match_parent"
+                                       android:layout_height="match_parent"
+                                       android:padding="18dp"
+                                       tools:context=".ui.MainActivity">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <TextView
+                android:text="特殊场景请求"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="testRequest"
-            android:text="动态url(GET)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="register"
+                android:text="返回类型为ResponseBody且无DataSource(PUT)"
+                android:textAllCaps="false"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="testRequest2"
-            android:text="动态url(POST)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="redirectRequest"
+                android:text="部分接口不Mock(GET)"
+                android:textAllCaps="false"/>
+
+        <TextView
+                android:text="动态url请求"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="login"
-            android:text="Json类型(POST)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="testRequest"
+                android:text="动态url(GET)"
+                android:textAllCaps="false"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="update"
-            android:text="表单类型(POST FORM)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="testRequest2"
+                android:text="动态url(POST)"
+                android:textAllCaps="false"/>
+
+        <TextView
+                android:text="普通POST请求"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="getUserInfo"
-            android:text="路径组合url(GET)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="login"
+                android:text="Json类型(POST)"
+                android:textAllCaps="false"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="register"
-            android:text="返回类型为ResponseBody且无DataSource(PUT)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="update"
+                android:text="表单类型(POST FORM)"
+                android:textAllCaps="false"/>
+
+        <TextView
+                android:text="组合路径请求"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="redirectRequest"
-            android:text="部分接口不Mock(GET)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="getUserInfo"
+                android:text="路径组合url(GET)"
+                android:textAllCaps="false"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="delete"
-            android:text="多路径组合url(DELETE)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="delete"
+                android:text="多路径组合url(DELETE)"
+                android:textAllCaps="false"/>
+
+        <TextView
+                android:text="列表类型数据请求"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="getStringList"
-            android:text="普通String列表(GET)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="getStringList"
+                android:text="普通String列表(GET)"
+                android:textAllCaps="false"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="getUserList"
-            android:text="用户列表(GET)"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="getUserList"
+                android:text="用户列表(GET)"
+                android:textAllCaps="false"/>
+
+        <TextView
+                android:text="协程请求"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="suspend1"
-            android:text="协程直接返回"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="suspend1"
+                android:text="协程直接返回"
+                android:textAllCaps="false"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="suspend2"
-            android:text="协程flow"
-            android:textAllCaps="false" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="suspend2"
+                android:text="协程Flow"
+                android:textAllCaps="false"/>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

@@ -20,6 +20,7 @@ import com.woilsy.mock.utils.LogUtil;
 import com.woilsy.mock.utils.NetUtil;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class Mocker {
         private void initByOptions(Context context, MockOptions options) {
             this.mMockOptions = options == null ? MockOptions.getDefault() : options;
             this.mDataStore = new MockDataStore(new MockParse(mMockOptions));
-            //导入数据 最高优先级 其他方式均为次要优先级
+            //导入数据 优先级较高 其他方式均为次要优先级
             DataSource[] dataSources = mMockOptions.getDataSources();
             if (dataSources != null) {
                 for (DataSource dataSource : dataSources) {
@@ -78,16 +79,28 @@ public class Mocker {
             }
             //开启服务或者不启动
             if (mMockOptions.isEnableNotification()) {
-                MockService.start(context, mMockOptions);
+                if (context == null) {
+                    LogUtil.e("由于Context为null，无法开启MockService，将使用MockServerExecutor");
+                    initMockServer();
+                } else {
+                    MockService.start(context, mMockOptions);
+                }
             } else {
-                mockServerExecutor = new MockServerExecutor();
-                mockServerExecutor.runMockServer(mMockOptions.getPort());
+                initMockServer();
             }
         }
 
+        private void initMockServer() {
+            mockServerExecutor = new MockServerExecutor();
+            mockServerExecutor.runMockServer(mMockOptions.getPort());
+        }
     }
 
-    public static void init(Context context, MockOptions options) {
+    public static void init(MockOptions options) {
+        MOCKER.initByOptions(null, options);
+    }
+
+    public static void init(@Nullable Context context, MockOptions options) {
         MOCKER.initByOptions(context, options);
     }
 

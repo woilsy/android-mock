@@ -6,6 +6,7 @@ import com.woilsy.mock.parse.MockOptionsAgent;
 import com.woilsy.mock.utils.ClassUtils;
 import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.MockRangeUtil;
+import okhttp3.ResponseBody;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -64,6 +65,10 @@ public class ClassGenerator extends AbsTypeGenerator {
      * 通过class获取带有mock数据字段的新的实例
      */
     private Object generatorClsObj(Class<?> cls) {
+        if (!checkClass(cls)) {
+            loge("()->" + cls.getName() + "不支持创建，直接返回");
+            return null;
+        }
         Object obj = ClassUtils.newClassInstance(cls);
         if (obj != null) {
             Field[] fields = cls.getDeclaredFields();
@@ -85,9 +90,13 @@ public class ClassGenerator extends AbsTypeGenerator {
         return obj;
     }
 
+    private boolean checkClass(Class<?> cls) {
+        return cls != ResponseBody.class;
+    }
+
     private void handleField(Object obj, Type type, Field f) throws IllegalAccessException {
         if (type instanceof Class) {
-            if (checkField(f)){
+            if (checkField(f)) {
                 Object fieldData = getMockFieldData((Class<?>) type, f);
                 if (fieldData == null) {
                     logi("()->没有mock注解数据，使用默认方式");
