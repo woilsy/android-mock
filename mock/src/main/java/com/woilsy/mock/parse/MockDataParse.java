@@ -49,7 +49,8 @@ public class MockDataParse {
         Set<HttpInfo> httpInfos = Mocker.getMockDataStore().keySet();
         List<HttpInfo> matchList = new ArrayList<>();
         for (HttpInfo httpInfo : httpInfos) {
-            String path = httpInfo.getPath();
+            String hp = httpInfo.getPath();
+            String path = hp.startsWith("/") ? hp : "/" + hp;
             String[] split2 = path.split("/");
             int len = split2.length;
             if (split1.length == len) {//长度一致
@@ -76,20 +77,24 @@ public class MockDataParse {
     }
 
     private static void parseMethod(Method m, MockPriority mockPriority) {
-        LogUtil.i("====== 开始解析 " + m.getName() + " ======");
-        //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
-        HttpInfo httpInfo = HttpInfo.getHttpInfo(m, mockPriority);
-        if (httpInfo != null) {
-            String path = httpInfo.getPath();
-            if (path == null || path.isEmpty()) {//需要动态解析
-                LogUtil.i("暂不支持的url");
-            } else {
-                LogUtil.i("path:" + path);
-                //添加到集合
-                putMethodData(m, httpInfo);
+        if (mockPriority == null) {
+            LogUtil.i(m.getName() + "被标记为排除，不进行解析");
+        } else {
+            LogUtil.i("====== 开始解析 " + m.getName() + " ======");
+            //类型本身一般没有什么意义 需要注意的是该类型中的泛型 以及ResponseBody的处理
+            HttpInfo httpInfo = HttpInfo.getHttpInfo(m, mockPriority);
+            if (httpInfo != null) {
+                String path = httpInfo.getPath();
+                if (path == null || path.isEmpty()) {//需要动态解析
+                    LogUtil.i("暂不支持的url");
+                } else {
+                    LogUtil.i("path:" + path);
+                    //添加到集合
+                    putMethodData(m, httpInfo);
+                }
             }
+            LogUtil.i("====== 停止解析 " + m.getName() + " ======");
         }
-        LogUtil.i("====== 停止解析 " + m.getName() + " ======");
     }
 
     public static void putMethodData(Method m, HttpInfo httpInfo) {
@@ -146,7 +151,7 @@ public class MockDataParse {
 
     private static void parseClass(Class<?> cls, MockStrategy mockStrategy) {
         Method[] methods = cls.getMethods();
-        String ss = mockStrategy == MockStrategy.EXCLUDE ? "默认解析：除了被@MockExclude标记的函数都解析，其他Method将拦截" : "默认不解析：仅解析被@MockInclude标记的函数，其他Method将放行";
+        String ss = mockStrategy == MockStrategy.EXCLUDE ? "默认解析：除了被@MockExclude标记的函数都解析" : "默认不解析：仅解析被@MockInclude标记的函数";
         LogUtil.i(cls.getSimpleName() + "当前Method解析策略为->" + ss);
         for (Method m : methods) {
             parseMethod(mockStrategy, m);
