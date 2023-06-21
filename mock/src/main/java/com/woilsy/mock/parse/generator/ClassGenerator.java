@@ -1,13 +1,6 @@
 package com.woilsy.mock.parse.generator;
 
-import com.woilsy.mock.annotations.Mock;
-import com.woilsy.mock.annotations.MockBooleanRange;
-import com.woilsy.mock.annotations.MockCharRange;
-import com.woilsy.mock.annotations.MockDoubleRange;
-import com.woilsy.mock.annotations.MockFloatRange;
-import com.woilsy.mock.annotations.MockIntRange;
-import com.woilsy.mock.annotations.MockLongRange;
-import com.woilsy.mock.annotations.MockStringRange;
+import com.woilsy.mock.annotations.*;
 import com.woilsy.mock.generate.Rule;
 import com.woilsy.mock.parse.MockOptionsAgent;
 import com.woilsy.mock.utils.ClassUtils;
@@ -15,7 +8,6 @@ import com.woilsy.mock.utils.GsonUtil;
 import com.woilsy.mock.utils.MockRangeUtil;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -29,7 +21,7 @@ public class ClassGenerator extends AbsTypeGenerator {
 
     @Override
     public Object generateType(Type type, Field typeField, Object parent) {
-        return handleObjFromCls((Class<?>) type, typeField);
+        return generatorObjFromCls((Class<?>) type, typeField);
     }
 
     /**
@@ -37,11 +29,11 @@ public class ClassGenerator extends AbsTypeGenerator {
      *
      * @param parentField cls在父类中的字段对象，通过这个字段可以读取其注解以及创建后设置到该字段中。
      */
-    private Object handleObjFromCls(Class<?> cls, Field parentField) {
-        Object finalObj = getFinalObj(cls, parentField);
-        if (finalObj == null) {//可变对象
+    private Object generatorObjFromCls(Class<?> cls, Field parentField) {
+        Object finalObj = generatorFinalObj(cls, parentField);
+        if (finalObj == null) {//尝试解析对象
             logi("()->class类型，解析class后返回" + cls);
-            Object clsObj = getClsObj(cls);
+            Object clsObj = generatorClsObj(cls);
             logi("()->class类型，已解析class后返回" + cls);
             return clsObj;
         } else {
@@ -53,7 +45,7 @@ public class ClassGenerator extends AbsTypeGenerator {
     /**
      * 获取最终对象，比如String，Integer等类型的数据通过规则进行生成。
      */
-    private Object getFinalObj(Class<?> cls, Field parentField) {
+    private Object generatorFinalObj(Class<?> cls, Field parentField) {
         //纯粹的尝试获取Final字段 需要先判定是否为可解析类型。。。可解析时 直接返回 不可解析时返回null
         if (getMockOptions().getRules() == null) return null;
         try {
@@ -69,10 +61,10 @@ public class ClassGenerator extends AbsTypeGenerator {
     }
 
     /**
-     * 通过class获取带有mock数据字段的新的示例
+     * 通过class获取带有mock数据字段的新的实例
      */
-    private Object getClsObj(Class<?> cls) {
-        Object obj = newClassInstance(cls);
+    private Object generatorClsObj(Class<?> cls) {
+        Object obj = ClassUtils.newClassInstance(cls);
         if (obj != null) {
             Field[] fields = cls.getDeclaredFields();
             for (Field f : fields) {
@@ -80,15 +72,9 @@ public class ClassGenerator extends AbsTypeGenerator {
                     Type genericType = f.getGenericType();
                     if (genericType instanceof ParameterizedType) {
                         Type rawType = ((ParameterizedType) genericType).getRawType();
-                        if (rawType instanceof Class) {
-                            handleMockFieldType(obj, (Class<?>) rawType, f);
-                        } else {
-                            handleFieldType(f, obj);
-                        }
-                    } else if (genericType instanceof Class) {
-                        handleMockFieldType(obj, (Class<?>) genericType, f);
+                        handleField(obj, rawType, f);
                     } else {
-                        handleFieldType(f, obj);
+                        handleField(obj, genericType, f);
                     }
                 } catch (Exception e) {
                     loge("()->处理字段时出错");
@@ -99,45 +85,30 @@ public class ClassGenerator extends AbsTypeGenerator {
         return obj;
     }
 
-    /**
-     * 通过class生成一个对象
-     */
-    private Object newClassInstance(Class<?> cls) {
-        try {//默认构造器创建
-            Constructor<?>[] constructors = cls.getDeclaredConstructors();
-            for (Constructor<?> constructor : constructors) {
-                int len = constructor.getParameterTypes().length;
-                if (len == 0) {
-                    constructor.setAccessible(true);
-                    return constructor.newInstance();
+    private void handleField(Object obj, Type type, Field f) throws IllegalAccessException {
+        if (type instanceof Class) {
+            if (checkField(f)){
+                Object fieldData = getMockFieldData((Class<?>) type, f);
+                if (fieldData == null) {
+                    logi("()->没有mock注解数据，使用默认方式");
+                    handleFieldType(f, obj);
+                } else {
+                    logi("()->解析mock注解成功，直接赋值到字段中" + f.getName());
+                    setParentField(obj, f, fieldData);
                 }
             }
-        } catch (Exception e) {//使用不安全的方式创建
-            loge("()->构造器创建失败，尝试使用Unsafe创建:");
-        }
-        return unsafeCreate(cls);
-    }
-
-    /**
-     * 使用Gson UNSAFE方式直接操作内存创建对象
-     */
-    private Object unsafeCreate(Class<?> cls) {
-        try {
-            return ClassUtils.allocateInstance(cls);
-        } catch (Exception e2) {
-            loge("()->尝试使用Unsafe创建失败:" + e2.getMessage());
-            return null;
-        }
-    }
-
-    private void handleMockFieldType(Object obj, Class<?> cls, Field f) throws IllegalAccessException {
-        Object fieldData = getMockFieldData(cls, f);
-        if (fieldData == null) {
-            logi("()->没有mock注解数据，使用默认方式");
-            handleFieldType(f, obj);
         } else {
-            logi("()->解析mock注解成功，直接赋值到字段中" + f.getName());
-            setParentField(obj, f, fieldData);
+            handleFieldType(f, obj);
+        }
+    }
+
+    private boolean checkField(Field field) {
+        MockIgnore annotation = field.getAnnotation(MockIgnore.class);
+        if (annotation != null) {
+            logi("()->字段" + field.getName() + "被标记为排除");
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -166,17 +137,12 @@ public class ClassGenerator extends AbsTypeGenerator {
                 if (!data.isEmpty()) {
                     boolean isJsonObject = data.startsWith("{") && data.endsWith("}");
                     boolean isJsonArray = data.startsWith("[") && data.endsWith("]");
-                    if (isJsonObject) {
-                        logi("()->是个jsonObject类型，尝试解析 " + data);
+                    if (isJsonArray || isJsonObject) {
+                        String typeString = isJsonArray ? "JsonArray类型" : "JsonObject类型";
+                        logi("()->" + typeString + "，尝试解析 " + data);
                         Object jsonObject = GsonUtil.jsonToObj(data, cls);
                         if (jsonObject != null) {
                             return jsonObject;
-                        }
-                    } else if (isJsonArray) {
-                        logi("()->是个jsonArray类型，尝试解析 " + data);
-                        Object jsonArray = GsonUtil.jsonToObj(data, cls);
-                        if (jsonArray != null) {
-                            return jsonArray;
                         }
                     }
                     return ClassUtils.stringToClass(data, cls);
@@ -197,7 +163,7 @@ public class ClassGenerator extends AbsTypeGenerator {
                 return MockRangeUtil.stringRange((MockStringRange) annotation);
             }
         }
-        return getImpl(cls, field);
+        return null;
     }
 
     private Object getImpl(Class<?> cls, Field typeField) {

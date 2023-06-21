@@ -5,6 +5,7 @@ import com.woilsy.mock.annotations.*
 data class UserInfo(
     @Mock("我是xxx")
     val nickName: String,
+    @MockIgnore
     val avatar: String,
 
     @Mock("[\"icon1.png\",\"icon2.png\"]")

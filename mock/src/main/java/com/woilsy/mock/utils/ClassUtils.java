@@ -1,16 +1,12 @@
 package com.woilsy.mock.utils;
 
 import com.google.gson.internal.UnsafeAllocator;
+import kotlin.coroutines.Continuation;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.Date;
-
-import kotlin.coroutines.Continuation;
 
 public class ClassUtils {
 
@@ -106,6 +102,37 @@ public class ClassUtils {
         try {
             return UNSAFE_ALLOCATOR.newInstance(cls);
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 通过class生成一个对象
+     */
+    public static Object newClassInstance(Class<?> cls) {
+        try {//默认构造器创建
+            Constructor<?>[] constructors = cls.getDeclaredConstructors();
+            for (Constructor<?> constructor : constructors) {
+                int len = constructor.getParameterTypes().length;
+                if (len == 0) {
+                    constructor.setAccessible(true);
+                    return constructor.newInstance();
+                }
+            }
+        } catch (Exception e) {//使用不安全的方式创建
+            LogUtil.e("()->构造器创建失败，尝试使用Unsafe创建:");
+        }
+        return unsafeCreate(cls);
+    }
+
+    /**
+     * 使用Gson UNSAFE方式直接操作内存创建对象
+     */
+    public static Object unsafeCreate(Class<?> cls) {
+        try {
+            return ClassUtils.allocateInstance(cls);
+        } catch (Exception e2) {
+            LogUtil.e("()->尝试使用Unsafe创建失败:", e2);
             return null;
         }
     }
