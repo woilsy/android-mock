@@ -25,9 +25,6 @@ object HttpManager {
 
     private var retrofit: Retrofit? = null
 
-    /**
-     * @param context 需要它的原因在于有时候需要使用缓存技术
-     */
     fun init(context: Context, baseUrl: String) {
         val builder = OkHttpClient
             .Builder()
