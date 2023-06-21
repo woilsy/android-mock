@@ -2,6 +2,7 @@ package com.woilsy.mock.parse;
 
 import com.woilsy.mock.entity.HttpData;
 import com.woilsy.mock.entity.HttpInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -66,16 +67,19 @@ public final class MockDataStore implements TypeParser, Map<HttpInfo, HttpData> 
         httpDataMap.clear();
     }
 
+    @NotNull
     @Override
     public Set<HttpInfo> keySet() {
         return httpDataMap.keySet();
     }
 
+    @NotNull
     @Override
     public Collection<HttpData> values() {
         return httpDataMap.values();
     }
 
+    @NotNull
     @Override
     public Set<Entry<HttpInfo, HttpData>> entrySet() {
         return httpDataMap.entrySet();

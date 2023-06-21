@@ -86,29 +86,27 @@ public class MockInterceptor implements Interceptor {
         return chain.proceed(request);
     }
 
+    /**
+     * 将动态url类型的数据手动插入
+     *
+     * @param params     请求参数
+     * @param method     请求函数
+     * @param mockObj    请求接口对象
+     * @param methodName 请求类型，比如POST/GET，作为key的一部分，用于去重。
+     */
     private void putDynamicUrlData(List<?> params, Method method, MockObj mockObj, String methodName) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             Annotation[] annotations = parameterAnnotations[i];
             for (Annotation annotation : annotations) {
+                //Url注解本身作用不大 主要是通过它的索引去获取实际的参数值
                 if (annotation instanceof Url) {
                     String url = params.get(i).toString();
                     String key = url + methodName;
                     if (!dynamicUrls.contains(key) && URLUtil.isNetworkUrl(url)) {
                         dynamicUrls.add(key);
                         //根据规则 手动插入数据
-                        if (mockObj != null) {
-                            MockPriority mockPriority = MockDataParse.getMockPriority(mockObj.value(), method);
-                            String encodedPath = Uri.parse(url).getEncodedPath();
-                            if (mockPriority != null) {
-                                HttpInfo httpInfo = new HttpInfo(
-                                        HttpMethod.valueOf(methodName.toUpperCase()),
-                                        encodedPath,
-                                        MockPriority.DEFAULT
-                                );
-                                MockDataParse.putMethodData(method, httpInfo);
-                            }
-                        }
+                        insertMethodData(method, mockObj, methodName, url);
                     }
                     break;
                 }
@@ -116,6 +114,27 @@ public class MockInterceptor implements Interceptor {
         }
     }
 
+    /**
+     * 将该请求函数进行解析后插入其类型
+     */
+    private static void insertMethodData(Method method, MockObj mockObj, String methodName, String url) {
+        if (mockObj != null) {
+            MockPriority mockPriority = MockDataParse.getMockPriority(mockObj.value(), method);
+            String encodedPath = Uri.parse(url).getEncodedPath();
+            if (mockPriority != null) {
+                HttpInfo httpInfo = new HttpInfo(
+                        HttpMethod.valueOf(methodName.toUpperCase()),
+                        encodedPath,
+                        MockPriority.DEFAULT
+                );
+                MockDataParse.putMethodData(method, httpInfo);
+            }
+        }
+    }
+
+    /**
+     * 得到新的Request进行请求
+     */
     private Response getMockResponse(Chain chain, Request request, HttpUrl httpUrl) throws IOException {
         HttpUrl httpUrl1 = httpUrl
                 .newBuilder()

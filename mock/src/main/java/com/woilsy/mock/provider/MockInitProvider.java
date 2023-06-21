@@ -8,6 +8,9 @@ import android.net.Uri;
 import com.woilsy.mock.Mocker;
 import com.woilsy.mock.options.MockOptions;
 
+/**
+ * 用于初始化Mocker，初始化还需要添加拦截器才会完成。
+ */
 public class MockInitProvider extends ContentProvider {
 
     @Override

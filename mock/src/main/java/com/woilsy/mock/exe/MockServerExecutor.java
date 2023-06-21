@@ -11,6 +11,9 @@ import java.net.BindException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * 用于执行HttpServer
+ */
 public class MockServerExecutor {
 
     private HttpServer httpServer;

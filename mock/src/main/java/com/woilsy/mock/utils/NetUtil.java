@@ -19,7 +19,7 @@ public class NetUtil {
                 return ipAdd == 0 ? null : intToIp(ipAdd);
             }
         } catch (Exception e) {
-            Log.e("NetUtil", "getIp error");
+            Log.e("NetUtil", "getIp error", e);
         }
         return null;
     }

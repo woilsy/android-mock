@@ -23,7 +23,7 @@ public class ClassUtils {
                         if (rawType == Continuation.class) {
                             Type[] actualTypeArguments = params.getActualTypeArguments();
                             if (actualTypeArguments.length > 0 && actualTypeArguments[0] instanceof WildcardType) {
-                                return (WildcardType) actualTypeArguments[0];
+                                return actualTypeArguments[0];
                             }
                         }
                     } catch (NoClassDefFoundError ignored) {
@@ -120,7 +120,7 @@ public class ClassUtils {
                 }
             }
         } catch (Exception e) {//使用不安全的方式创建
-            LogUtil.e("()->构造器创建失败，尝试使用Unsafe创建:");
+            LogUtil.e("构造器创建失败，尝试使用Unsafe创建。");
         }
         return unsafeCreate(cls);
     }
@@ -132,7 +132,7 @@ public class ClassUtils {
         try {
             return ClassUtils.allocateInstance(cls);
         } catch (Exception e2) {
-            LogUtil.e("()->尝试使用Unsafe创建失败:", e2);
+            LogUtil.e("尝试使用Unsafe创建失败:", e2);
             return null;
         }
     }

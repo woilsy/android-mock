@@ -32,8 +32,8 @@ public class WildcardTypeGenerator extends AbsTypeGenerator {
      * 查找一个有用的类型
      */
     private Type findValidType(WildcardType wt) {
+        //先找lowerBounds
         Type[] lowerBounds = wt.getLowerBounds();
-        Type[] upperBounds = wt.getUpperBounds();
         Type lowerType = null;
         int invalidCount = 0;
         for (Type lowerBound : lowerBounds) {
@@ -43,10 +43,11 @@ public class WildcardTypeGenerator extends AbsTypeGenerator {
                 lowerType = lowerBound;
             }
         }
-        //如果上方不满足条件
+        //如果不满足条件 那么尝试去upperBounds中找
         if (lowerType == null || invalidCount > 0) {
             invalidCount = 0;
             Type upperType = null;
+            Type[] upperBounds = wt.getUpperBounds();
             for (Type upperBound : upperBounds) {
                 if (upperBound == Object.class) {
                     invalidCount++;

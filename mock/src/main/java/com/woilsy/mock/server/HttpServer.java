@@ -60,7 +60,7 @@ public class HttpServer implements IMockServer, HttpServerRequestCallback {
         if (data == null) {//部分情况没有mock数据，例如定义返回类型为ResponseBody且没有为其填充数据
             int code = 404;
             AsyncHttpServerResponse httpServerResponse = response.code(404);
-            String message = "没有找到" + path + "的mock数据，" + "错误原因：如果定义返回类型为非Bean类，那么需要定义DataSource";
+            String message = "没有找到" + path + "的mock数据，请在Logcat查看Mock日志";
             String sbJson = "{" + "\"code\"" + ":" + code + ",\"message\"" + ":\"" + message + "\"" + "}";
             httpServerResponse.send(sbJson);
         } else {
