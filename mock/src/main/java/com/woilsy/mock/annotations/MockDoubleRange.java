@@ -15,8 +15,14 @@ public @interface MockDoubleRange {
 
     double[] value() default {};
 
+    /**
+     *  the least value returned
+     */
     double from() default Double.MIN_VALUE;
 
+    /**
+     *  the upper bound (exclusive)
+     */
     double to() default Double.MAX_VALUE;
 
 }

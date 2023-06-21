@@ -15,8 +15,14 @@ public @interface MockFloatRange {
 
     float[] value() default {};
 
+    /**
+     *  the least value returned
+     */
     float from() default Float.MIN_VALUE;
 
+    /**
+     *  the upper bound (exclusive)
+     */
     float to() default Float.MAX_VALUE;
 
 }

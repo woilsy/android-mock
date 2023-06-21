@@ -41,8 +41,8 @@ public class MockRangeUtil {
         }
     }
 
-    public static char getRandomCharacter(char ch1, char ch2) {
-        return (char) (ch1 + RANDOM.nextDouble() * (ch2 - ch1 + 1));
+    public static char getRandomCharacter(char c1, char c2) {
+        return  (char) (c1 + RANDOM.nextInt((int) c2 - (int) c1));
     }
 
     public static int intRange(MockIntRange range) {
@@ -51,7 +51,7 @@ public class MockRangeUtil {
         if (value.length == 0) {
             int min = range.from();
             int max = range.to();
-            return RANDOM.nextInt((max - min) + 1) + min;
+            return RANDOM.nextInt(max - min) + min;
         } else {
             return value[RANDOM.nextInt(value.length)];
         }
@@ -63,7 +63,7 @@ public class MockRangeUtil {
         if (value.length == 0) {
             long min = range.from();
             long max = range.to();
-            return RANDOM.nextLong(min, max + 1);
+            return RANDOM.nextLong(min, max);
         } else {
             return value[RANDOM.nextInt(value.length)];
         }
