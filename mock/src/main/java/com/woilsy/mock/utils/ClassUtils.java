@@ -110,17 +110,20 @@ public class ClassUtils {
      * 通过class生成一个对象
      */
     public static Object newClassInstance(Class<?> cls) {
+        if (cls == null) return null;
+        String name = cls.getSimpleName();
         try {//默认构造器创建
             Constructor<?>[] constructors = cls.getDeclaredConstructors();
             for (Constructor<?> constructor : constructors) {
                 int len = constructor.getParameterTypes().length;
                 if (len == 0) {
                     constructor.setAccessible(true);
+                    LogUtil.i("已通过构造器创建->" + name);
                     return constructor.newInstance();
                 }
             }
         } catch (Exception e) {//使用不安全的方式创建
-            LogUtil.e("构造器创建失败，尝试使用Unsafe创建。");
+            LogUtil.e("构造器创建失败，尝试使用Unsafe创建->" + name);
         }
         return unsafeCreate(cls);
     }

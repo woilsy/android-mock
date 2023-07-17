@@ -32,6 +32,12 @@
                 android:text="部分接口不Mock(GET)"
                 android:textAllCaps="false"/>
 
+        <Button
+                android:layout_width="match_parent"
+                android:text="返回类型为Object"
+                android:onClick="getObject"
+                android:layout_height="wrap_content"/>
+
         <TextView
                 android:text="动态url请求"
                 android:textSize="16sp"

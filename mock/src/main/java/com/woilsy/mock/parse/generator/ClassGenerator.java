@@ -50,9 +50,11 @@ public class ClassGenerator extends AbsTypeGenerator {
         //纯粹的尝试获取Final字段 需要先判定是否为可解析类型。。。可解析时 直接返回 不可解析时返回null
         if (getMockOptions().getRules() == null) return null;
         try {
-            Object data = getMockFieldData(cls, parentField);
-            if (data != null) {//带mock注解，且解析出数据
-                return data;
+            if (parentField != null) {
+                Object data = getMockFieldData(cls, parentField.getAnnotations());
+                if (data != null) {//带mock注解，且解析出数据
+                    return data;
+                }
             }
         } catch (Exception e) {
             loge("()->生成final字段" + cls + "失败");
@@ -97,9 +99,9 @@ public class ClassGenerator extends AbsTypeGenerator {
     private void handleField(Object obj, Type type, Field f) throws IllegalAccessException {
         if (type instanceof Class) {
             if (checkField(f)) {
-                Object fieldData = getMockFieldData((Class<?>) type, f);
+                Object fieldData = getMockFieldData((Class<?>) type, f.getAnnotations());
                 if (fieldData == null) {
-                    logi("()->没有mock注解数据，使用默认方式");
+                    logi("()->" + f.getName() + "没有mock注解数据，使用默认方式");
                     handleFieldType(f, obj);
                 } else {
                     logi("()->解析mock注解成功，直接赋值到字段中" + f.getName());
@@ -135,10 +137,13 @@ public class ClassGenerator extends AbsTypeGenerator {
         }
     }
 
-    //只处理带Mock注解的情况，其他情况直接返回null表示没有通过该注解获取到内容
-    private Object getMockFieldData(Class<?> cls, Field field) {
-        if (field == null) return null;
-        Annotation[] annotations = field.getAnnotations();
+    /**
+     * 处理Mock系列注解
+     *
+     * @return 其他情况直接返回null表示没有通过该注解获取到内容
+     */
+    private Object getMockFieldData(Class<?> cls, Annotation[] annotations) {
+        if (annotations == null) return null;
         for (Annotation annotation : annotations) {
             if (annotation instanceof Mock) {
                 //如果data有值 尝试将其转换为对应的值 一般是基本类型从string转为xxx等，需要匹配cls
@@ -170,6 +175,11 @@ public class ClassGenerator extends AbsTypeGenerator {
                 return MockRangeUtil.longRange((MockLongRange) annotation);
             } else if (annotation instanceof MockStringRange) {
                 return MockRangeUtil.stringRange((MockStringRange) annotation);
+            } else if (annotation instanceof MockClass) {
+                Class<?> value = ((MockClass) annotation).value();
+                if (cls == Object.class) {
+                    return ClassUtils.newClassInstance(value);
+                }
             }
         }
         return null;

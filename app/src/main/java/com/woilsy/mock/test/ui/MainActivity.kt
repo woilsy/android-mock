@@ -208,4 +208,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun getObject(view: View) {
+        getApiService()
+            .anyData
+            .subscribe(
+                {
+                    Log.d(TAG, "getObject: ${it.data}")
+                }, {
+                    it.printStackTrace()
+                }
+            )
+    }
+
 }
