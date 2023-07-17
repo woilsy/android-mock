@@ -12,6 +12,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MockClass {
 
-    Class<?> value();
+    Class<?> value() default Object.class;
+
+    String className() default "";
 
 }

@@ -176,9 +176,16 @@ public class ClassGenerator extends AbsTypeGenerator {
             } else if (annotation instanceof MockStringRange) {
                 return MockRangeUtil.stringRange((MockStringRange) annotation);
             } else if (annotation instanceof MockClass) {
-                Class<?> value = ((MockClass) annotation).value();
+                MockClass mockClass = (MockClass) annotation;
+                //仅处理这一个场景
                 if (cls == Object.class) {
-                    return ClassUtils.newClassInstance(value);
+                    Class<?> value = mockClass.value();
+                    //仅有默认值 返回
+                    if (value == Object.class) {
+                        return ClassUtils.newClassInstance(mockClass.className());
+                    } else {
+                        return ClassUtils.newClassInstance(value);
+                    }
                 }
             }
         }

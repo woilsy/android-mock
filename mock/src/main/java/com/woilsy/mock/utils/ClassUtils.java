@@ -2,6 +2,7 @@ package com.woilsy.mock.utils;
 
 import com.google.gson.internal.UnsafeAllocator;
 import kotlin.coroutines.Continuation;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -60,6 +61,7 @@ public class ClassUtils {
         return cls;
     }
 
+    @Nullable
     public static Object stringToBaseType(String s, Class<?> cls) {
         Class<?> aClass = getEncapsulationType(cls);
         try {
@@ -90,6 +92,7 @@ public class ClassUtils {
         return null;
     }
 
+    @Nullable
     public static Object stringToClass(String s, Class<?> cls) {
         if (cls == String.class) {
             return s;
@@ -98,6 +101,7 @@ public class ClassUtils {
         }
     }
 
+    @Nullable
     public static <T> Object allocateInstance(Class<T> cls) {
         try {
             return UNSAFE_ALLOCATOR.newInstance(cls);
@@ -106,9 +110,21 @@ public class ClassUtils {
         }
     }
 
+    @Nullable
+    public static Object newClassInstance(String className) {
+        try {
+            if (className == null || className.isEmpty()) return null;
+            Class<?> aClass = Class.forName(className);
+            return newClassInstance(aClass);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
     /**
      * 通过class生成一个对象
      */
+    @Nullable
     public static Object newClassInstance(Class<?> cls) {
         if (cls == null) return null;
         String name = cls.getSimpleName();
@@ -131,6 +147,7 @@ public class ClassUtils {
     /**
      * 使用Gson UNSAFE方式直接操作内存创建对象
      */
+    @Nullable
     public static Object unsafeCreate(Class<?> cls) {
         try {
             return ClassUtils.allocateInstance(cls);
