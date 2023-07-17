@@ -64,10 +64,11 @@ public class ClassGenerator extends AbsTypeGenerator {
     }
 
     /**
-     * 通过class获取带有mock数据字段的新的实例
+     * 通过class获取带有mock数据字段的新的实例，如果一个class内部包含@Mock注解，需要通过它来生成对象。
      */
     private Object generatorClsObj(Class<?> cls) {
-        if (!checkClass(cls)) {
+        if (cls == null) return null;
+        if (cls == ResponseBody.class) {
             loge("()->" + cls.getName() + "不支持创建，直接返回");
             return null;
         }
@@ -90,10 +91,6 @@ public class ClassGenerator extends AbsTypeGenerator {
             }
         }
         return obj;
-    }
-
-    private boolean checkClass(Class<?> cls) {
-        return cls != ResponseBody.class;
     }
 
     private void handleField(Object obj, Type type, Field f) throws IllegalAccessException {
@@ -177,15 +174,17 @@ public class ClassGenerator extends AbsTypeGenerator {
                 return MockRangeUtil.stringRange((MockStringRange) annotation);
             } else if (annotation instanceof MockClass) {
                 MockClass mockClass = (MockClass) annotation;
-                //仅处理这一个场景
+                //仅处理这一个场景 生产的class对象 需要重新进入解析流程 不能直接通过ClassUtils直接返回
                 if (cls == Object.class) {
                     Class<?> value = mockClass.value();
                     //仅有默认值 返回
+                    Class<?> gClass = null;
                     if (value == Object.class) {
-                        return ClassUtils.newClassInstance(mockClass.className());
+                        gClass = ClassUtils.getClassByName(mockClass.className());
                     } else {
-                        return ClassUtils.newClassInstance(value);
+                        gClass = value;
                     }
+                    return generatorClsObj(gClass);
                 }
             }
         }

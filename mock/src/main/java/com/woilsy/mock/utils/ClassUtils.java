@@ -111,14 +111,18 @@ public class ClassUtils {
     }
 
     @Nullable
-    public static Object newClassInstance(String className) {
+    public static Class<?> getClassByName(String className) {
         try {
             if (className == null || className.isEmpty()) return null;
-            Class<?> aClass = Class.forName(className);
-            return newClassInstance(aClass);
+            return Class.forName(className);
         } catch (ClassNotFoundException e) {
             return null;
         }
+    }
+
+    @Nullable
+    public static Object newClassInstance(String className) {
+        return newClassInstance(getClassByName(className));
     }
 
     /**

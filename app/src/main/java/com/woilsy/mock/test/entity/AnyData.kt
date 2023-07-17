@@ -1,5 +1,6 @@
 package com.woilsy.mock.test.entity
 
+import com.woilsy.mock.annotations.Mock
 import com.woilsy.mock.annotations.MockClass
 
 /**
@@ -7,11 +8,12 @@ import com.woilsy.mock.annotations.MockClass
  */
 class AnyData(
     val type: Int,
-    @MockClass(Data1::class)
+    @MockClass(className = "com.woilsy.mock.test.entity.Data1")
     val data: Any,
 )
 
 data class Data1(
     val age: Int,
+    @Mock("我是自定义的数据")
     val name: String
 )
