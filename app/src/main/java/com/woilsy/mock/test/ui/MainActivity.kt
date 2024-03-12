@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.woilsy.mock.Mocker
+import com.woilsy.mock.debug.MockGetter
 import com.woilsy.mock.test.R
 import com.woilsy.mock.test.api.ApiService2
 import com.woilsy.mock.test.entity.LoginRequest
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     fun testRequest(view: View) {
         getApiService()
-            .test(Mocker.getMockBaseUrl())
+            .test(MockGetter.getMockBaseUrl())
             .enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(p0: Call<ResponseBody?>, p1: Response<ResponseBody?>) {
                     Log.d(TAG, "onResponse: $p1")
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
     fun testRequest2(view: View) {
         getApiService()
-            .test(Mocker.getMockBaseUrl() + "/hello", "123")
+            .test(MockGetter.getMockBaseUrl() + "/hello", "123")
             .enqueue(object : Callback<List<String>?> {
                 override fun onResponse(p0: Call<List<String>?>, p1: Response<List<String>?>) {
                     Log.d(TAG, "onResponse: $p1")
@@ -218,6 +218,10 @@ class MainActivity : AppCompatActivity() {
                     it.printStackTrace()
                 }
             )
+    }
+
+    fun test(view: View) {
+        Log.d(TAG, "test: 获取值为：" + MockGetter.getMockBaseUrl())
     }
 
 }

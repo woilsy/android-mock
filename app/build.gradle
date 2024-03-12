@@ -50,8 +50,13 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     //Flow CallAdapter
     implementation "io.github.vincent-series:sharp-retrofit:2.0"
-    //mock
     implementation project(path: ':mock')
+    debugImplementation project(':mock-debug')
+    //mock
+    //http
+    def retrofitVersion = "2.9.0"
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     //log
     implementation "com.parkingwang:okhttp3-loginterceptor:0.5"
 }

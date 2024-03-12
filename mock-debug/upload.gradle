@@ -10,7 +10,7 @@ afterEvaluate {
                 from components.release
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.woilsy'
-                artifactId = 'android-mock'
+                artifactId = 'android-mock-debug'
                 version = '1.0.0'
             }
         }

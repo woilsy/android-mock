@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'com.woilsy.mock.debug'
+    namespace 'com.woilsy.mock.annotation'
 
     compileSdk app_target_sdk
 
@@ -32,8 +32,6 @@ android {
 
 dependencies {
 
-    api project(':mock-annotation')
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-}
 
-apply from: "./upload.gradle"
+
+}

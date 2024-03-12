@@ -1,5 +1,6 @@
 package com.woilsy.mock.annotations;
 
+
 import com.woilsy.mock.strategy.MockPriority;
 
 import java.lang.annotation.ElementType;

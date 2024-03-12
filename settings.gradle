@@ -17,4 +17,6 @@ dependencyResolutionManagement {
 
 include ':app'
 rootProject.name = "AndroidMock"
+include ':mock-debug'
 include ':mock'
+include ':mock-annotation'

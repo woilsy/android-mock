@@ -4,12 +4,7 @@ import android.content.Context
 import com.coder.vincent.sharp_retrofit.call_adapter.flow.FlowCallAdapterFactory
 import com.google.gson.Gson
 import com.parkingwang.okhttp3.LogInterceptor.LogInterceptor
-import com.woilsy.mock.Mocker
-import com.woilsy.mock.data.AssetFileDataSource
-import com.woilsy.mock.generate.BaseTypeGenerator
-import com.woilsy.mock.generate.MatchRule
-import com.woilsy.mock.interceptor.MockInterceptor
-import com.woilsy.mock.options.MockOptions
+import com.woilsy.mock.debug.MockGetter
 import com.woilsy.mock.test.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -48,21 +43,21 @@ object HttpManager {
     }
 
     private fun initMockConfig(context: Context, builder: OkHttpClient.Builder) {
-        //可选 相当于更新MockOptions
-        Mocker.init(
-            context,
-            MockOptions.Builder()
-                .enableLog(true)
-                .enableNotification(false)
-                .setMockListRandomSize(1, 3)
-                .setDynamicAccess(true, true)
-                .addRule(MatchRule())
-                .addRule(BaseTypeGenerator())
-                .setDataSource(AssetFileDataSource(context, "mock.json"))
-                .setPort(9090)
-                .build()
-        )
-        builder.addInterceptor(MockInterceptor())
+//        //可选 相当于更新MockOptions
+//        Mocker.init(
+//            context,
+//            MockOptions.Builder()
+//                .enableLog(true)
+//                .enableNotification(false)
+//                .setMockListRandomSize(1, 3)
+//                .setDynamicAccess(true, true)
+//                .addRule(MatchRule())
+//                .addRule(BaseTypeGenerator())
+//                .setDataSource(AssetFileDataSource(context, "mock.json"))
+//                .setPort(9090)
+//                .build()
+//        )
+        builder.addInterceptor(MockGetter.getMockInterceptor())
     }
 
     @Suppress("UNCHECKED_CAST")

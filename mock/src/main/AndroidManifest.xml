@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <application android:usesCleartextTraffic="true">
-        <service android:name=".service.MockService" />
+    <application>
         <provider
-            android:name=".provider.MockInitProvider"
+            android:name=".MockInitProvider"
             android:authorities="${applicationId}.mock" />
     </application>
 
